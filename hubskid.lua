@@ -6,7 +6,7 @@ local LP = P.LocalPlayer
 -- 1. UI
 -- ===================================================
 local Gui = Instance.new("ScreenGui")
-Gui.Name = "NetRobloc"
+Gui.Name = "LunarXHop"
 Gui.ResetOnSpawn = false
 Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 -- Thử nhiều nơi gắn UI để chạy được trên nhiều executor
@@ -37,7 +37,7 @@ local HubTitle = Instance.new("TextLabel", Frame)
 HubTitle.Size = UDim2.new(1, -164, 0, 28)
 HubTitle.Position = UDim2.new(0, 84, 0, 8)
 HubTitle.BackgroundTransparency = 1
-HubTitle.Text = "NetRobloc"
+HubTitle.Text = "LunarXHop"
 HubTitle.TextSize = 22
 HubTitle.Font = Enum.Font.SourceSansBold
 
@@ -62,7 +62,7 @@ TimeLabel.Font = Enum.Font.SourceSans
 
 -- Ảnh logo (góc trái)
 local IMAGE_ID  = "0"  -- << ĐỔI: ID ảnh Roblox (số), ví dụ "1234567890"
-local IMAGE_URL = "https://files.catbox.moe/xymm7j.jpg"   -- << HOẶC dán link ảnh trực tiếp (.png/.jpg), cần executor hỗ trợ writefile/getcustomasset
+local IMAGE_URL = "https://files.catbox.moe/ja1l5a.jpg"   -- << HOẶC dán link ảnh trực tiếp (.png/.jpg), cần executor hỗ trợ writefile/getcustomasset
 
 -- Nền ảnh (ảnh logo phủ kín khung, phủ lớp đen mờ để chữ dễ đọc)
 local BG_DARKNESS = 0.75 -- 0 = ảnh rõ nhất, 1 = đen hoàn toàn (nên để 0.7 - 0.85)
