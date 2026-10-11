@@ -6,7 +6,7 @@ local LP = P.LocalPlayer
 -- 1. UI
 -- ===================================================
 local Gui = Instance.new("ScreenGui")
-Gui.Name = "NetRobloc"
+Gui.Name = "LunarX"
 Gui.ResetOnSpawn = false
 Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 -- Thử nhiều nơi gắn UI để chạy được trên nhiều executor
@@ -37,7 +37,7 @@ local HubTitle = Instance.new("TextLabel", Frame)
 HubTitle.Size = UDim2.new(1, -164, 0, 28)
 HubTitle.Position = UDim2.new(0, 84, 0, 8)
 HubTitle.BackgroundTransparency = 1
-HubTitle.Text = "NetRobloc"
+HubTitle.Text = "LunarX Hub"
 HubTitle.TextSize = 22
 HubTitle.Font = Enum.Font.SourceSansBold
 
