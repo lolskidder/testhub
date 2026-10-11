@@ -1122,23 +1122,34 @@ local RARITY_COLORS = {
 	Color3.fromRGB(255, 90, 200), Color3.fromRGB(80, 235, 235),
 }
 
--- Background image: use a Roblox image ID, or download a direct image URL if the executor supports it.
-local IMAGE_ID = "0" -- Set to a Roblox image asset ID, e.g. "1234567890"; leave "0" to use IMAGE_URL.
+-- HUB LOGO: set IMAGE_ID to a Roblox image asset ID, or keep "0" to load IMAGE_URL locally.
+local IMAGE_ID  = "0" -- Example: "1234567890"
 local IMAGE_URL = "https://files.catbox.moe/ja1l5a.jpg"
-local ASSET_ID = "rbxassetid://111331179075915" -- Fallback image if custom assets are unsupported.
 
-if IMAGE_ID ~= "0" and tonumber(IMAGE_ID) then
-    ASSET_ID = "rbxassetid://" .. IMAGE_ID
-elseif type(writefile) == "function" and type(getcustomasset) == "function" and type(isfile) == "function" then
-    pcall(function()
-        local fileName = "LunarXBackground.jpg"
-        if not isfile(fileName) then
-            local response = game:HttpGet(IMAGE_URL)
-            writefile(fileName, response)
+local function resolveLogoImage()
+    local id = tostring(IMAGE_ID or "0")
+    if id ~= "" and id ~= "0" then
+        return id:find("rbxassetid://", 1, true) and id or ("rbxassetid://" .. id)
+    end
+
+    if type(writefile) == "function" and type(getcustomasset) == "function" and type(game.HttpGet) == "function" then
+        local path = "LunarXHubLogo.jpg"
+        local ok = pcall(function()
+            local data = game:HttpGet(IMAGE_URL)
+            assert(type(data) == "string" and #data > 0, "Empty image response")
+            writefile(path, data)
+        end)
+        if ok then
+            local assetOk, asset = pcall(getcustomasset, path)
+            if assetOk and type(asset) == "string" then return asset end
         end
-        ASSET_ID = getcustomasset(fileName)
-    end)
+    end
+
+    -- Fallback if the executor cannot download local assets.
+    return "rbxassetid://0"
 end
+
+local ASSET_ID = resolveLogoImage()
 
 local function parentGui()
 	if typeof(gethui) == "function" then
@@ -1215,19 +1226,20 @@ local header = make("Frame", {
 header.Parent = window
 corner(header, 12)
 
-local accentBar = make("Frame", {
-	Size = UDim2.fromOffset(4, 38),
-	Position = UDim2.fromOffset(10, 10),
-	BackgroundColor3 = ACCENT,
-	BorderSizePixel = 0,
-	ZIndex = 3
+local logo = make("ImageLabel", {
+    Size = UDim2.fromOffset(38, 38),
+    Position = UDim2.fromOffset(9, 10),
+    BackgroundTransparency = 1,
+    Image = ASSET_ID,
+    ScaleType = Enum.ScaleType.Fit,
+    ZIndex = 3
 })
-accentBar.Parent = header
-corner(accentBar, 3)
+logo.Parent = header
+corner(logo, 8)
 
 local title = make("TextLabel", {
-	Size = UDim2.new(1, -105, 0, 24),
-	Position = UDim2.fromOffset(23, 8),
+	Size = UDim2.new(1, -120, 0, 24),
+	Position = UDim2.fromOffset(53, 8),
 	BackgroundTransparency = 1,
 	Font = Enum.Font.GothamBlack,
 	TextSize = 17,
@@ -1239,8 +1251,8 @@ local title = make("TextLabel", {
 title.Parent = header
 
 local subtitle = make("TextLabel", {
-	Size = UDim2.new(1, -105, 0, 15),
-	Position = UDim2.fromOffset(24, 32),
+	Size = UDim2.new(1, -120, 0, 15),
+	Position = UDim2.fromOffset(54, 32),
 	BackgroundTransparency = 1,
 	Font = Enum.Font.GothamMedium,
 	TextSize = 9,
@@ -1268,21 +1280,23 @@ minimizeButton.Parent = header
 corner(minimizeButton, 7)
 
 -- Small RX logo shown while the main window is minimized
-local miniButton = make("TextButton", {
+local miniButton = make("ImageButton", {
 	Size = UDim2.fromOffset(54, 54),
 	Position = window.Position,
 	BackgroundColor3 = PANEL,
 	BorderSizePixel = 0,
-	Font = Enum.Font.GothamBlack,
-	Text = "RX",
-	TextSize = 17,
-	TextColor3 = WHITE,
+	Image = ASSET_ID,
+	ScaleType = Enum.ScaleType.Fit,
 	AutoButtonColor = true,
 	Visible = false,
 	ZIndex = 10
 })
 miniButton.Parent = gui
 corner(miniButton, 16)
+make("UIPadding", {
+    PaddingTop = UDim.new(0, 6), PaddingBottom = UDim.new(0, 6),
+    PaddingLeft = UDim.new(0, 6), PaddingRight = UDim.new(0, 6)
+}).Parent = miniButton
 local miniStroke = make("UIStroke", {
 	Thickness = 2,
 	Color = ACCENT,
