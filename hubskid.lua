@@ -2512,7 +2512,7 @@ local gi = (function()
 	end)
 	return ok and type(r) == "string" and r or nil
 end)()
-local kf, ky, ex, kl = "Avenoric/Keys/FishingMaster.txt", "LunarX-SPD7-DQHX", 1791818340, "https://linkfree.click/s/ngao-gaming-hubz1u17pnmunx0jzb"
+local kf, ky, ex, kl = "Avenoric/Keys/FishingMaster.txt", "LunarX-SPD7-DQHX", 1791818340, "https://pastefy.app/JwiYvWuq/raw"
 local kc = {t = 0, v = false}
 local function kv()
 	if os.clock() < kc.t then return kc.v end
@@ -2523,12 +2523,12 @@ end
 if ge.__FmD then pcall(function() ge.__FmD:Destroy() end) end
 ge.__FmD = nil
 task.defer(function() ge.__FmD = L.GateGui end)
-L:Gate({Title = "LunarX - Gaming Hub", Link = kl, Discord = "https://discord.gg/fTQF5TvfEJ", Config = "FishingMaster", Check = function(s)
+L:Gate({Title = "LunarX - Hub", Link = kl, Discord = "https://discord.gg/fTQF5TvfEJ", Config = "FishingMaster", Check = function(s)
 	if workspace:GetServerTimeNow() >= ex then return false, "Key Expired" end
 	return s == ky, "Wrong Key"
 end})
 ge.__FmD = nil
-local gw = L:Window({Title = "LunarX - Gaming Hub | Fishing Master", Config = `FishingMaster/{lp.Name}`})
+local gw = L:Window({Title = "LunarX - Hub | Fishing Master", Config = `FishingMaster/{lp.Name}`})
 do
 	local on = gw.Notify
 	gw.Notify = function(s, q)
