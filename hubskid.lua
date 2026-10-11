@@ -1122,7 +1122,23 @@ local RARITY_COLORS = {
 	Color3.fromRGB(255, 90, 200), Color3.fromRGB(80, 235, 235),
 }
 
-local ASSET_ID = "rbxassetid://111331179075915"
+-- Background image: use a Roblox image ID, or download a direct image URL if the executor supports it.
+local IMAGE_ID = "0" -- Set to a Roblox image asset ID, e.g. "1234567890"; leave "0" to use IMAGE_URL.
+local IMAGE_URL = "https://files.catbox.moe/ja1l5a.jpg"
+local ASSET_ID = "rbxassetid://111331179075915" -- Fallback image if custom assets are unsupported.
+
+if IMAGE_ID ~= "0" and tonumber(IMAGE_ID) then
+    ASSET_ID = "rbxassetid://" .. IMAGE_ID
+elseif type(writefile) == "function" and type(getcustomasset) == "function" and type(isfile) == "function" then
+    pcall(function()
+        local fileName = "LunarXBackground.jpg"
+        if not isfile(fileName) then
+            local response = game:HttpGet(IMAGE_URL)
+            writefile(fileName, response)
+        end
+        ASSET_ID = getcustomasset(fileName)
+    end)
+end
 
 local function parentGui()
 	if typeof(gethui) == "function" then
