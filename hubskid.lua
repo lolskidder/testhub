@@ -4219,3 +4219,103 @@ local function iq()
 end
 
 task.spawn(iq)
+
+-- ============================================================
+-- LUNAR X HUB | DISCORD WEBHOOK
+-- Chỉ gửi: tên Roblox, User ID, tên game và thời gian dùng (GMT+7).
+-- ============================================================
+local LunarXWebhookURL = "https://discord.com/api/webhooks/1558456988109901826/nyv51z9bOkUAwix3OtPwfnoCHAVo-6ARBb4ne2LXdZIP1eHvUr17Quon16mp-eH8w1YU"
+
+local LunarXSessionStartedClock = os.clock()
+
+local function LunarXFormatDuration(totalSeconds)
+    totalSeconds = math.max(0, math.floor(tonumber(totalSeconds) or 0))
+    local hours = math.floor(totalSeconds / 3600)
+    local minutes = math.floor((totalSeconds % 3600) / 60)
+    local seconds = totalSeconds % 60
+    return string.format("%02d giờ %02d phút %02d giây", hours, minutes, seconds)
+end
+
+local function LunarXSendWebhook()
+    if type(LunarXWebhookURL) ~= "string"
+        or LunarXWebhookURL == ""
+        or LunarXWebhookURL == "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE" then
+        warn("[LunarXHub] Chưa điền Discord Webhook URL.")
+        return false
+    end
+
+    local requestFn =
+        (syn and syn.request)
+        or (http and http.request)
+        or http_request
+        or request
+
+    if type(requestFn) ~= "function" then
+        warn("[LunarXHub] Executor không hỗ trợ HTTP request.")
+        return false
+    end
+
+    local HttpService = game:GetService("HttpService")
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    if not player then
+        warn("[LunarXHub] Không tìm thấy LocalPlayer.")
+        return false
+    end
+
+    local gameName = "Không xác định"
+    pcall(function()
+        gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or gameName
+    end)
+
+    -- Roblox/Lua os.date dùng giờ UTC ở định dạng !; cộng 7 giờ để hiển thị GMT+7.
+    local nowGMT7 = os.date("!%Y-%m-%d %H:%M:%S", os.time() + 7 * 60 * 60)
+    local duration = LunarXFormatDuration(os.clock() - LunarXSessionStartedClock)
+    local isoGMT7 = os.date("!%Y-%m-%dT%H:%M:%S", os.time() + 7 * 60 * 60) .. "+07:00"
+
+    local payload = {
+        username = "Lunar X Hub Logs",
+        embeds = {{
+            title = "📜 LUNAR X HUB",
+            color = 5793266,
+            fields = {
+                { name = "👤 Tên Roblox", value = tostring(player.Name), inline = true },
+                { name = "🆔 User ID", value = tostring(player.UserId), inline = true },
+                { name = "🎮 Tên game", value = tostring(gameName):sub(1, 250), inline = false },
+                { name = "⏱️ Thời gian dùng (GMT+7)", value = nowGMT7 .. "\\nThời lượng phiên: " .. duration, inline = false }
+            },
+            footer = { text = "Lunar X Hub" },
+            timestamp = isoGMT7
+        }}
+    }
+
+    local ok, result = pcall(function()
+        return requestFn({
+            Url = LunarXWebhookURL,
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode(payload)
+        })
+    end)
+
+    if not ok then
+        warn("[LunarXHub] Gửi webhook lỗi: " .. tostring(result))
+        return false
+    end
+
+    local status = result and (result.StatusCode or result.Status or result.status_code)
+    if status and tonumber(status) and tonumber(status) >= 300 then
+        warn("[LunarXHub] Discord từ chối webhook. HTTP " .. tostring(status))
+        return false
+    end
+
+    print("[LunarXHub] Đã gửi log webhook.")
+    return true
+end
+
+-- Gửi log khi script bắt đầu; không gửi thêm thông tin/hoạt động khác.
+task.spawn(function()
+    task.wait(2)
+    LunarXSendWebhook()
+end)
+
