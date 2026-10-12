@@ -33021,11 +33021,6 @@ Summon And Kill Rip Indra]],
 		end
 	end)
 
-	if not getgenv().VxezeAimHook then
-		getgenv().VxezeAimHook = true
-		hookmetamethod(game, "__namecall", newcclosure(function(...) end))
-	end
-
 	RunService = game:GetService("RunService")
 	runAsync = require(game.ReplicatedStorage.Util.runAsync)
 	TextUtil = require(game.ReplicatedStorage.Modules.Util.TextUtil)
