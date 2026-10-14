@@ -840,7 +840,7 @@ local function inv(u)
 	end
 end
 
-local kr, ka = "^NGAO%-[A-HJ-NP-Z2-9][A-HJ-NP-Z2-9][A-HJ-NP-Z2-9][A-HJ-NP-Z2-9]%-[A-HJ-NP-Z2-9][A-HJ-NP-Z2-9][A-HJ-NP-Z2-9][A-HJ-NP-Z2-9]$", nil
+local kr, ka = "Avenoric/Keys/BreakAndStealAnEgg.txt", "LunarX-1PD7-D7HZ", 1792509720, "https://pastefy.app/wwC6MhOV"
 
 local function fv(s)
 	local hi, lo = 0xcbf29ce4, 0x84222325
