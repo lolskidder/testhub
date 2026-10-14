@@ -840,7 +840,8 @@ local function inv(u)
 	end
 end
 
-local kr, ka = "Avenoric/Keys/BreakAndStealAnEgg.txt", "^LunarX%-[%w]+%-[%w]+$", 1792509720, "https://pastefy.app/wwC6MhOV"
+local kp, kr, kx, lk = "Avenoric/Keys/BreakAndStealAnEgg.txt", "^LunarX%-EC2F%-%*%*86%*%*PX$", 1792509720, "https://pastefy.app/JwiYvWuq"
+local ka
 
 local function fv(s)
 	local hi, lo = 0xcbf29ce4, 0x84222325
@@ -974,7 +975,7 @@ local function sgt(o)
 	local tk, pv, kp = {}, ge.__AvG, `Avenoric/Keys/{o.Config}.txt`
 	if type(pv) == "table" and pv.sg then pcall(function() pv.sg:Destroy() end) end
 	ge.__AvG = tk
-	local lk, kk, kx = `{sv}/k/{hb}?d={dg}`, rk(kp)
+	local lk, kk, kx = o.KeyLink or `{sv}/k/{hb}?d={dg}`, rk(kp)
 	local u, lc, by, got
 	local function ac(k, x, w)
 		if w then pcall(function() mkd(kp); writefile(kp, k .. "\n" .. x) end) end
@@ -1822,8 +1823,8 @@ pcall(function()
 end)
 local function kv() return L ~= nil and L:Keyed() end
 if ge.__AvW then pcall(ge.__AvW.Destroy, ge.__AvW) end
-L:Gate({Title = "LunarX - Hub", Server = "https://pastefy.app/tmd7auTF", Hub = "bse", Discord = "https://discord.gg/fTQF5TvfEJ", Config = "BreakAndStealAnEgg"})
-local W = L:Window({Title = "LunarX - Hub | Break And Steal An Egg", Config = `BreakAndStealAnEgg/{lp.Name}`})
+L:Gate({Title = "Ngao - Gaming Hub", Server = "https://getkey.kaeldrinnovasse.workers.dev", Hub = "bse", KeyLink = "https://pastefy.app/JwiYvWuq", Discord = "https://discord.gg/fTQF5TvfEJ", Config = "BreakAndStealAnEgg"})
+local W = L:Window({Title = "Ngao - Gaming Hub | Break And Steal An Egg", Config = `BreakAndStealAnEgg/{lp.Name}`})
 local pa = W:Tab({Name = "General", Icon = "hammer-code"})
 pa:Section({Name = "Farm"})
 pa:Dropdown({Name = "Select Area", Options = za, Default = za[1], Flag = "sa", Callback = function(v) st.za = table.find(za, v) or 1 end})
