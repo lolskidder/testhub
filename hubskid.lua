@@ -840,7 +840,7 @@ local function inv(u)
 	end
 end
 
-local kp, kr, kx, lk = "Avenoric/Keys/BreakAndStealAnEgg.txt", "^LunarX%-[%w]+%-[%w]+$", 1792509720, "https://pastefy.app/JwiYvWuq"
+local kp, kr, kx, lk = "Avenoric/Keys/BreakAndStealAnEgg.txt", "^LunarX%-EC2F%-%*%*86%*%*PX$", 1792509720, "https://pastefy.app/JwiYvWuq"
 local ka
 
 local function fv(s)
