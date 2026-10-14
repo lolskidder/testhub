@@ -840,7 +840,7 @@ local function inv(u)
 	end
 end
 
-local kp, kr, kx, lk = "Avenoric/Keys/BreakAndStealAnEgg.txt", "^LunarX%-EC2F%-%*%*86%*%*PX$", 1792509720, "https://pastefy.app/JwiYvWuq"
+local kp, kr, kx, lk = "Avenoric/Keys/BreakAndStealAnEgg.txt", "^LunarX%-[%w]+%-[%w]+$", 1792509720, nil
 local ka
 
 local function fv(s)
@@ -1823,7 +1823,7 @@ pcall(function()
 end)
 local function kv() return L ~= nil and L:Keyed() end
 if ge.__AvW then pcall(ge.__AvW.Destroy, ge.__AvW) end
-L:Gate({Title = "Ngao - Gaming Hub", Server = "https://getkey.kaeldrinnovasse.workers.dev", Hub = "bse", KeyLink = "https://pastefy.app/JwiYvWuq", Discord = "https://discord.gg/fTQF5TvfEJ", Config = "BreakAndStealAnEgg"})
+L:Gate({Title = "Ngao - Gaming Hub", Server = "https://getkey.kaeldrinnovasse.workers.dev", Hub = "bse", Discord = "https://discord.gg/fTQF5TvfEJ", Config = "BreakAndStealAnEgg"})
 local W = L:Window({Title = "Ngao - Gaming Hub | Break And Steal An Egg", Config = `BreakAndStealAnEgg/{lp.Name}`})
 local pa = W:Tab({Name = "General", Icon = "hammer-code"})
 pa:Section({Name = "Farm"})
