@@ -1,3 +1,37 @@
+-- Logo configuration (top-left corner)
+local IMAGE_ID  = "0" -- Use a Roblox image asset ID here, e.g. "1234567890"
+local IMAGE_URL = "https://files.catbox.moe/ja1l5a.jpg" -- Direct .png/.jpg URL; requires executor writefile/getcustomasset
+
+local function loadSenaLogo()
+    if IMAGE_ID ~= "0" and IMAGE_ID ~= "" then
+        return "rbxassetid://" .. IMAGE_ID
+    end
+
+    if IMAGE_URL ~= "" and type(writefile) == "function" and type(getcustomasset) == "function" then
+        local ok, data = pcall(function()
+            return game:HttpGet(IMAGE_URL)
+        end)
+        if ok and type(data) == "string" and #data > 0 then
+            local fileName = "sena_hub_logo.jpg"
+            local wrote = pcall(function()
+                writefile(fileName, data)
+            end)
+            if wrote then
+                local assetOk, asset = pcall(function()
+                    return getcustomasset(fileName)
+                end)
+                if assetOk and type(asset) == "string" then
+                    return asset
+                end
+            end
+        end
+    end
+
+    return ""
+end
+
+local SENA_LOGO_IMAGE = loadSenaLogo()
+
 
 
 local function geniter(f, s, c)
@@ -27207,7 +27241,7 @@ do
 			ImageLabel2.Position = UDim2.fromOffset(11, 23)
 			ImageLabel2.Size = UDim2.fromOffset(20, 20)
 			ImageLabel2.BackgroundTransparency = 1
-			ImageLabel2.Image = "rbxassetid://96240498384290"
+			ImageLabel2.Image = SENA_LOGO_IMAGE
 			ImageLabel2.ScaleType = Enum.ScaleType.Fit
 			ImageLabel2.Parent = Frame2
 
