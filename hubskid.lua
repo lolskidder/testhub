@@ -29675,7 +29675,7 @@ do
 				Folder = "SenaSAEv4",
 				Version = 1,
 				Color = Color3.fromRGB(232, 232, 238),
-				Image = "http://56.10.112.179:8080/visual/sena_bg.jpg"
+				Image = "rbxassetid://70895505430795"
 			})
 			v4779(v4742)
 			t216 = {}
