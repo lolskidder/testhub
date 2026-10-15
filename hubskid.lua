@@ -29670,7 +29670,7 @@ do
 
 			v4730()
 			v4742 = SenaLibOverride:Window({
-				Title = "LunarX Hub |",
+				Title = "SixSevenX Hub |",
 				Footer = "Steal An Egg",
 				Folder = "SenaSAEv4",
 				Version = 1,
