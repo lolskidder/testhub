@@ -27295,7 +27295,39 @@ do
 			ImageLabel3.Position = UDim2.new(0, 12, 0.5, 0)
 			ImageLabel3.Size = UDim2.fromOffset(12, 12)
 			ImageLabel3.BackgroundTransparency = 1
-			ImageLabel3.Image = "rbxassetid://94434236999817"
+			-- Logo/icon configuration
+local IMAGE_ID  = "0" -- Roblox image asset ID, e.g. "1234567890"
+local IMAGE_URL = "https://files.catbox.moe/ja1l5a.jpg" -- Direct .png/.jpg URL; requires writefile/getcustomasset
+
+local function getConfiguredImage()
+    if IMAGE_ID ~= "0" and IMAGE_ID ~= "" then
+        return "rbxassetid://" .. IMAGE_ID
+    end
+
+    if IMAGE_URL ~= "" and type(writefile) == "function" and type(getcustomasset) == "function" then
+        local ok, data = pcall(function()
+            return game:HttpGet(IMAGE_URL)
+        end)
+        if ok and type(data) == "string" and #data > 0 then
+            local fileName = "sena_hub_icon.jpg"
+            local writeOk = pcall(function()
+                writefile(fileName, data)
+            end)
+            if writeOk then
+                local assetOk, asset = pcall(function()
+                    return getcustomasset(fileName)
+                end)
+                if assetOk and type(asset) == "string" then
+                    return asset
+                end
+            end
+        end
+    end
+
+    return ""
+end
+
+ImageLabel3.Image = getConfiguredImage()
 			ImageLabel3.ScaleType = Enum.ScaleType.Fit
 			ImageLabel3.Parent = TextButton
 
