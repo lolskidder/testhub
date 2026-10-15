@@ -27296,8 +27296,8 @@ do
 			ImageLabel3.Size = UDim2.fromOffset(12, 12)
 			ImageLabel3.BackgroundTransparency = 1
 			-- Logo/icon configuration
-local IMAGE_ID  = "0" -- Roblox image asset ID, e.g. "1234567890"
-local IMAGE_URL = "https://files.catbox.moe/ja1l5a.jpg" -- Direct .png/.jpg URL; requires writefile/getcustomasset
+local IMAGE_ID  = "0" -- Set a Roblox asset ID here to use Roblox image instead
+local IMAGE_URL = "https://files.catbox.moe/ja1l5a.jpg"
 
 local function getConfiguredImage()
     if IMAGE_ID ~= "0" and IMAGE_ID ~= "" then
