@@ -3777,7 +3777,7 @@ local LogoImg = Instance.new("ImageLabel")
 LogoImg.Size = UDim2.new(1, -6, 1, -6)
 LogoImg.Position = UDim2.new(0, 3, 0, 3)
 LogoImg.BackgroundTransparency = 1
-LogoImg.Image = "rbxthumb://type=Asset&id=115542332056889&w=150&h=150"
+LogoImg.Image = "rbxthumb://type=Asset&id=70895505430795&w=150&h=150"
 LogoImg.ScaleType = Enum.ScaleType.Fit
 LogoImg.Parent = LogoFrame
 
@@ -3863,7 +3863,7 @@ LogoBtn.InputEnded:Connect(function(input)
 end)
 
 local Window = Fluent:CreateWindow({
-    Title = "NhoiiiX - Hub",
+    Title = "NhoiiiX Hub",
     SubTitle = " | Heavyweigh Fishing",
     TabWidth = 130,
     Size = UDim2.fromOffset(460, 400),
