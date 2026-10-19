@@ -46,7 +46,7 @@ do
 		local color7 = Color3.fromRGB(140, 140, 165)
 		local hui = gethui and gethui() or game:GetService("CoreGui")
 		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "ExecutorWarning"
+		screenGui.Name = "OnyxExecutorWarning"
 		screenGui.IgnoreGuiInset = true
 		screenGui.ResetOnSpawn = false
 		screenGui.DisplayOrder = 2000000
@@ -180,15 +180,15 @@ LOADUI = {}
 
 do
 	local hui = gethui and gethui() or game:GetService("CoreGui")
-	local Loading = hui:FindFirstChild("Loading")
+	local onyxLoading = hui:FindFirstChild("NhoiiiXLoading")
 
-	if Loading then
-		Loading:Destroy()
+	if onyxLoading then
+		onyxLoading:Destroy()
 	end
 
 	local TweenService_ = game:GetService("TweenService")
 	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "Loading"
+	screenGui.Name = "NhoiiiXLoading"
 	screenGui.IgnoreGuiInset = true
 	screenGui.ResetOnSpawn = false
 	screenGui.DisplayOrder = 99998
@@ -248,7 +248,7 @@ do
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
 	textLabel.TextColor3 = Color3.fromRGB(242, 242, 248)
 	textLabel.TextTransparency = 1
-	textLabel.Text = "Loading"
+	textLabel.Text = "Loading Onyx"
 	textLabel.Parent = frame2
 	local textLabel2 = Instance.new("TextLabel")
 	textLabel2.Position = UDim2.fromOffset(81, 43)
@@ -384,7 +384,7 @@ task.delay(30, function()
 end)
 
 task.spawn(function()
-	print("-- LOADING  --")
+	print("-- LOADING NhoiiiX --")
 
 	for _, v in ipairs({ 0, 5, 11, 22 }) do
 		local n = math.floor(v / 22 * 100 + 0.5)
@@ -392,7 +392,7 @@ task.spawn(function()
 		task.wait(0.25)
 	end
 
-	print("Loaded. discord.gg/aXWW8hytgX")
+	print("Loaded. discord.gg/onyxscripts")
 end)
 
 if _G.OnyxV2 then
@@ -521,7 +521,7 @@ end]]
 end
 
 v:AddTheme({
-	Name = "NhoiiiX",
+	Name = "Onyx",
 	Background = v:Gradient({
 		["0"] = { Color = Color3.fromHex("#161619"), Transparency = 0.12 },
 		["100"] = { Color = Color3.fromHex("#161619"), Transparency = 0.12 },
@@ -549,7 +549,7 @@ v:AddTheme({
 	ElementBackgroundTransparency = 0.3,
 })
 
-v:SetTheme ("NhoiiiX")
+v:SetTheme("Onyx")
 LOADUI.step(0.4, "Building window")
 local v2
 
@@ -558,7 +558,7 @@ do
 	local createWindow = v3.CreateWindow
 
 	local tbl = {
-		Title = "LunarX - Premium",
+		Title = "Onyx - Premium",
 		Icon = "solar:planet-bold",
 		Author = "Murder Mystery 2",
 		Folder = "OnyxV2",
@@ -584,7 +584,7 @@ do
 	v2 = createWindow(v3, tbl)
 end
 
-v2:Tag({ Title = "@NhoiiiX", Icon = "youtube", Color = Color3.fromHex("#ffffff"), Radius = 6 })
+v2:Tag({ Title = "@NhoiiiXScripts", Icon = "youtube", Color = Color3.fromHex("#ffffff"), Radius = 6 })
 
 v2:Tag({
 	Title = "discord.gg/aXWW8hytgX",
@@ -596,7 +596,7 @@ v2:Tag({
 v2:Tag({ Title = "Mobile & PC", Icon = "smartphone", Color = Color3.fromHex("#ffffff"), Radius = 6 })
 
 task.spawn(function()
-	local tbl = { ["discord.gg/aXWW8hytgX"] = true, ["Mobile & PC"] = true, ["@Dev-NhoiiiX"] = true }
+	local tbl = { ["discord.gg/aXWW8hytgX"] = true, ["Mobile & PC"] = true, ["@NhoiiiXScripts"] = true }
 	local colorSequence = ColorSequence.new
 	local tbl2 = {}
 	local v3 = ColorSequenceKeypoint.new(0, Color3.fromRGB(26, 26, 32))
@@ -1267,7 +1267,7 @@ tbl.discordFetch = function()
 	end
 
 	tbl.discordInfo = {
-		name = result.guild.name or "NhoiiiX Scripts",
+		name = result.guild.name or "Onyx Scripts",
 		members = result.approximate_member_count,
 		online = result.approximate_presence_count,
 		icon = str2,
@@ -1359,7 +1359,7 @@ tbl.discordCard = function(arg)
 	}
 
 	local paragraph = arg.Paragraph
-	local tbl3 = { Title = v3 and v3.name or "NhoiiiX Scripts" }
+	local tbl3 = { Title = v3 and v3.name or "Onyx Scripts" }
 	local str
 
 	if v3 then
@@ -1536,7 +1536,7 @@ tbl.card = function(arg)
 		textLabel.TextXAlignment = Enum.TextXAlignment.Left
 		textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		textLabel.TextTransparency = 1
-		textLabel.Text = tostring(tbl2.title or "NhoiiiX")
+		textLabel.Text = tostring(tbl2.title or "Onyx")
 		textLabel.ZIndex = 1
 		textLabel.Parent = frame
 		local uiGradient2 = Instance.new("UIGradient", textLabel)
@@ -1816,7 +1816,7 @@ tbl.farewell = function()
 
 	tbl.card({
 		title = "Bye bye!",
-		subtitle = "Thanks for running NhoiiiX",
+		subtitle = "Thanks for running Onyx",
 		body = "Something let you down? Tell us in the server.",
 	})
 end
@@ -14916,7 +14916,7 @@ LOADUI.done()
 
 tbl.notifyNow({
 	Title = "Onyx v2",
-	Content = "Loaded. G toggles the window. Invite copied - discord.gg/aXWW8hytgX",
+	Content = "Loaded. G toggles the window. Invite copied - discord.gg/onyxscripts",
 	Duration = 10,
 	Icon = "solar:planet-bold",
 })
