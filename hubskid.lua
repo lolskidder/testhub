@@ -46,7 +46,7 @@ do
 		local color7 = Color3.fromRGB(140, 140, 165)
 		local hui = gethui and gethui() or game:GetService("CoreGui")
 		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "OnyxExecutorWarning"
+		screenGui.Name = "ExecutorWarning"
 		screenGui.IgnoreGuiInset = true
 		screenGui.ResetOnSpawn = false
 		screenGui.DisplayOrder = 2000000
@@ -180,15 +180,15 @@ LOADUI = {}
 
 do
 	local hui = gethui and gethui() or game:GetService("CoreGui")
-	local onyxLoading = hui:FindFirstChild("OnyxLoading")
+	local Loading = hui:FindFirstChild("Loading")
 
-	if onyxLoading then
-		onyxLoading:Destroy()
+	if Loading then
+		Loading:Destroy()
 	end
 
 	local TweenService_ = game:GetService("TweenService")
 	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "OnyxLoading"
+	screenGui.Name = "Loading"
 	screenGui.IgnoreGuiInset = true
 	screenGui.ResetOnSpawn = false
 	screenGui.DisplayOrder = 99998
@@ -248,7 +248,7 @@ do
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
 	textLabel.TextColor3 = Color3.fromRGB(242, 242, 248)
 	textLabel.TextTransparency = 1
-	textLabel.Text = "Loading Onyx"
+	textLabel.Text = "Loading"
 	textLabel.Parent = frame2
 	local textLabel2 = Instance.new("TextLabel")
 	textLabel2.Position = UDim2.fromOffset(81, 43)
@@ -384,7 +384,7 @@ task.delay(30, function()
 end)
 
 task.spawn(function()
-	print("-- LOADING ONYX --")
+	print("-- LOADING  --")
 
 	for _, v in ipairs({ 0, 5, 11, 22 }) do
 		local n = math.floor(v / 22 * 100 + 0.5)
@@ -392,7 +392,7 @@ task.spawn(function()
 		task.wait(0.25)
 	end
 
-	print("Loaded. discord.gg/onyxscripts")
+	print("Loaded. discord.gg/aXWW8hytgX")
 end)
 
 if _G.OnyxV2 then
@@ -558,7 +558,7 @@ do
 	local createWindow = v3.CreateWindow
 
 	local tbl = {
-		Title = "Onyx - Premium",
+		Title = "LunarX - Premium",
 		Icon = "solar:planet-bold",
 		Author = "Murder Mystery 2",
 		Folder = "OnyxV2",
@@ -587,7 +587,7 @@ end
 v2:Tag({ Title = "@OnyxScripts", Icon = "youtube", Color = Color3.fromHex("#ffffff"), Radius = 6 })
 
 v2:Tag({
-	Title = "discord.gg/onyxscripts",
+	Title = "discord.gg/aXWW8hytgX",
 	Icon = "message-square-more",
 	Color = Color3.fromHex("#ffffff"),
 	Radius = 6,
@@ -596,7 +596,7 @@ v2:Tag({
 v2:Tag({ Title = "Mobile & PC", Icon = "smartphone", Color = Color3.fromHex("#ffffff"), Radius = 6 })
 
 task.spawn(function()
-	local tbl = { ["discord.gg/onyxscripts"] = true, ["Mobile & PC"] = true, ["@OnyxScripts"] = true }
+	local tbl = { ["discord.gg/aXWW8hytgX"] = true, ["Mobile & PC"] = true, ["@Dev-NhoiiiX"] = true }
 	local colorSequence = ColorSequence.new
 	local tbl2 = {}
 	local v3 = ColorSequenceKeypoint.new(0, Color3.fromRGB(26, 26, 32))
@@ -14916,7 +14916,7 @@ LOADUI.done()
 
 tbl.notifyNow({
 	Title = "Onyx v2",
-	Content = "Loaded. G toggles the window. Invite copied - discord.gg/onyxscripts",
+	Content = "Loaded. G toggles the window. Invite copied - discord.gg/aXWW8hytgX",
 	Duration = 10,
 	Icon = "solar:planet-bold",
 })
