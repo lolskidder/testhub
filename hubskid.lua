@@ -14916,7 +14916,7 @@ LOADUI.done()
 
 tbl.notifyNow({
 	Title = "Onyx v2",
-	Content = "Loaded. G toggles the window. Invite copied - discord.gg/onyxscripts",
+	Content = "Loaded. G toggles the window. Invite copied - discord.gg/aXWW8hytgX",
 	Duration = 10,
 	Icon = "solar:planet-bold",
 })
