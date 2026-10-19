@@ -1201,8 +1201,8 @@ tbl.reclip = function(arg)
 	end
 end
 
-tbl.DISCORD_INVITE = "onyxscripts"
-tbl.DISCORD_FETCH = "XEBpqUNrMy"
+tbl.DISCORD_INVITE = "aXWW8hytgX"
+tbl.DISCORD_FETCH = "aXWW8hytgX"
 tbl.discordInfo = nil
 tbl.discordTried = false
 
@@ -14915,7 +14915,7 @@ LOADUI.step(1, "Ready")
 LOADUI.done()
 
 tbl.notifyNow({
-	Title = "Onyx v2",
+	Title = "NhoiiiX",
 	Content = "Loaded. G toggles the window. Invite copied - discord.gg/aXWW8hytgX",
 	Duration = 10,
 	Icon = "solar:planet-bold",
