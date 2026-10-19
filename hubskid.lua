@@ -3814,36 +3814,66 @@ local minimizeKey = Enum.KeyCode.LeftControl
 local lastToggleTime = 0
 local cachedMainHubFrame = nil
 
-local function toggleUI()
-    local now = tick()
-    if now - lastToggleTime < 0.3 then return end
-    lastToggleTime = now
-    uiVisible = not uiVisible
+local function FindMainHubFrame()
     if cachedMainHubFrame and cachedMainHubFrame.Parent then
-        cachedMainHubFrame.Visible = uiVisible
-        return
+        return cachedMainHubFrame
     end
-    for _, gui in ipairs(game:GetService("CoreGui"):GetChildren()) do
-        if gui:IsA("ScreenGui") then
-            for _, desc in ipairs(gui:GetDescendants()) do
-                if desc:IsA("TextLabel") and (desc.Text == "StarCrowHub" or desc.Text:find("StarCrow")) then
-                    local p = desc.Parent
-                    while p and p.Parent ~= gui do p = p.Parent end
-                    if p and p:IsA("Frame") then
-                        cachedMainHubFrame = p
-                        p.Visible = uiVisible
-                        return
+
+    local containers = {}
+    local coreGui = game:GetService("CoreGui")
+    local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    if coreGui then table.insert(containers, coreGui) end
+    if playerGui then table.insert(containers, playerGui) end
+
+    for _, container in ipairs(containers) do
+        for _, gui in ipairs(container:GetChildren()) do
+            if gui:IsA("ScreenGui") and gui.Name ~= "StarCrowLogoGui" then
+                for _, desc in ipairs(gui:GetDescendants()) do
+                    if desc:IsA("TextLabel") then
+                        local title = string.lower(desc.Text or "")
+                        if title:find("nhoiiix hub", 1, true)
+                            or title:find("heavyweigh fishing", 1, true)
+                            or title == "starcrowhub" then
+                            local root = desc
+                            while root.Parent and root.Parent ~= gui do
+                                root = root.Parent
+                            end
+                            if root and root:IsA("GuiObject") then
+                                cachedMainHubFrame = root
+                                return root
+                            end
+                        end
                     end
                 end
             end
         end
     end
+    return nil
+end
+
+local function toggleUI()
+    local now = tick()
+    if now - lastToggleTime < 0.3 then return end
+    lastToggleTime = now
+
+    local mainFrame = FindMainHubFrame()
+    if not mainFrame then
+        warn("NhoiiiX Hub UI not found; wait for the window to finish loading, then click the logo again.")
+        return
+    end
+
+    uiVisible = not mainFrame.Visible
+    mainFrame.Visible = uiVisible
 end
 
 UserInputService.InputBegan:Connect(function(input, processed)
     if UserInputService:GetFocusedTextBox() then return end
     if not processed and input.KeyCode == minimizeKey then
-        uiVisible = not uiVisible
+        local mainFrame = FindMainHubFrame()
+        if mainFrame then
+            uiVisible = not mainFrame.Visible
+            mainFrame.Visible = uiVisible
+        end
     end
 end)
 
