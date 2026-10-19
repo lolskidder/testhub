@@ -521,7 +521,7 @@ end]]
 end
 
 v:AddTheme({
-	Name = "Onyx",
+	Name = "NhoiiiX",
 	Background = v:Gradient({
 		["0"] = { Color = Color3.fromHex("#161619"), Transparency = 0.12 },
 		["100"] = { Color = Color3.fromHex("#161619"), Transparency = 0.12 },
@@ -549,7 +549,7 @@ v:AddTheme({
 	ElementBackgroundTransparency = 0.3,
 })
 
-v:SetTheme("Onyx")
+v:SetTheme ("NhoiiiX")
 LOADUI.step(0.4, "Building window")
 local v2
 
@@ -584,7 +584,7 @@ do
 	v2 = createWindow(v3, tbl)
 end
 
-v2:Tag({ Title = "@OnyxScripts", Icon = "youtube", Color = Color3.fromHex("#ffffff"), Radius = 6 })
+v2:Tag({ Title = "@NhoiiiX", Icon = "youtube", Color = Color3.fromHex("#ffffff"), Radius = 6 })
 
 v2:Tag({
 	Title = "discord.gg/aXWW8hytgX",
@@ -831,7 +831,7 @@ end)
 local color = Color3.fromHex
 
 v2:EditOpenButton({
-	Title = "Onyx",
+	Title = "NhoiiiX",
 	Icon = "solar:planet-bold",
 	CornerRadius = UDim.new(0, 16),
 	StrokeThickness = 2,
@@ -1267,7 +1267,7 @@ tbl.discordFetch = function()
 	end
 
 	tbl.discordInfo = {
-		name = result.guild.name or "Onyx Scripts",
+		name = result.guild.name or "NhoiiiX Scripts",
 		members = result.approximate_member_count,
 		online = result.approximate_presence_count,
 		icon = str2,
@@ -1359,7 +1359,7 @@ tbl.discordCard = function(arg)
 	}
 
 	local paragraph = arg.Paragraph
-	local tbl3 = { Title = v3 and v3.name or "Onyx Scripts" }
+	local tbl3 = { Title = v3 and v3.name or "NhoiiiX Scripts" }
 	local str
 
 	if v3 then
@@ -1536,7 +1536,7 @@ tbl.card = function(arg)
 		textLabel.TextXAlignment = Enum.TextXAlignment.Left
 		textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		textLabel.TextTransparency = 1
-		textLabel.Text = tostring(tbl2.title or "Onyx")
+		textLabel.Text = tostring(tbl2.title or "NhoiiiX")
 		textLabel.ZIndex = 1
 		textLabel.Parent = frame
 		local uiGradient2 = Instance.new("UIGradient", textLabel)
@@ -1816,7 +1816,7 @@ tbl.farewell = function()
 
 	tbl.card({
 		title = "Bye bye!",
-		subtitle = "Thanks for running Onyx",
+		subtitle = "Thanks for running NhoiiiX",
 		body = "Something let you down? Tell us in the server.",
 	})
 end
