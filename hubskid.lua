@@ -26,47 +26,47 @@ local F = {
     Find = table.find
 }
 
-_G.Spooky = _G.Spooky or {}
-local Spooky = _G.Spooky
+_G.NhoiiiX = _G.NhoiiiX or {}
+local NhoiiiX = _G.NhoiiiX
 
-Spooky.Diagnostics = {errors={}, statuses={}, lastNotice={}}
-function Spooky.ReportIssue(feature, err)
-    local d=Spooky.Diagnostics
+NhoiiiX.Diagnostics = {errors={}, statuses={}, lastNotice={}}
+function NhoiiiX.ReportIssue(feature, err)
+    local d=NhoiiiX.Diagnostics
     local text=tostring(err)
     local item=d.errors[feature]
     d.errors[feature]={message=text,count=(item and item.count or 0)+1,time=os.clock()}
     if not d.lastNotice[feature] or os.clock()-d.lastNotice[feature]>15 then
         d.lastNotice[feature]=os.clock()
-        warn("[Spooky / " .. feature .. "] " .. text)
-        if _G.Spooky_Log then pcall(_G.Spooky_Log,feature .. ": " .. text) end
+        warn("[NhoiiiX / " .. feature .. "] " .. text)
+        if _G.NhoiiiX_Log then pcall(_G.NhoiiiX_Log,feature .. ": " .. text) end
         if not d.lastToast or os.clock()-d.lastToast>20 then
             d.lastToast=os.clock()
             pcall(function()
                 game:GetService("StarterGui"):SetCore("SendNotification",{
-                    Title="Spooky · " .. feature,
+                    Title="NhoiiiX · " .. feature,
                     Text="Error detectado. Revisa la consola de errores.",Duration=5,
                 })
             end)
         end
     end
 end
-Spooky.Globals   = Spooky.Globals or {}
-Spooky.State     = Spooky.State or {}
-Spooky.Config    = Spooky.Config or {}
-Spooky.VFX       = Spooky.VFX or {}
-Spooky.UI        = Spooky.UI or {}
-Spooky.Cache     = Spooky.Cache or {}
-Spooky.Closures  = Spooky.Closures or {}
+NhoiiiX.Globals   = NhoiiiX.Globals or {}
+NhoiiiX.State     = NhoiiiX.State or {}
+NhoiiiX.Config    = NhoiiiX.Config or {}
+NhoiiiX.VFX       = NhoiiiX.VFX or {}
+NhoiiiX.UI        = NhoiiiX.UI or {}
+NhoiiiX.Cache     = NhoiiiX.Cache or {}
+NhoiiiX.Closures  = NhoiiiX.Closures or {}
 _G.PlayerBlacklist = _G.PlayerBlacklist or {}
-Spooky.Blacklist = _G.PlayerBlacklist
-function Spooky.ExportPlayerBlacklist()
+NhoiiiX.Blacklist = _G.PlayerBlacklist
+function NhoiiiX.ExportPlayerBlacklist()
     local result = {}
     for key, value in pairs(_G.PlayerBlacklist or {}) do
         if value == true and (type(key) == "string" or type(key) == "number") then result[tostring(key)] = true end
     end
     return result
 end
-function Spooky.RestorePlayerBlacklist(data)
+function NhoiiiX.RestorePlayerBlacklist(data)
     if type(data) ~= "table" then return end
     local result = {}
     for key, value in pairs(data) do
@@ -75,8 +75,8 @@ function Spooky.RestorePlayerBlacklist(data)
             if tonumber(key) then result[tonumber(key)] = true end
         end
     end
-    _G.PlayerBlacklist, Spooky.Blacklist = result, result
-    if Spooky.RefreshPlayerList then task.defer(Spooky.RefreshPlayerList) end
+    _G.PlayerBlacklist, NhoiiiX.Blacklist = result, result
+    if NhoiiiX.RefreshPlayerList then task.defer(NhoiiiX.RefreshPlayerList) end
 end
 
 local Players           = game:GetService("Players")
@@ -108,8 +108,8 @@ task.spawn(function()
             pcall(function() game.Loaded:Wait() end)
         end
         local chosenTeam = nil
-        if isfile and isfile("Spooky_AutoTeam.txt") and readfile then
-            local raw = readfile("Spooky_AutoTeam.txt")
+        if isfile and isfile("NhoiiiX_AutoTeam.txt") and readfile then
+            local raw = readfile("NhoiiiX_AutoTeam.txt")
             if raw then
                 local t = string.match(raw, "%a+")
                 if t == "Marines" or t == "Pirates" then
@@ -149,13 +149,13 @@ local function safeParent(gui)
         end)
     end
 end
-if _G.Spooky_Cleanup then
-    pcall(_G.Spooky_Cleanup)
+if _G.NhoiiiX_Cleanup then
+    pcall(_G.NhoiiiX_Cleanup)
 end
 local SCRIPT_SESSION = tick()
-_G.Spooky_Session = SCRIPT_SESSION
+_G.NhoiiiX_Session = SCRIPT_SESSION
 local function isCurrentSession()
-    return _G.Spooky_Session == SCRIPT_SESSION
+    return _G.NhoiiiX_Session == SCRIPT_SESSION
 end
 local ActiveScriptConnections = {}
 local function registerConnection(conn)
@@ -167,39 +167,39 @@ end
 local function cleanOldGuis(parent)
     if not parent then return end
     local guiNames = {
-        "Spooky_GUI",
-        "Spooky_LoadingGui",
-        "Spooky_LoginGui",
-        "Spooky_MobileToggle",
-        "SpookyCamLockWidget",
-        "SpookyTrackerWidget",
+        "NhoiiiX_GUI",
+        "NhoiiiX_LoadingGui",
+        "NhoiiiX_LoginGui",
+        "NhoiiiX_MobileToggle",
+        "NhoiiiXCamLockWidget",
+        "NhoiiiXTrackerWidget",
         "SanguineNoLagBoostWidget",
         "SanguineLagBoostWidget",
         "SuperJumpWidget",
-        "SpookySuperJumpWidget",
-        "Spooky_Macro_Floating_Combo",
-        "SpookyMacroEditorWindow",
-        "SpookyIslandTeleport",
-        "SpookyIslandTeleportGui",
+        "NhoiiiXSuperJumpWidget",
+        "NhoiiiX_Macro_Floating_Combo",
+        "NhoiiiXMacroEditorWindow",
+        "NhoiiiXIslandTeleport",
+        "NhoiiiXIslandTeleportGui",
         "IslandTeleportGui",
-        "SpookyShipCustomGui",
-        "SpookyShipModWindow",
+        "NhoiiiXShipCustomGui",
+        "NhoiiiXShipModWindow",
         "ShipCustomGui",
-        "SpookyKeybindsGui",
-        "Spooky_Notification_Gui",
-        "SpookyCombatHUDWidget",
-        "Spooky_Float_FloatHUD_Aimbot",
-        "Spooky_Float_FloatHUD_BusoKen",
-        "Spooky_Float_FloatHUD_V4",
-        "Spooky_Float_FloatHUD_Soru",
-        "Spooky_Float_FloatHUD_MagnetHealth"
+        "NhoiiiXKeybindsGui",
+        "NhoiiiX_Notification_Gui",
+        "NhoiiiXCombatHUDWidget",
+        "NhoiiiX_Float_FloatHUD_Aimbot",
+        "NhoiiiX_Float_FloatHUD_BusoKen",
+        "NhoiiiX_Float_FloatHUD_V4",
+        "NhoiiiX_Float_FloatHUD_Soru",
+        "NhoiiiX_Float_FloatHUD_MagnetHealth"
     }
     for _, name in ipairs(guiNames) do
         local g = parent:FindFirstChild(name)
         if g then pcall(function() g:Destroy() end) end
     end
     for _, ch in ipairs(parent:GetChildren()) do
-        if ch:IsA("ScreenGui") and string.find(ch.Name, "Spooky_Float_") then
+        if ch:IsA("ScreenGui") and string.find(ch.Name, "NhoiiiX_Float_") then
             pcall(function() ch:Destroy() end)
         end
     end
@@ -207,18 +207,18 @@ end
 cleanOldGuis(TargetParent)
 if PlayerGui and PlayerGui ~= TargetParent then cleanOldGuis(PlayerGui) end
 
-_G.SpookyStartupLoaderFinished = false
-_G.SpookyOnStartupLoaderFinished = nil
+_G.NhoiiiXStartupLoaderFinished = false
+_G.NhoiiiXOnStartupLoaderFinished = nil
 do
     local gui = Instance.new("ScreenGui")
-    gui.Name = "Spooky_LoadingGui"
+    gui.Name = "NhoiiiX_LoadingGui"
     gui.DisplayOrder = 99999
     gui.IgnoreGuiInset = true
     gui.ResetOnSpawn = false
     safeParent(gui)
 
     local blur = Instance.new("BlurEffect")
-    blur.Name = "Spooky_LoaderBlur"
+    blur.Name = "NhoiiiX_LoaderBlur"
     blur.Size = 0
     blur.Parent = Lighting
     TweenService:Create(blur, TweenInfo.new(0.38, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = 16 }):Play()
@@ -265,7 +265,7 @@ do
     Instance.new("UICorner", aura).CornerRadius = UDim.new(1, 0)
 
     local logo = Instance.new("ImageLabel", panel)
-    logo.Name = "SpookyLogo"
+    logo.Name = "NhoiiiXLogo"
     logo.Size = UDim2.new(0, 56, 0, 56)
     logo.Position = UDim2.new(0, 32, 0, 28)
     logo.BackgroundTransparency = 1
@@ -311,7 +311,7 @@ do
     vbStk.Color = Color3.fromRGB(58, 48, 80)
     vbStk.Thickness = 1
 
-    local es = (_G.Spooky_CurrentLang == "ES" or _G.CurrentLang == "ES")
+    local es = (_G.NhoiiiX_CurrentLang == "ES" or _G.CurrentLang == "ES")
 
     local status = Instance.new("TextLabel", panel)
     status.Position = UDim2.fromOffset(30, 108)
@@ -448,7 +448,7 @@ do
         if finished then return end
         finished = true
         pulsing = false
-        setProgress(100, 0.22, es and "Tu espacio esta listo!" or "Your workspace is ready!", "SPOOKY / READY")
+        setProgress(100, 0.22, es and "Tu espacio esta listo!" or "Your workspace is ready!", "NhoiiiX / READY")
         pctLbl.TextColor3 = Color3.fromRGB(120, 255, 180)
         TweenService:Create(spark, TweenInfo.new(0.2), { BackgroundColor3 = Color3.fromRGB(120, 255, 180) }):Play()
 
@@ -469,9 +469,9 @@ do
             }):Play()
 
             task.delay(0.32, function()
-                _G.SpookyStartupLoaderFinished = true
-                local reveal = _G.SpookyOnStartupLoaderFinished
-                _G.SpookyOnStartupLoaderFinished = nil
+                _G.NhoiiiXStartupLoaderFinished = true
+                local reveal = _G.NhoiiiXOnStartupLoaderFinished
+                _G.NhoiiiXOnStartupLoaderFinished = nil
                 if reveal then pcall(reveal) end
                 pcall(function() blur:Destroy() end)
                 pcall(function() gui:Destroy() end)
@@ -479,7 +479,7 @@ do
         end)
     end
 
-    _G.SpookyStartupStage = function(stage)
+    _G.NhoiiiXStartupStage = function(stage)
         if finished or not isCurrentSession() then return end
         local stages = {
             controls = { 55, "FASE 02 / CONTROLES", es and "Organizando controles y atajos..." or "Organizing controls & keybinds..." },
@@ -492,7 +492,7 @@ do
     end
 
     local began = os.clock()
-    _G.SpookyFinishStartup = function()
+    _G.NhoiiiXFinishStartup = function()
         task.delay(math.max(0, 0.65 - (os.clock() - began)), finish)
     end
 
@@ -507,12 +507,12 @@ end
 
 pcall(function()
     for _, obj in ipairs(workspace:GetChildren()) do
-        if obj.Name == "SpookyWaterPlatform" or obj.Name == "SpookyTracerAnchor" then
+        if obj.Name == "NhoiiiXWaterPlatform" or obj.Name == "NhoiiiXTracerAnchor" then
             pcall(function() obj:Destroy() end)
         end
     end
     for _, obj in ipairs(Lighting:GetChildren()) do
-        if obj.Name == "Spooky_Skybox" or obj.Name == "Spooky_CC" or obj.Name == "Spooky_Bloom" or obj.Name == "Spooky_RainbowSky" or obj.Name == "Spooky_RainbowAtmosphere" then
+        if obj.Name == "NhoiiiX_Skybox" or obj.Name == "NhoiiiX_CC" or obj.Name == "NhoiiiX_Bloom" or obj.Name == "NhoiiiX_RainbowSky" or obj.Name == "NhoiiiX_RainbowAtmosphere" then
             pcall(function() obj:Destroy() end)
         end
     end
@@ -536,16 +536,16 @@ local function performFullScriptShutdown()
         end
     end
 
-    if _G.SpookyStopMacro then pcall(_G.SpookyStopMacro) end
-    if _G.SpookyRestoreGunAim then pcall(_G.SpookyRestoreGunAim); _G.SpookyRestoreGunAim = nil end
-    if _G.SpookyRestoreMouseAim then pcall(_G.SpookyRestoreMouseAim) end
-    if Spooky.CleanupCombatVisuals then pcall(Spooky.CleanupCombatVisuals) end
-    pcall(function() RunService:UnbindFromRenderStep("SpookyCamLockExecution") end)
+    if _G.NhoiiiXStopMacro then pcall(_G.NhoiiiXStopMacro) end
+    if _G.NhoiiiXRestoreGunAim then pcall(_G.NhoiiiXRestoreGunAim); _G.NhoiiiXRestoreGunAim = nil end
+    if _G.NhoiiiXRestoreMouseAim then pcall(_G.NhoiiiXRestoreMouseAim) end
+    if NhoiiiX.CleanupCombatVisuals then pcall(NhoiiiX.CleanupCombatVisuals) end
+    pcall(function() RunService:UnbindFromRenderStep("NhoiiiXCamLockExecution") end)
 
-    _G.Spooky_Session = nil
-    _G.Spooky_Loaded = false
+    _G.NhoiiiX_Session = nil
+    _G.NhoiiiX_Loaded = false
 
-    getgenv().SpookyAutoBountyRunning = false
+    getgenv().NhoiiiXAutoBountyRunning = false
     getgenv().AutoBountyActive = false
     _G.AutoFarmOvercharged = false
     _G.GunAuraActive = false
@@ -557,18 +557,18 @@ local function performFullScriptShutdown()
     _G.G_SilentAimTargetPos = nil
     _G.centuTargetChar = nil
     _G.centuAimPosition = nil
-    local fnAutoBounty = _G.stopSpookyAutoBountyExact or (type(stopSpookyAutoBountyExact) == "function" and stopSpookyAutoBountyExact)
+    local fnAutoBounty = _G.stopNhoiiiXAutoBountyExact or (type(stopNhoiiiXAutoBountyExact) == "function" and stopNhoiiiXAutoBountyExact)
     if fnAutoBounty then pcall(fnAutoBounty) end
     local fnIslandTween = _G.stopIslandTween or (type(stopIslandTween) == "function" and stopIslandTween)
     if fnIslandTween then pcall(fnIslandTween) end
 
-    local fnCleanESPs = _G.Spooky_CleanAllESPs or _G.cleanAllESPs or (type(cleanAllESPs) == "function" and cleanAllESPs)
+    local fnCleanESPs = _G.NhoiiiX_CleanAllESPs or _G.cleanAllESPs or (type(cleanAllESPs) == "function" and cleanAllESPs)
     if fnCleanESPs then pcall(fnCleanESPs) end
-    local fnCleanVFX = getgenv().SpookyColorVFX_Cleanup or _G.SpookyColorVFX_Cleanup or _G.cleanupVFX or (type(cleanupVFX) == "function" and cleanupVFX)
+    local fnCleanVFX = getgenv().NhoiiiXColorVFX_Cleanup or _G.NhoiiiXColorVFX_Cleanup or _G.cleanupVFX or (type(cleanupVFX) == "function" and cleanupVFX)
     if fnCleanVFX then pcall(fnCleanVFX) end
-    local fnFruitScales = _G.Spooky_RestoreFruitScales or _G.restoreAllFruitScales or (type(restoreAllFruitScales) == "function" and restoreAllFruitScales)
+    local fnFruitScales = _G.NhoiiiX_RestoreFruitScales or _G.restoreAllFruitScales or (type(restoreAllFruitScales) == "function" and restoreAllFruitScales)
     if fnFruitScales then pcall(fnFruitScales) end
-    local fnHud = _G.Spooky_CleanupHudOverlays or _G.cleanupHudOverlays or (type(cleanupHudOverlays) == "function" and cleanupHudOverlays)
+    local fnHud = _G.NhoiiiX_CleanupHudOverlays or _G.cleanupHudOverlays or (type(cleanupHudOverlays) == "function" and cleanupHudOverlays)
     if fnHud then pcall(fnHud) end
 
     pcall(function()
@@ -615,7 +615,7 @@ local function performFullScriptShutdown()
 
     pcall(function()
         for _, obj in ipairs(workspace:GetChildren()) do
-            if obj.Name == "SpookyWaterPlatform" or obj.Name == "WaterPlatform" or obj.Name == "SpookyTracerAnchor" then
+            if obj.Name == "NhoiiiXWaterPlatform" or obj.Name == "WaterPlatform" or obj.Name == "NhoiiiXTracerAnchor" then
                 pcall(function() obj:Destroy() end)
             end
         end
@@ -625,7 +625,7 @@ local function performFullScriptShutdown()
             waterPlane.Size = Vector3.new(1000, 80, 1000)
         end
         for _, obj in ipairs(Lighting:GetChildren()) do
-            if obj.Name:find("Spooky") or obj.Name:find("Shaders") then
+            if obj.Name:find("NhoiiiX") or obj.Name:find("Shaders") then
                 pcall(function() obj:Destroy() end)
             end
         end
@@ -636,10 +636,10 @@ local function performFullScriptShutdown()
     pcall(function()
         local pGui = LocalPlayer:FindFirstChild("PlayerGui") or game:GetService("CoreGui")
         local guiList = {
-            "Spooky_GUI", "Spooky_LoginGui", "Spooky_MobileToggle", "SpookyCamLockWidget", "SpookyTrackerWidget",
-            "SuperJumpWidget", "SpookySuperJumpWidget", "Spooky_HUDOverlay",
-            "Spooky_Macro_Floating_Combo", "Spooky_ImportModal", "SpookyIslandTeleport",
-            "SpookyIslandTeleportGui", "IslandTeleportGui", "SpookyShipCustomGui", "SpookyShipModWindow"
+            "NhoiiiX_GUI", "NhoiiiX_LoginGui", "NhoiiiX_MobileToggle", "NhoiiiXCamLockWidget", "NhoiiiXTrackerWidget",
+            "SuperJumpWidget", "NhoiiiXSuperJumpWidget", "NhoiiiX_HUDOverlay",
+            "NhoiiiX_Macro_Floating_Combo", "NhoiiiX_ImportModal", "NhoiiiXIslandTeleport",
+            "NhoiiiXIslandTeleportGui", "IslandTeleportGui", "NhoiiiXShipCustomGui", "NhoiiiXShipModWindow"
         }
         for _, gName in ipairs(guiList) do
             local found = pGui:FindFirstChild(gName, true)
@@ -648,20 +648,20 @@ local function performFullScriptShutdown()
     end)
 
     pcall(function()
-        if Spooky.UI.screen and Spooky.UI.screen.Parent then
-            Spooky.UI.screen:Destroy()
+        if NhoiiiX.UI.screen and NhoiiiX.UI.screen.Parent then
+            NhoiiiX.UI.screen:Destroy()
         end
     end)
-    print("[Project Spooky] All features successfully deactivated and script closed.")
+    print("[Project NhoiiiX] All features successfully deactivated and script closed.")
 end
-_G.Spooky_Cleanup = performFullScriptShutdown
-_G.Spooky_Loaded = true
+_G.NhoiiiX_Cleanup = performFullScriptShutdown
+_G.NhoiiiX_Loaded = true
 
 task.spawn(function()
     local savedTeam = "Pirates"
     pcall(function()
-        if isfile and isfile("Spooky_AutoTeam.txt") and readfile then
-            local raw = readfile("Spooky_AutoTeam.txt")
+        if isfile and isfile("NhoiiiX_AutoTeam.txt") and readfile then
+            local raw = readfile("NhoiiiX_AutoTeam.txt")
             if raw then
                 local t = string.match(raw, "%a+")
                 if t == "Marines" or t == "Pirates" or t == "None" then
@@ -669,7 +669,7 @@ task.spawn(function()
                 end
             end
         else
-            if writefile then writefile("Spooky_AutoTeam.txt", "Pirates") end
+            if writefile then writefile("NhoiiiX_AutoTeam.txt", "Pirates") end
         end
     end)
     if savedTeam ~= "None" then
@@ -793,7 +793,7 @@ local globalShowTab = nil
 local showTab = nil
 local CurrentTheme = "White"
 
-_G.SpookyThemedElements = { AllHeaderEmblems = {} }
+_G.NhoiiiXThemedElements = { AllHeaderEmblems = {} }
 local refreshMacroStepsUI = nil
 local refreshKeybindsList = nil
 local btnToggleTransparent = nil
@@ -805,16 +805,16 @@ local btnConfigs = nil
 local applyLanguage = nil
 local PCKeybinds = {}
 _G.PCKeybinds = PCKeybinds
-_G.SpookyKeybinds = PCKeybinds
+_G.NhoiiiXKeybinds = PCKeybinds
 local FeatureStates    = {}
-Spooky.AttackBudget = {}
-function Spooky.TakeAttackBudget(channel, delay)
+NhoiiiX.AttackBudget = {}
+function NhoiiiX.TakeAttackBudget(channel, delay)
     local now = os.clock()
-    if now < (Spooky.AttackBudget[channel] or 0) then return false end
-    Spooky.AttackBudget[channel] = now + math.clamp(tonumber(delay) or 0.15, 0.12, 1)
+    if now < (NhoiiiX.AttackBudget[channel] or 0) then return false end
+    NhoiiiX.AttackBudget[channel] = now + math.clamp(tonumber(delay) or 0.15, 0.12, 1)
     return true
 end
-Spooky.RetiredFeatures = {
+NhoiiiX.RetiredFeatures = {
     GunAimbot=true, FruitDiscordNotify=true, FruitAutoClipTP=true,
     PvPStickyTarget=true, PvPLineOfSight=true,
 }
@@ -822,35 +822,35 @@ local FeatureCallbacks = {}
 _G.FeatureStates = FeatureStates
 _G.FeatureCallbacks = FeatureCallbacks
 local ToggleButtons    = {}
-Spooky.ToggleCopies = {}
-Spooky.AppliedFeatures = {}
-Spooky.FeatureVersions = {}
-_G.SpookyCombatTargetValid=nil
-_G.SpookyIsEnemy=nil
-_G.SpookyInSafeZone=nil
-_G.SpookyPvPAllowed=nil
-Spooky.ControlCatalog = {}
-Spooky.PendingCustomControls = nil
-Spooky.PendingFloatingPositions = nil
-_G.SpookySyncCustomControl = nil
-_G.SpookySetCustomControls = nil
-_G.SpookySetFloatingPositions = nil
-_G.SpookyGetFloatingPositions = nil
-_G.SpookyRefreshFloatingWidgets = nil
-function Spooky.ResolveFeature(name)
+NhoiiiX.ToggleCopies = {}
+NhoiiiX.AppliedFeatures = {}
+NhoiiiX.FeatureVersions = {}
+_G.NhoiiiXCombatTargetValid=nil
+_G.NhoiiiXIsEnemy=nil
+_G.NhoiiiXInSafeZone=nil
+_G.NhoiiiXPvPAllowed=nil
+NhoiiiX.ControlCatalog = {}
+NhoiiiX.PendingCustomControls = nil
+NhoiiiX.PendingFloatingPositions = nil
+_G.NhoiiiXSyncCustomControl = nil
+_G.NhoiiiXSetCustomControls = nil
+_G.NhoiiiXSetFloatingPositions = nil
+_G.NhoiiiXGetFloatingPositions = nil
+_G.NhoiiiXRefreshFloatingWidgets = nil
+function NhoiiiX.ResolveFeature(name)
     return ({FruitsM1="OneShotKitsune",InfiniteSoru="InfinitySoru",SpeedHack="WalkSpeed"})[name] or name
 end
-function Spooky.RegisterControl(btn, feature, en, es, run)
+function NhoiiiX.RegisterControl(btn, feature, en, es, run)
     local page = btn:FindFirstAncestorWhichIsA("ScrollingFrame")
-    local group = btn.Parent and btn.Parent:GetAttribute("SpookyControlGroup") or ""
+    local group = btn.Parent and btn.Parent:GetAttribute("NhoiiiXControlGroup") or ""
     local pageName = page and page.Name or "UI"
     local id = feature and ("Toggle:" .. feature) or ("Action:" .. pageName .. ":" .. group .. ":" .. en)
     if en == "+ Add Control" then return end
-    Spooky.ControlCatalog[id] = {feature=feature,en=en,es=es,run=run,isToggle=feature~=nil,page=pageName:gsub("_Page$","")}
+    NhoiiiX.ControlCatalog[id] = {feature=feature,en=en,es=es,run=run,isToggle=feature~=nil,page=pageName:gsub("_Page$","")}
 end
 local TranslatableUI   = {}
 local function updateToggleVisual(name, active)
-    for _, data in ipairs(Spooky.ToggleCopies[name] or {}) do
+    for _, data in ipairs(NhoiiiX.ToggleCopies[name] or {}) do
     if data.btn and data.btn.Parent then
         TweenService:Create(data.btn, TweenInfo.new(0.18), {
             BackgroundColor3 = active and Color3.fromRGB(24, 22, 34) or Color3.fromRGB(16, 16, 18)
@@ -860,8 +860,8 @@ local function updateToggleVisual(name, active)
                 TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 200, 215)
             }):Play()
         end
-        if data.spookyIcon then
-            TweenService:Create(data.spookyIcon, TweenInfo.new(0.18), {
+        if data.NhoiiiXIcon then
+            TweenService:Create(data.NhoiiiXIcon, TweenInfo.new(0.18), {
                 ImageColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 160)
             }):Play()
         end
@@ -870,7 +870,7 @@ local function updateToggleVisual(name, active)
                 Color = active and Color3.fromRGB(240, 240, 255) or Color3.fromRGB(50, 50, 65)
             }):Play()
         end
-        local curAccent = _G.CurrentAccentColor or (_G.SpookyThemeAccents and CurrentTheme and _G.SpookyThemeAccents[CurrentTheme] and _G.SpookyThemeAccents[CurrentTheme].accent) or Color3.fromRGB(65, 145, 255)
+        local curAccent = _G.CurrentAccentColor or (_G.NhoiiiXThemeAccents and CurrentTheme and _G.NhoiiiXThemeAccents[CurrentTheme] and _G.NhoiiiXThemeAccents[CurrentTheme].accent) or Color3.fromRGB(65, 145, 255)
         if data.btnStk then
             TweenService:Create(data.btnStk, TweenInfo.new(0.18), {
                 Color = active and curAccent or Color3.fromRGB(36, 36, 42)
@@ -901,54 +901,54 @@ local function updateToggleVisual(name, active)
     end
 end
 local function setFeatureState(name, active, skipCallback)
-    name = Spooky.ResolveFeature(name)
-    if Spooky.RetiredFeatures[name] then FeatureStates[name] = false; return end
+    name = NhoiiiX.ResolveFeature(name)
+    if NhoiiiX.RetiredFeatures[name] then FeatureStates[name] = false; return end
     if name == "KitsuneAutoBounty" or name == "OneShotKitsune2" or name == "AutoV4Kit" then
         FeatureStates[name] = false
         return
     end
     active = active == true
-    Spooky.FeatureVersions[name] = (Spooky.FeatureVersions[name] or 0) + 1
-    local version = Spooky.FeatureVersions[name]
+    NhoiiiX.FeatureVersions[name] = (NhoiiiX.FeatureVersions[name] or 0) + 1
+    local version = NhoiiiX.FeatureVersions[name]
     FeatureStates[name] = active
     local visualOK, visualError = pcall(updateToggleVisual, name, active)
-    if not visualOK then Spooky.ReportIssue("Toggle visual", visualError) end
-    if _G.SpookyUpdateFloatingWidget then
+    if not visualOK then NhoiiiX.ReportIssue("Toggle visual", visualError) end
+    if _G.NhoiiiXUpdateFloatingWidget then
         if name == "AimbotPlayer2" or name == "AimbotPlayer1" or name == "AimbotPlayer3" then
-            _G.SpookyUpdateFloatingWidget("FloatHUD_Aimbot", active)
+            _G.NhoiiiXUpdateFloatingWidget("FloatHUD_Aimbot", active)
         elseif name == "AutoBuso" or name == "AutoKen" then
             local both = (FeatureStates["AutoBuso"] == true and FeatureStates["AutoKen"] == true)
-            _G.SpookyUpdateFloatingWidget("FloatHUD_BusoKen", both)
+            _G.NhoiiiXUpdateFloatingWidget("FloatHUD_BusoKen", both)
         elseif name == "AutoV4" then
-            _G.SpookyUpdateFloatingWidget("FloatHUD_V4", active)
+            _G.NhoiiiXUpdateFloatingWidget("FloatHUD_V4", active)
 
         elseif name == "CombatHUD" then
-            _G.SpookyUpdateFloatingWidget("CombatHUD", active)
+            _G.NhoiiiXUpdateFloatingWidget("CombatHUD", active)
         end
     end
-    if _G.SpookySyncCustomControl then
-        local ok, err = pcall(_G.SpookySyncCustomControl, name)
-        if not ok then Spooky.ReportIssue("Custom control", err) end
+    if _G.NhoiiiXSyncCustomControl then
+        local ok, err = pcall(_G.NhoiiiXSyncCustomControl, name)
+        if not ok then NhoiiiX.ReportIssue("Custom control", err) end
     end
     if not skipCallback and FeatureCallbacks[name] then
         local callback = FeatureCallbacks[name]
         task.spawn(function()
-            if not isCurrentSession() or Spooky.FeatureVersions[name] ~= version then return end
+            if not isCurrentSession() or NhoiiiX.FeatureVersions[name] ~= version then return end
             local ok, err = pcall(callback, active)
-            if ok then Spooky.AppliedFeatures[name] = callback
-            else Spooky.ReportIssue(name,err) end
+            if ok then NhoiiiX.AppliedFeatures[name] = callback
+            else NhoiiiX.ReportIssue(name,err) end
         end)
     end
 end
 local function notifyToggle(name, state)
     local status = state and (CurrentLang == "EN" and "ENABLED" or "ACTIVADO") or (CurrentLang == "EN" and "DISABLED" or "DESACTIVADO")
-    print(string.format("[Project Spooky] %s: %s", name, status))
-    if _G.Spooky_Log then
-        pcall(_G.Spooky_Log, (state and "[+] " or "[-] ") .. tostring(name))
+    print(string.format("[Project NhoiiiX] %s: %s", name, status))
+    if _G.NhoiiiX_Log then
+        pcall(_G.NhoiiiX_Log, (state and "[+] " or "[-] ") .. tostring(name))
     end
 end
 local function toggleFeature(name)
-    name = Spooky.ResolveFeature(name)
+    name = NhoiiiX.ResolveFeature(name)
     local newState = not (FeatureStates[name] or false)
     setFeatureState(name, newState)
     local data = ToggleButtons[name]
@@ -1002,20 +1002,20 @@ local function computeScale()
 end
 _G.computeScale = computeScale
 local lastUIPos = nil
-local SpookyEditableElements = {}
-_G.SpookyEditableElements = SpookyEditableElements
-local SpookySetPanelTransparency = nil
-local setSpookyTransparentMode
+local NhoiiiXEditableElements = {}
+_G.NhoiiiXEditableElements = NhoiiiXEditableElements
+local NhoiiiXSetPanelTransparency = nil
+local setNhoiiiXTransparentMode
 local isKeyValidLocal = true
 local BW = UDim2.new(0, 124, 0, 30)
 local BS = UDim2.new(0, 124, 0, 26)
 local X1, X2, X3 = 6, 134, 262
 
 do
-    local launchProjectSpooky
+    local launchProjectNhoiiiX
 ScreenGui = Instance.new("ScreenGui")
-Spooky.UI.screen=ScreenGui
-    ScreenGui.Name = "Spooky_GUI"
+NhoiiiX.UI.screen=ScreenGui
+    ScreenGui.Name = "NhoiiiX_GUI"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.IgnoreGuiInset = true
@@ -1047,12 +1047,12 @@ Spooky.UI.screen=ScreenGui
     UIFrameStroke.Color = Color3.fromRGB(9, 9, 13)
     UIFrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    getgenv().SpookyUIFrame = MAINUIframe
-    getgenv().SpookyUIStroke = UIFrameStroke
-    getgenv().SpookyUICorner = UIFrameCorner
+    getgenv().NhoiiiXUIFrame = MAINUIframe
+    getgenv().NhoiiiXUIStroke = UIFrameStroke
+    getgenv().NhoiiiXUICorner = UIFrameCorner
 
     local UIFrameWallpaper = Instance.new("ImageLabel", MAINUIframe)
-    UIFrameWallpaper.Name = "SpookyUIWallpaper"
+    UIFrameWallpaper.Name = "NhoiiiXUIWallpaper"
     UIFrameWallpaper.Size = UDim2.new(1, 0, 1, 0)
     UIFrameWallpaper.Position = UDim2.new(0, 0, 0, 0)
     UIFrameWallpaper.BackgroundTransparency = 1
@@ -1063,10 +1063,10 @@ Spooky.UI.screen=ScreenGui
     UIFrameWallpaper.Visible = true
     local UIFrameWallpaperCorner = Instance.new("UICorner", UIFrameWallpaper)
     UIFrameWallpaperCorner.CornerRadius = UIFrameCorner.CornerRadius
-    getgenv().SpookyUIWallpaper = UIFrameWallpaper
+    getgenv().NhoiiiXUIWallpaper = UIFrameWallpaper
 
     local UIFrameOverlay = Instance.new("ImageLabel", MAINUIframe)
-    UIFrameOverlay.Name = "SpookyUIOverlay"
+    UIFrameOverlay.Name = "NhoiiiXUIOverlay"
     UIFrameOverlay.Size = UDim2.new(1, 0, 1, 0)
     UIFrameOverlay.Position = UDim2.new(0, 0, 0, 0)
     UIFrameOverlay.BackgroundTransparency = 1
@@ -1074,10 +1074,10 @@ Spooky.UI.screen=ScreenGui
     UIFrameOverlay.Visible = false
     local UIFrameOverlayCorner = Instance.new("UICorner", UIFrameOverlay)
     UIFrameOverlayCorner.CornerRadius = UIFrameCorner.CornerRadius
-    getgenv().SpookyUIOverlay = UIFrameOverlay
+    getgenv().NhoiiiXUIOverlay = UIFrameOverlay
 
-    if SpookyEditableElements then
-        SpookyEditableElements["MainFrame"] = MAINUIframe
+    if NhoiiiXEditableElements then
+        NhoiiiXEditableElements["MainFrame"] = MAINUIframe
     end
 
     UIScale = Instance.new("UIScale", MAINUIframe)
@@ -1181,7 +1181,7 @@ Spooky.UI.screen=ScreenGui
     makeDraggable({ topDragHandle, MAINUIframe }, MAINUIframe)
 
     local leftSideImg = Instance.new("Frame", MAINUIframe)
-    _G.SpookyThemedElements.leftSideImg = leftSideImg
+    _G.NhoiiiXThemedElements.leftSideImg = leftSideImg
     leftSideImg.Name = "left side image"
     makeDraggable(leftSideImg, MAINUIframe)
     leftSideImg.Size = UDim2.new(0, 128, 0, 369)
@@ -1196,80 +1196,80 @@ Spooky.UI.screen=ScreenGui
     leftDivider.BackgroundColor3 = Color3.fromRGB(28, 26, 38)
     leftDivider.BorderSizePixel = 0
 
-    local initSpookyColor = _G.CurrentAccentColor or Color3.fromRGB(165, 80, 255)
+    local initNhoiiiXColor = _G.CurrentAccentColor or Color3.fromRGB(165, 80, 255)
 
-    local spookyFireAura = Instance.new("ImageLabel", MAINUIframe)
-    spookyFireAura.Name = "spookyFireAura"
-    spookyFireAura.Size = UDim2.new(0, 88, 0, 88)
-    spookyFireAura.Position = UDim2.new(0, 20, 0, 6)
-    spookyFireAura.BackgroundTransparency = 1
-    spookyFireAura.BorderSizePixel = 0
-    spookyFireAura.ZIndex = 7
-    spookyFireAura.Image = "rbxassetid://124747708335361"
-    spookyFireAura.ImageColor3 = initSpookyColor
-    spookyFireAura.ImageTransparency = 0.65
-    spookyFireAura.ScaleType = Enum.ScaleType.Stretch
-    Instance.new("UICorner", spookyFireAura).CornerRadius = UDim.new(0.5, 0)
-    _G.SpookyThemedElements.spookyFireAura = spookyFireAura
+    local NhoiiiXFireAura = Instance.new("ImageLabel", MAINUIframe)
+    NhoiiiXFireAura.Name = "NhoiiiXFireAura"
+    NhoiiiXFireAura.Size = UDim2.new(0, 88, 0, 88)
+    NhoiiiXFireAura.Position = UDim2.new(0, 20, 0, 6)
+    NhoiiiXFireAura.BackgroundTransparency = 1
+    NhoiiiXFireAura.BorderSizePixel = 0
+    NhoiiiXFireAura.ZIndex = 7
+    NhoiiiXFireAura.Image = "rbxassetid://124747708335361"
+    NhoiiiXFireAura.ImageColor3 = initNhoiiiXColor
+    NhoiiiXFireAura.ImageTransparency = 0.65
+    NhoiiiXFireAura.ScaleType = Enum.ScaleType.Stretch
+    Instance.new("UICorner", NhoiiiXFireAura).CornerRadius = UDim.new(0.5, 0)
+    _G.NhoiiiXThemedElements.NhoiiiXFireAura = NhoiiiXFireAura
 
-    local spookyAuraStroke = Instance.new("UIStroke", spookyFireAura)
-    spookyAuraStroke.Thickness = 3.0
-    spookyAuraStroke.Transparency = 0.6
-    spookyAuraStroke.Color = initSpookyColor
-    _G.SpookyThemedElements.spookyAuraStroke = spookyAuraStroke
+    local NhoiiiXAuraStroke = Instance.new("UIStroke", NhoiiiXFireAura)
+    NhoiiiXAuraStroke.Thickness = 3.0
+    NhoiiiXAuraStroke.Transparency = 0.6
+    NhoiiiXAuraStroke.Color = initNhoiiiXColor
+    _G.NhoiiiXThemedElements.NhoiiiXAuraStroke = NhoiiiXAuraStroke
 
-    local spookyIcon = Instance.new("ImageLabel", MAINUIframe)
-    spookyIcon.Name = "spooky icon (do not change this icon)"
-    spookyIcon.Size = UDim2.new(0, 80, 0, 80)
-    spookyIcon.Position = UDim2.new(0, 24, 0, 10)
-    spookyIcon.BackgroundTransparency = 1
-    spookyIcon.BorderSizePixel = 0
-    spookyIcon.ZIndex = 8
-    spookyIcon.Visible = true
-    spookyIcon.Active = false
-    spookyIcon.Image = "rbxassetid://124747708335361"
-    spookyIcon.ImageColor3 = initSpookyColor
-    spookyIcon.ScaleType = Enum.ScaleType.Stretch
-    Instance.new("UICorner", spookyIcon).CornerRadius = UDim.new(0.5, 0)
-    _G.SpookyThemedElements.spookyIcon = spookyIcon
+    local NhoiiiXIcon = Instance.new("ImageLabel", MAINUIframe)
+    NhoiiiXIcon.Name = "NhoiiiX icon (do not change this icon)"
+    NhoiiiXIcon.Size = UDim2.new(0, 80, 0, 80)
+    NhoiiiXIcon.Position = UDim2.new(0, 24, 0, 10)
+    NhoiiiXIcon.BackgroundTransparency = 1
+    NhoiiiXIcon.BorderSizePixel = 0
+    NhoiiiXIcon.ZIndex = 8
+    NhoiiiXIcon.Visible = true
+    NhoiiiXIcon.Active = false
+    NhoiiiXIcon.Image = "rbxassetid://124747708335361"
+    NhoiiiXIcon.ImageColor3 = initNhoiiiXColor
+    NhoiiiXIcon.ScaleType = Enum.ScaleType.Stretch
+    Instance.new("UICorner", NhoiiiXIcon).CornerRadius = UDim.new(0.5, 0)
+    _G.NhoiiiXThemedElements.NhoiiiXIcon = NhoiiiXIcon
 
-    local spookyIconStroke = Instance.new("UIStroke", spookyIcon)
-    spookyIconStroke.Name = "spookyIconGlow"
-    spookyIconStroke.Thickness = 2.0
-    spookyIconStroke.Transparency = 0.35
-    spookyIconStroke.Color = initSpookyColor
-    _G.SpookyThemedElements.spookyIconStroke = spookyIconStroke
+    local NhoiiiXIconStroke = Instance.new("UIStroke", NhoiiiXIcon)
+    NhoiiiXIconStroke.Name = "NhoiiiXIconGlow"
+    NhoiiiXIconStroke.Thickness = 2.0
+    NhoiiiXIconStroke.Transparency = 0.35
+    NhoiiiXIconStroke.Color = initNhoiiiXColor
+    _G.NhoiiiXThemedElements.NhoiiiXIconStroke = NhoiiiXIconStroke
 
-    local function playSpookyFloat()
+    local function playNhoiiiXFloat()
         pcall(function()
-            if _G.SpookyFloatTween then pcall(function() _G.SpookyFloatTween:Cancel() end) end
-            if _G.SpookyTiltTween then pcall(function() _G.SpookyTiltTween:Cancel() end) end
-            if _G.SpookyAuraTween then pcall(function() _G.SpookyAuraTween:Cancel() end) end
+            if _G.NhoiiiXFloatTween then pcall(function() _G.NhoiiiXFloatTween:Cancel() end) end
+            if _G.NhoiiiXTiltTween then pcall(function() _G.NhoiiiXTiltTween:Cancel() end) end
+            if _G.NhoiiiXAuraTween then pcall(function() _G.NhoiiiXAuraTween:Cancel() end) end
 
-            spookyIcon.Position = UDim2.new(0, 24, 0, 10)
-            spookyIcon.Rotation = 0
-            spookyFireAura.Position = UDim2.new(0, 20, 0, 6)
-            spookyFireAura.Size = UDim2.new(0, 88, 0, 88)
-            spookyFireAura.ImageTransparency = 0.55
+            NhoiiiXIcon.Position = UDim2.new(0, 24, 0, 10)
+            NhoiiiXIcon.Rotation = 0
+            NhoiiiXFireAura.Position = UDim2.new(0, 20, 0, 6)
+            NhoiiiXFireAura.Size = UDim2.new(0, 88, 0, 88)
+            NhoiiiXFireAura.ImageTransparency = 0.55
         end)
     end
-    playSpookyFloat()
-    _G.SpookyPlayFloatAnimation = playSpookyFloat
+    playNhoiiiXFloat()
+    _G.NhoiiiXPlayFloatAnimation = playNhoiiiXFloat
 
-    local spookyLbl = Instance.new("TextLabel", MAINUIframe)
-    _G.SpookyThemedElements.spookyLbl = spookyLbl
-    spookyLbl.Name = "spooky (do not change this name)"
-    spookyLbl.Size = UDim2.new(0, 128, 0, 24)
-    spookyLbl.Position = UDim2.new(0, 0, 0, 96)
-    spookyLbl.BackgroundTransparency = 1
-    spookyLbl.Font = Enum.Font.GothamBold
-    spookyLbl.Text = "SPOOKY"
-    spookyLbl.TextSize = 15
-    spookyLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    spookyLbl.TextXAlignment = Enum.TextXAlignment.Center
+    local NhoiiiXLbl = Instance.new("TextLabel", MAINUIframe)
+    _G.NhoiiiXThemedElements.NhoiiiXLbl = NhoiiiXLbl
+    NhoiiiXLbl.Name = "NhoiiiX (do not change this name)"
+    NhoiiiXLbl.Size = UDim2.new(0, 128, 0, 24)
+    NhoiiiXLbl.Position = UDim2.new(0, 0, 0, 96)
+    NhoiiiXLbl.BackgroundTransparency = 1
+    NhoiiiXLbl.Font = Enum.Font.GothamBold
+    NhoiiiXLbl.Text = "NhoiiiX"
+    NhoiiiXLbl.TextSize = 15
+    NhoiiiXLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NhoiiiXLbl.TextXAlignment = Enum.TextXAlignment.Center
 
     local rightSideImg = Instance.new("Frame", MAINUIframe)
-    _G.SpookyThemedElements.rightSideImg = rightSideImg
+    _G.NhoiiiXThemedElements.rightSideImg = rightSideImg
     rightSideImg.Name = "right side image"
     rightSideImg.Size = UDim2.new(0, 122, 0, 369)
     rightSideImg.Position = UDim2.new(0.811, 0, 0, 0)
@@ -1293,7 +1293,7 @@ Spooky.UI.screen=ScreenGui
     CloseBtn.TextSize = 14
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseBtn.ZIndex = 10
-    _G.SpookyThemedElements.CloseBtn = CloseBtn
+    _G.NhoiiiXThemedElements.CloseBtn = CloseBtn
 
     local MinimizeBtn = Instance.new("TextButton", MAINUIframe)
     MinimizeBtn.Name = "minimized to toggle button"
@@ -1305,7 +1305,7 @@ Spooky.UI.screen=ScreenGui
     MinimizeBtn.TextSize = 18
     MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizeBtn.ZIndex = 10
-    _G.SpookyThemedElements.MinimizeBtn = MinimizeBtn
+    _G.NhoiiiXThemedElements.MinimizeBtn = MinimizeBtn
 
     local versionBadge = Instance.new("Frame", MAINUIframe)
     versionBadge.Name = "versionBadge"
@@ -1329,7 +1329,7 @@ Spooky.UI.screen=ScreenGui
     versionLbl.TextColor3 = Color3.fromRGB(200, 200, 220)
     versionLbl.TextXAlignment = Enum.TextXAlignment.Center
     versionLbl.ZIndex = 11
-    _G.SpookyThemedElements.versionLbl = versionLbl
+    _G.NhoiiiXThemedElements.versionLbl = versionLbl
 
     local changeHudBtn = Instance.new("TextButton", MAINUIframe)
     changeHudBtn.Name = "change hud / theme button"
@@ -1341,7 +1341,7 @@ Spooky.UI.screen=ScreenGui
     changeHudBtn.TextSize = 10
     changeHudBtn.TextColor3 = Color3.fromRGB(210, 210, 230)
     changeHudBtn.ZIndex = 10
-    _G.SpookyThemedElements.changeHudBtn = changeHudBtn
+    _G.NhoiiiXThemedElements.changeHudBtn = changeHudBtn
     table.insert(TranslatableUI, {
         btn = changeHudBtn,
         en = "Change Hud",
@@ -1354,8 +1354,8 @@ Spooky.UI.screen=ScreenGui
         TweenService:Create(changeHudBtn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(18, 18, 26) }):Play()
     end)
     changeHudBtn.MouseButton1Click:Connect(function()
-        if _G.CycleSpookyTheme then
-            _G.CycleSpookyTheme()
+        if _G.CycleNhoiiiXTheme then
+            _G.CycleNhoiiiXTheme()
         end
     end)
 
@@ -1398,8 +1398,8 @@ Spooky.UI.screen=ScreenGui
             end
         end)
     end
-    _G.Spooky_Log = addLog
-    addLog("Spooky Ready")
+    _G.NhoiiiX_Log = addLog
+    addLog("NhoiiiX Ready")
 
     local topImg = Instance.new("ImageLabel", MAINUIframe)
     topImg.Name = "top image"
@@ -1486,13 +1486,13 @@ Spooky.UI.screen=ScreenGui
     welcomeLbl.TextXAlignment = Enum.TextXAlignment.Center
     welcomeLbl.ZIndex = 5
 
-    _G.SpookyThemedElements.topImg = topImg
-    _G.SpookyThemedElements.midImg = midImg
-    _G.SpookyThemedElements.botImg = botImg
-    _G.SpookyThemedElements.titleBanner = titleBanner
-    _G.SpookyThemedElements.playerProfile = playerProfile
-    _G.SpookyThemedElements.playerProfileStroke = pfStroke
-    _G.SpookyThemedElements.welcomeLbl = welcomeLbl
+    _G.NhoiiiXThemedElements.topImg = topImg
+    _G.NhoiiiXThemedElements.midImg = midImg
+    _G.NhoiiiXThemedElements.botImg = botImg
+    _G.NhoiiiXThemedElements.titleBanner = titleBanner
+    _G.NhoiiiXThemedElements.playerProfile = playerProfile
+    _G.NhoiiiXThemedElements.playerProfileStroke = pfStroke
+    _G.NhoiiiXThemedElements.welcomeLbl = welcomeLbl
 
     local HomeStatsContainer = Instance.new("Frame", MAINUIframe)
     HomeStatsContainer.Name = "HomeStatsContainer"
@@ -1538,11 +1538,11 @@ Spooky.UI.screen=ScreenGui
     local playerLevelLbl, cLevel = makeStatCard(HomeStatsContainer, UDim2.new(0, 0, 0, 48), UDim2.new(0, 172, 0, 42), "LEVEL", "Level MAX")
     local teamLbl, cTeam = makeStatCard(HomeStatsContainer, UDim2.new(0, 188, 0, 48), UDim2.new(0, 172, 0, 42), "FACTION", "Pirates")
 
-    _G.SpookyThemedElements.playerNameLbl = playerNameLbl
-    _G.SpookyThemedElements.playerLevelLbl = playerLevelLbl
-    _G.SpookyThemedElements.playerBountyLbl = playerBountyLbl
-    _G.SpookyThemedElements.teamLbl = teamLbl
-    _G.SpookyThemedElements.HomeStatsContainer = HomeStatsContainer
+    _G.NhoiiiXThemedElements.playerNameLbl = playerNameLbl
+    _G.NhoiiiXThemedElements.playerLevelLbl = playerLevelLbl
+    _G.NhoiiiXThemedElements.playerBountyLbl = playerBountyLbl
+    _G.NhoiiiXThemedElements.teamLbl = teamLbl
+    _G.NhoiiiXThemedElements.HomeStatsContainer = HomeStatsContainer
 
     local creditsBadge = Instance.new("Frame", MAINUIframe)
     creditsBadge.Name = "CreditsBadge"
@@ -1558,20 +1558,20 @@ Spooky.UI.screen=ScreenGui
     cbStroke.Thickness = 1
 
     local creditsLbl = Instance.new("TextLabel", creditsBadge)
-    _G.SpookyThemedElements.creditsLbl = creditsLbl
+    _G.NhoiiiXThemedElements.creditsLbl = creditsLbl
     creditsLbl.Name = "credits"
     creditsLbl.Size = UDim2.new(1, 0, 1, 0)
     creditsLbl.Position = UDim2.new(0, 0, 0, 0)
     creditsLbl.BackgroundTransparency = 1
     creditsLbl.Font = Enum.Font.GothamBold
-    creditsLbl.Text = "Project Spooky  •  By Darling"
+    creditsLbl.Text = "NhoiiiX Pvp  •  By NhoiiiX"
     creditsLbl.TextSize = 10
     creditsLbl.TextColor3 = Color3.fromRGB(210, 210, 235)
     creditsLbl.TextXAlignment = Enum.TextXAlignment.Center
     creditsLbl.ZIndex = 6
 
     local creditsPersonLbl = Instance.new("TextLabel", MAINUIframe)
-    _G.SpookyThemedElements.creditsPersonLbl = creditsPersonLbl
+    _G.NhoiiiXThemedElements.creditsPersonLbl = creditsPersonLbl
     creditsPersonLbl.Name = "credits (person)"
     creditsPersonLbl.Size = UDim2.new(0, 360, 0, 1)
     creditsPersonLbl.Position = UDim2.new(0, 150, 0, 340)
@@ -1619,7 +1619,7 @@ Spooky.UI.screen=ScreenGui
     centerPagesBg.BorderSizePixel = 0
     centerPagesBg.ZIndex = 2
     centerPagesBg.Visible = true
-    _G.SpookyThemedElements.centerPagesBg = centerPagesBg
+    _G.NhoiiiXThemedElements.centerPagesBg = centerPagesBg
 
     PagesFolder = Instance.new("Frame", MAINUIframe)
     PagesFolder.Name = "Pages"
@@ -1629,7 +1629,7 @@ Spooky.UI.screen=ScreenGui
     PagesFolder.BorderSizePixel = 0
     PagesFolder.ZIndex = 8
     PagesFolder.Visible = true
-    _G.SpookyPagesFolder = PagesFolder
+    _G.NhoiiiXPagesFolder = PagesFolder
 
     createScrollPage = function(pageName, canvasHeight)
         local sf = Instance.new("ScrollingFrame")
@@ -1663,12 +1663,12 @@ Spooky.UI.screen=ScreenGui
     local sideLayout = Instance.new("UIListLayout", SidebarScroll)
     sideLayout.SortOrder = Enum.SortOrder.LayoutOrder
     sideLayout.Padding = UDim.new(0, 3)
-    _G.SpookySideLayout = sideLayout
+    _G.NhoiiiXSideLayout = sideLayout
 
     local tabDefinitions = {
         { id = "Home",          label = "Home" },
         { id = "Combat",        label = "Combat" },
-        { id = "SpookyBounty",  label = "Auto Bounty" },
+        { id = "NhoiiiXBounty",  label = "Auto Bounty" },
         { id = "ControlPeople", label = "Player list" },
         { id = "Cheats",        label = "Cheats" },
         { id = "FFlags",        label = "ffflags" },
@@ -1695,10 +1695,10 @@ Spooky.UI.screen=ScreenGui
             return "Home"
         elseif norm == "combat" or norm == "combate" or norm == "pvp" then
             return "Combat"
-        elseif norm == "spookybounty" or norm == "autobounty" or norm == "bounty" or norm == "spooky_bounty" or norm == "auto_bounty" then
-            return "SpookyBounty"
+        elseif norm == "NhoiiiXbounty" or norm == "autobounty" or norm == "bounty" or norm == "NhoiiiX_bounty" or norm == "auto_bounty" then
+            return "NhoiiiXBounty"
         elseif norm == "kitsunebounty" or norm == "kitautobounty" or norm == "kitbounty" or norm == "kitsune" then
-            return "SpookyBounty"
+            return "NhoiiiXBounty"
         elseif norm == "controlpeople" or norm == "playerlist" or norm == "players" or norm == "other" or norm == "jugadores" or norm == "player" then
             return "ControlPeople"
         elseif norm == "cheats" or norm == "glitches" or norm == "trucos" then
@@ -1792,8 +1792,8 @@ Spooky.UI.screen=ScreenGui
         if midImg then midImg.Visible = false end
         if botImg then botImg.Visible = false end
 
-        if _G.SpookyThemedElements and _G.SpookyThemedElements.centerPagesBg then
-            _G.SpookyThemedElements.centerPagesBg.Visible = true
+        if _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.centerPagesBg then
+            _G.NhoiiiXThemedElements.centerPagesBg.Visible = true
         end
 
         for _, page in pairs(PagesFolder:GetChildren()) do
@@ -1802,14 +1802,14 @@ Spooky.UI.screen=ScreenGui
                 if not isHome then
                     if canonId == "Combat" and page.Name == "Combat_Page" then
                         isTarget = true
-                    elseif canonId == "SpookyBounty" and page.Name == "AutoBounty_Page" then
+                    elseif canonId == "NhoiiiXBounty" and page.Name == "AutoBounty_Page" then
                         isTarget = true
                     elseif canonId == "KitsuneBounty" and page.Name == "KitsuneBounty_Page" then
                         isTarget = true
                     elseif canonId == "ControlPeople" and page.Name == "ControlPeople_Page" then
                         isTarget = true
-                        if _G.SpookyRefreshPlayerList then
-                            task.defer(function() pcall(_G.SpookyRefreshPlayerList) end)
+                        if _G.NhoiiiXRefreshPlayerList then
+                            task.defer(function() pcall(_G.NhoiiiXRefreshPlayerList) end)
                         end
                     elseif canonId == "Cheats" and (page.Name == "Glitches_Page" or page.Name == "Cheats_Page") then
                         isTarget = true
@@ -1849,7 +1849,7 @@ Spooky.UI.screen=ScreenGui
         addLog("[TAB] " .. tostring(canonId))
     end
     globalShowTab = showTab
-    _G.SpookyShowTab = showTab
+    _G.NhoiiiXShowTab = showTab
 
     for idx, tdef in ipairs(tabDefinitions) do
         local isDefault = (tdef.id == "Home")
@@ -1944,9 +1944,9 @@ Spooky.UI.screen=ScreenGui
     end
 
     local MobileToggle = Instance.new("ImageButton", ScreenGui)
-    _G.SpookyThemedElements.MobileToggle = MobileToggle
-    if SpookyEditableElements then SpookyEditableElements["MobileToggle"] = MobileToggle end
-    MobileToggle.Name = "Spooky_MobileToggle"
+    _G.NhoiiiXThemedElements.MobileToggle = MobileToggle
+    if NhoiiiXEditableElements then NhoiiiXEditableElements["MobileToggle"] = MobileToggle end
+    MobileToggle.Name = "NhoiiiX_MobileToggle"
     MobileToggle.Size = UDim2.new(0, 52, 0, 52)
     MobileToggle.Position = UDim2.new(0, 20, 0, 80)
     MobileToggle.BackgroundColor3 = Color3.fromRGB(10, 10, 14)
@@ -1997,16 +1997,16 @@ Spooky.UI.screen=ScreenGui
     local isAnimatingUI = false
     local currentUIAnimation = "Pop"
     local uiAnimDuration = 0.28
-    _G.SpookySetUIAnimation = function(name, dur)
+    _G.NhoiiiXSetUIAnimation = function(name, dur)
         local allowed = {Pop=true, Bounce=true, SlideUp=true, SlideDown=true, ZoomSmooth=true, Fade=true}
         if allowed[name] then currentUIAnimation = name end
         local duration = tonumber(dur)
         if duration and duration == duration then uiAnimDuration = math.clamp(duration, 0.1, 0.6) end
-        if _G.SpookyUpdateAnimButtonsVisual then
-            _G.SpookyUpdateAnimButtonsVisual(currentUIAnimation)
+        if _G.NhoiiiXUpdateAnimButtonsVisual then
+            _G.NhoiiiXUpdateAnimButtonsVisual(currentUIAnimation)
         end
     end
-    _G.SpookyGetUIAnimation = function()
+    _G.NhoiiiXGetUIAnimation = function()
         return currentUIAnimation, uiAnimDuration
     end
 
@@ -2062,7 +2062,7 @@ Spooky.UI.screen=ScreenGui
         local base = lastUIPos or UDim2.new(0.5, 0, 0.5, 0)
         local duration = math.clamp(tonumber(uiAnimDuration) or 0.28, 0.1, 0.6)
         if not visible then duration *= 0.75 end
-        if _G.SpookyFloatTween then pcall(function() _G.SpookyFloatTween:Pause() end) end
+        if _G.NhoiiiXFloatTween then pcall(function() _G.NhoiiiXFloatTween:Pause() end) end
         MAINUIframe.AnchorPoint = Vector2.new(0.5, 0.5)
         MobileToggle.Visible = true
         local mode = currentUIAnimation
@@ -2106,11 +2106,11 @@ Spooky.UI.screen=ScreenGui
             MAINUIframe.Position = base
             UIScale.Scale = scale
             isAnimatingUI = false
-            if visible and _G.SpookyFloatTween then pcall(function() _G.SpookyFloatTween:Play() end) end
+            if visible and _G.NhoiiiXFloatTween then pcall(function() _G.NhoiiiXFloatTween:Play() end) end
             if not visible then showMobileBtn() end
         end)
     end
-    _G.SpookyToggleUI = function(input)
+    _G.NhoiiiXToggleUI = function(input)
         if not isCurrentSession() or not isKeyValidLocal then return end
         if input and input == lastUIToggleInput then return end
         lastUIToggleInput = input
@@ -2119,9 +2119,9 @@ Spooky.UI.screen=ScreenGui
         setUIVisibility(not visible)
     end
 
-    _G.SpookySetUIVisibility = setUIVisibility
+    _G.NhoiiiXSetUIVisibility = setUIVisibility
 
-    _G.SpookyPreviewAnimation = function()
+    _G.NhoiiiXPreviewAnimation = function()
         if isAnimatingUI then return end
         if not MAINUIframe.Visible then
             setUIVisibility(true)
@@ -2148,14 +2148,14 @@ Spooky.UI.screen=ScreenGui
 
     local function handleToggleOpen()
         if toggleMoved or not isKeyValidLocal or not isCurrentSession() then return end
-        _G.SpookyToggleUI()
+        _G.NhoiiiXToggleUI()
     end
     MinimizeBtn.Activated:Connect(function() setUIVisibility(false) end)
     MobileToggle.Activated:Connect(handleToggleOpen)
     registerConnection(UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe or not isKeyValidLocal or not isCurrentSession() or UserInputService:GetFocusedTextBox() then return end
         if input.KeyCode == Enum.KeyCode.RightControl or input.KeyCode == Enum.KeyCode.Insert then
-            _G.SpookyToggleUI(input)
+            _G.NhoiiiXToggleUI(input)
         end
     end))
 
@@ -2200,17 +2200,17 @@ Spooky.UI.screen=ScreenGui
             accent = Color3.fromRGB(238, 190, 40),
             bright = Color3.fromRGB(255, 215, 80)
         },
-        ["Spooky Dark"] = {
+        ["NhoiiiX Dark"] = {
             accent = Color3.fromRGB(238, 190, 40),
             bright = Color3.fromRGB(255, 215, 80)
         }
     }
-    _G.SpookyThemeAccents = ThemeAccents
+    _G.NhoiiiXThemeAccents = ThemeAccents
 
     local function loadEarlyThemeConfig()
         pcall(function()
-            if isfile and isfile("ProjectSpooky_UIConfig.json") and readfile and HttpService then
-                local raw = readfile("ProjectSpooky_UIConfig.json")
+            if isfile and isfile("ProjectNhoiiiX_UIConfig.json") and readfile and HttpService then
+                local raw = readfile("ProjectNhoiiiX_UIConfig.json")
                 if raw and #raw > 5 then
                     local data = HttpService:JSONDecode(raw)
                     if data and type(data) == "table" and data.theme then
@@ -2228,7 +2228,7 @@ Spooky.UI.screen=ScreenGui
     end
     loadEarlyThemeConfig()
 
-    launchProjectSpooky = function()
+    launchProjectNhoiiiX = function()
         MAINUIframe.AnchorPoint = Vector2.new(0.5, 0.5)
         MAINUIframe.Position = UDim2.new(0.5, 0, 0.5, 0)
         MAINUIframe.Visible = false
@@ -2236,7 +2236,7 @@ Spooky.UI.screen=ScreenGui
         updateMobileScaling()
         UIScale.Scale = currentBaseScale or 1.0
 
-        local function revealSpookyUI()
+        local function revealNhoiiiXUI()
             if not isCurrentSession() or not MAINUIframe.Parent then return end
             setUIVisibility(true)
             if MobileToggle then MobileToggle.Visible = true end
@@ -2244,29 +2244,29 @@ Spooky.UI.screen=ScreenGui
             if showHomeSubView then pcall(function() showHomeSubView("Dashboard") end) end
         end
 
-        if _G.SpookyStartupLoaderFinished then
-            revealSpookyUI()
+        if _G.NhoiiiXStartupLoaderFinished then
+            revealNhoiiiXUI()
         else
-            _G.SpookyOnStartupLoaderFinished = revealSpookyUI
+            _G.NhoiiiXOnStartupLoaderFinished = revealNhoiiiXUI
         end
     end
 
-    launchProjectSpooky()
+    launchProjectNhoiiiX()
 end
 
-setSpookyTransparentMode = function(enabled, alpha)
-    isSpookyTransparentActive = enabled
+setNhoiiiXTransparentMode = function(enabled, alpha)
+    isNhoiiiXTransparentActive = enabled
 end
-getgenv().SetSpookyTransparentMode = setSpookyTransparentMode
+getgenv().SetNhoiiiXTransparentMode = setNhoiiiXTransparentMode
 
 local translateTerm = nil
 local function makeCard(parent, titleEN, titleES, h, y)
     local card = Instance.new("Frame")
-    card:SetAttribute("SpookyControlGroup", titleEN)
+    card:SetAttribute("NhoiiiXControlGroup", titleEN)
     card.Size = UDim2.new(1, -10, 0, h)
     card.Position = UDim2.new(0, 5, 0, y)
-    card.BackgroundColor3 = _G.SpookyGlassModeActive and Color3.fromRGB(10, 10, 14) or Color3.fromRGB(11, 11, 16)
-    card.BackgroundTransparency = _G.SpookyGlassModeActive and 0.30 or 0
+    card.BackgroundColor3 = _G.NhoiiiXGlassModeActive and Color3.fromRGB(10, 10, 14) or Color3.fromRGB(11, 11, 16)
+    card.BackgroundTransparency = _G.NhoiiiXGlassModeActive and 0.30 or 0
     card.BorderSizePixel = 0
     card.Parent = parent
     card.ClipsDescendants = false
@@ -2282,12 +2282,12 @@ local function makeCard(parent, titleEN, titleES, h, y)
     local cStroke = Instance.new("UIStroke", card)
     cStroke.Color = Color3.fromRGB(38, 36, 52)
     cStroke.Thickness = 1.1
-    cStroke.Transparency = _G.SpookyGlassModeActive and 0.25 or 0
+    cStroke.Transparency = _G.NhoiiiXGlassModeActive and 0.25 or 0
     table.insert(AllCardFrames, card)
 
-    if isSpookyTransparentActive then
+    if isNhoiiiXTransparentActive then
         card.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
-        card.BackgroundTransparency = _G.SpookyGlassAlpha
+        card.BackgroundTransparency = _G.NhoiiiXGlassAlpha
         if cStroke then cStroke.Transparency = 0.40 end
     end
 
@@ -2298,17 +2298,17 @@ local function makeCard(parent, titleEN, titleES, h, y)
     cardTop.BackgroundTransparency = 1
     cardTop.BorderSizePixel = 0
 
-    local spookyHeaderIcon = Instance.new("ImageLabel", cardTop)
-    spookyHeaderIcon.Name = "HeaderEmblem"
-    spookyHeaderIcon.Size = UDim2.new(0, 13, 0, 13)
-    spookyHeaderIcon.Position = UDim2.new(0, 8, 0.5, -6.5)
-    spookyHeaderIcon.BackgroundTransparency = 1
-    spookyHeaderIcon.Image = (CurrentTheme == "Red Spooky") and "rbxassetid://88089153116193" or "rbxassetid://124747708335361"
-    spookyHeaderIcon.ImageColor3 = Color3.fromRGB(200, 210, 235)
-    spookyHeaderIcon.ZIndex = 3
-    Instance.new("UICorner", spookyHeaderIcon).CornerRadius = UDim.new(1, 0)
-    if _G.SpookyThemedElements and _G.SpookyThemedElements.AllHeaderEmblems then
-        table.insert(_G.SpookyThemedElements.AllHeaderEmblems, spookyHeaderIcon)
+    local NhoiiiXHeaderIcon = Instance.new("ImageLabel", cardTop)
+    NhoiiiXHeaderIcon.Name = "HeaderEmblem"
+    NhoiiiXHeaderIcon.Size = UDim2.new(0, 13, 0, 13)
+    NhoiiiXHeaderIcon.Position = UDim2.new(0, 8, 0.5, -6.5)
+    NhoiiiXHeaderIcon.BackgroundTransparency = 1
+    NhoiiiXHeaderIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or "rbxassetid://124747708335361"
+    NhoiiiXHeaderIcon.ImageColor3 = Color3.fromRGB(200, 210, 235)
+    NhoiiiXHeaderIcon.ZIndex = 3
+    Instance.new("UICorner", NhoiiiXHeaderIcon).CornerRadius = UDim.new(1, 0)
+    if _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.AllHeaderEmblems then
+        table.insert(_G.NhoiiiXThemedElements.AllHeaderEmblems, NhoiiiXHeaderIcon)
     end
 
     local hdr = Instance.new("TextLabel", cardTop)
@@ -2338,7 +2338,7 @@ local function makeCard(parent, titleEN, titleES, h, y)
     })
     return card
 end
-if _G.SpookyStartupStage then _G.SpookyStartupStage("controls") end
+if _G.NhoiiiXStartupStage then _G.NhoiiiXStartupStage("controls") end
 local function createToggleButton(parent, name, textEN, textES, size, pos, isSub)
     local btn = Instance.new("TextButton")
     btn.Name = name
@@ -2396,7 +2396,7 @@ local function createToggleButton(parent, name, textEN, textES, size, pos, isSub
     ToggleButtons[name] = {
         btn = btn,
         txtLbl = txtLbl,
-        spookyIcon = nil,
+        NhoiiiXIcon = nil,
         iconStk = nil,
         btnStk = btnStk,
         switchPill = switchPill,
@@ -2406,11 +2406,11 @@ local function createToggleButton(parent, name, textEN, textES, size, pos, isSub
         textES = textES,
         text = textEN
     }
-    Spooky.ToggleCopies[name] = Spooky.ToggleCopies[name] or {}
-    table.insert(Spooky.ToggleCopies[name], ToggleButtons[name])
+    NhoiiiX.ToggleCopies[name] = NhoiiiX.ToggleCopies[name] or {}
+    table.insert(NhoiiiX.ToggleCopies[name], ToggleButtons[name])
     if FeatureStates[name] == nil then FeatureStates[name] = false end
     updateToggleVisual(name, FeatureStates[name])
-    Spooky.RegisterControl(btn,name,textEN,textES,function() toggleFeature(name) end)
+    NhoiiiX.RegisterControl(btn,name,textEN,textES,function() toggleFeature(name) end)
     table.insert(TranslatableUI, {
         txtLbl = txtLbl,
         btn = btn,
@@ -2486,7 +2486,7 @@ local function createActionButton(parent, textEN, textES, size, pos, onClick)
             lastActionClick = now
             onClick()
         end
-        Spooky.RegisterControl(btn,nil,textEN,textES,onActionActivated)
+        NhoiiiX.RegisterControl(btn,nil,textEN,textES,onActionActivated)
         btn.Activated:Connect(onActionActivated)
     end
     table.insert(TranslatableUI, {
@@ -2667,9 +2667,9 @@ local function createCycleButton(parent, prefixEN, prefixES, choices, defaultIdx
         isCycle = true
     })
     table.insert(AllUIButtons, btn)
-    if isSpookyTransparentActive then
+    if isNhoiiiXTransparentActive then
         btn.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
-        btn.BackgroundTransparency = _G.SpookyGlassAlpha
+        btn.BackgroundTransparency = _G.NhoiiiXGlassAlpha
     end
     local lastCycleClick = 0
     local function onCycleActivated()
@@ -2687,7 +2687,7 @@ local function createCycleButton(parent, prefixEN, prefixES, choices, defaultIdx
     return btn
 end
 
-local function styleSpookyTextBox(box)
+local function styleNhoiiiXTextBox(box)
     if not box or not box:IsA("TextBox") then return end
     if box.Text == "TextBox" or box.Text == "textbox" then
         box.Text = ""
@@ -2707,9 +2707,9 @@ local function styleSpookyTextBox(box)
     stk.Color = Color3.fromRGB(45, 45, 58)
     stk.Thickness = 1
 
-    if not box:FindFirstChild("SpookyBoxEmblem") and not box.MultiLine then
+    if not box:FindFirstChild("NhoiiiXBoxEmblem") and not box.MultiLine then
         local emblem = Instance.new("ImageLabel", box)
-        emblem.Name = "SpookyBoxEmblem"
+        emblem.Name = "NhoiiiXBoxEmblem"
         emblem.Size = UDim2.new(0, 16, 0, 16)
         emblem.Position = UDim2.new(1, -22, 0.5, -8)
         emblem.BackgroundTransparency = 1
@@ -2739,7 +2739,7 @@ end
 local TAB_TRANSLATIONS = {
     Home          = { ES = "Inicio",         EN = "Home",            PT = "Inicio",         TL = "Tahanan",        FR = "Accueil" },
     Combat        = { ES = "Combate",        EN = "Combat",          PT = "Combate",        TL = "Labanan",        FR = "Combat" },
-    SpookyBounty  = { ES = "Spooky Bounty",  EN = "Spooky Bounty",   PT = "Spooky Bounty",  TL = "Spooky Bounty",  FR = "Spooky Bounty" },
+    NhoiiiXBounty  = { ES = "NhoiiiX Bounty",  EN = "NhoiiiX Bounty",   PT = "NhoiiiX Bounty",  TL = "NhoiiiX Bounty",  FR = "NhoiiiX Bounty" },
     KitsuneBounty = { ES = "Kit Auto Bounty", EN = "Kit Auto Bounty", PT = "Kit Auto Bounty", TL = "Kit Auto Bounty", FR = "Kit Auto Bounty" },
     ControlPeople = { ES = "Jugadores",      EN = "Player list",     PT = "Jogadores",      TL = "Mga Manlalaro",  FR = "Joueurs" },
     Cheats        = { ES = "Trucos",         EN = "Cheats",          PT = "Tracas",         TL = "Pandaraya",      FR = "Triche" },
@@ -2760,7 +2760,7 @@ local TAB_TRANSLATIONS = {
 local UI_DICTIONARY = {
     ["+ ADD KEYBIND"] = { PT = "+ ADICIONAR TECLA", TL = "+ MAGDAGDAG NG KEYBIND", FR = "+ AJOUTER RACCOURCI", ES = "+ AGREGAR KEYBIND", EN = "+ ADD KEYBIND" },
     ["+ AGREGAR KEYBIND"] = { PT = "+ ADICIONAR TECLA", TL = "+ MAGDAGDAG NG KEYBIND", FR = "+ AJOUTER RACCOURCI", ES = "+ AGREGAR KEYBIND", EN = "+ ADD KEYBIND" },
-    [":spooky vfx:"] = { PT = ":spooky vfx:", TL = ":spooky vfx:", FR = ":spooky vfx:", ES = ":spooky vfx:", EN = ":spooky vfx:" },
+    [":NhoiiiX vfx:"] = { PT = ":NhoiiiX vfx:", TL = ":NhoiiiX vfx:", FR = ":NhoiiiX vfx:", ES = ":NhoiiiX vfx:", EN = ":NhoiiiX vfx:" },
     ["ABRIR PESTANA KEYBINDS"] = { PT = "ABRIR ABA DE TECLAS E ATALHOS ->", TL = "BUKSAN ANG TAB NG KEYBINDS ->", FR = "OUVRIR ONGLET RACCOURCIS ->", ES = "ABRIR PESTANA KEYBINDS", EN = "OPEN KEYBINDS & SHORTCUTS TAB ->" },
     ["APLICAR POR ID"] = { PT = "APLICAR POR ID", TL = "ILAPAT GAMIT ANG ID", FR = "APPLIQUER PAR ID", ES = "APLICAR POR ID", EN = "APPLY BY ID" },
     ["APPLY BY ID"] = { PT = "APLICAR POR ID", TL = "ILAPAT GAMIT ANG ID", FR = "APPLIQUER PAR ID", ES = "APLICAR POR ID", EN = "APPLY BY ID" },
@@ -2858,8 +2858,8 @@ local UI_DICTIONARY = {
     ["Cancelar Curación"] = { PT = "Cancelar Cura", TL = "Kanselahin ang Pagpagaling", FR = "Annuler Soin", ES = "Cancelar Curación", EN = "Cancel Healing" },
     ["Cargar Global"] = { PT = "Carregar Config Global", TL = "I-load ang Global Config", FR = "Charger Config Globale", ES = "Cargar Global", EN = "Load Global Config" },
     ["Cargar Macro"] = { PT = "Carregar Macro", TL = "I-load ang Macro", FR = "Charger Macro", ES = "Cargar Macro", EN = "Load Macro" },
-    ["Spooky Full Flags"] = { PT = "Spooky Full Flags", TL = "Spooky Full Flags", FR = "Spooky Full Flags", ES = "Spooky Full Flags", EN = "Spooky Full Flags" },
-    ["Cargar Preset Spooky"] = { PT = "Spooky Full Flags", TL = "Spooky Full Flags", FR = "Spooky Full Flags", ES = "Spooky Full Flags", EN = "Spooky Full Flags" },
+    ["NhoiiiX Full Flags"] = { PT = "NhoiiiX Full Flags", TL = "NhoiiiX Full Flags", FR = "NhoiiiX Full Flags", ES = "NhoiiiX Full Flags", EN = "NhoiiiX Full Flags" },
+    ["Cargar Preset NhoiiiX"] = { PT = "NhoiiiX Full Flags", TL = "NhoiiiX Full Flags", FR = "NhoiiiX Full Flags", ES = "NhoiiiX Full Flags", EN = "NhoiiiX Full Flags" },
     ["Center Main Window"] = { PT = "Centralizar Janela Principal", TL = "Igitna ang Pangunahing Bintana", FR = "Centrer la Fenetre Principale", ES = "Centrar Ventana Principal", EN = "Center Main Window" },
     ["Centrar Ventana Principal"] = { PT = "Centralizar Janela Principal", TL = "Igitna ang Pangunahing Bintana", FR = "Centrer la Fenetre Principale", ES = "Centrar Ventana Principal", EN = "Center Main Window" },
     ["Chams Arcoiris"] = { PT = "Chams Arco-Iris", TL = "Rainbow Chams", FR = "Chams Arc-en-Ciel", ES = "Chams Arcoiris", EN = "Rainbow Chams" },
@@ -3048,7 +3048,7 @@ local UI_DICTIONARY = {
     ["Limpiar BL"] = { PT = "Limpar BL", TL = "Linisin ang BL", FR = "Effacer BL", ES = "Limpiar BL", EN = "Clear BL" },
     ["Limpiar Lista"] = { PT = "Limpar Lista Negra", TL = "I-reset ang Blacklist", FR = "Reinitialiser Liste Noire", ES = "Limpiar Lista", EN = "Reset Blacklist" },
     ["Lista Negra de Habilidades"] = { PT = "Lista Negra de Habilidades", TL = "Blacklist ng Kakayahan", FR = "Liste Noire de Competences", ES = "Lista Negra de Habilidades", EN = "Skill Blacklist" },
-    ["Load Spooky Preset"] = { PT = "Spooky Full Flags", TL = "Spooky Full Flags", FR = "Spooky Full Flags", ES = "Spooky Full Flags", EN = "Spooky Full Flags" },
+    ["Load NhoiiiX Preset"] = { PT = "NhoiiiX Full Flags", TL = "NhoiiiX Full Flags", FR = "NhoiiiX Full Flags", ES = "NhoiiiX Full Flags", EN = "NhoiiiX Full Flags" },
     ["Load Global Config"] = { PT = "Carregar Config Global", TL = "I-load ang Global Config", FR = "Charger Config Globale", ES = "Cargar Global", EN = "Load Global Config" },
     ["Load Macro"] = { PT = "Carregar Macro", TL = "I-load ang Macro", FR = "Charger Macro", ES = "Cargar Macro", EN = "Load Macro" },
     ["Lock Part"] = { PT = "Parte do Alvo", TL = "Bahagi ng Target", FR = "Partie Cible", ES = "Parte Obj.", EN = "Lock Part" },
@@ -3076,7 +3076,7 @@ local UI_DICTIONARY = {
     ["Misc"] = { PT = "Diversos", TL = "Iba Pa", FR = "Divers", ES = "Varios", EN = "Misc" },
     ["Modo Gigante"] = { PT = "Modo Gigante", TL = "Modong Higante", FR = "Mode Geant", ES = "Modo Gigante", EN = "Giant Mode" },
     ["Mods Personaje"] = { PT = "Modificacoes de Personagem", TL = "Mga Mod ng Karakter", FR = "Mods de Personnage", ES = "Mods Personaje", EN = "Character Mods" },
-    ["Motor Spooky VFX"] = { PT = "Motor VFX Spooky", TL = "Spooky VFX Engine", FR = "Moteur VFX Spooky", ES = "Motor Spooky VFX", EN = "Spooky VFX Engine" },
+    ["Motor NhoiiiX VFX"] = { PT = "Motor VFX NhoiiiX", TL = "NhoiiiX VFX Engine", FR = "Moteur VFX NhoiiiX", ES = "Motor NhoiiiX VFX", EN = "NhoiiiX VFX Engine" },
     ["Movement & Utility"] = { PT = "Movimento e Utilidades", TL = "Paggalaw at Utility", FR = "Mouvement et Utilite", ES = "Movimiento y Utilidades", EN = "Movement & Utility" },
     ["Movement Glitches"] = { PT = "Glitches de Movimento", TL = "Glitches ng Paggalaw", FR = "Glitches de Mouvement", ES = "Glitches de Movimiento", EN = "Movement Glitches" },
     ["Mover HUD"] = { PT = "Mover HUD", TL = "Ilipat ang HUD", FR = "Deplacer HUD", ES = "Mover HUD", EN = "HUD Move" },
@@ -3218,10 +3218,10 @@ local UI_DICTIONARY = {
     ["Soru y Boosts"] = { PT = "Soru e Impulsos", TL = "Soru at Impulso", FR = "Soru et Boosts", ES = "Soru y Boosts", EN = "Soru & Boosts" },
     ["Spanish"] = { PT = "Espanhol", TL = "Espanyol", FR = "Espagnol", ES = "Español", EN = "Spanish" },
     ["Speed"] = { PT = "Velocidade", TL = "Bilis", FR = "Vitesse", ES = "Velocidad", EN = "Speed" },
-    ["Spooky AI"] = { PT = "Spooky IA", TL = "Spooky AI", FR = "Spooky IA", ES = "Spooky IA", EN = "Spooky AI" },
-    ["Spooky Bounty"] = { PT = "Spooky Bounty", TL = "Spooky Bounty", FR = "Spooky Bounty", ES = "Spooky Bounty", EN = "Spooky Bounty" },
-    ["Spooky IA"] = { PT = "Spooky IA", TL = "Spooky AI", FR = "Spooky IA", ES = "Spooky IA", EN = "Spooky AI" },
-    ["Spooky VFX Engine"] = { PT = "Motor VFX Spooky", TL = "Spooky VFX Engine", FR = "Moteur VFX Spooky", ES = "Motor Spooky VFX", EN = "Spooky VFX Engine" },
+    ["NhoiiiX AI"] = { PT = "NhoiiiX IA", TL = "NhoiiiX AI", FR = "NhoiiiX IA", ES = "NhoiiiX IA", EN = "NhoiiiX AI" },
+    ["NhoiiiX Bounty"] = { PT = "NhoiiiX Bounty", TL = "NhoiiiX Bounty", FR = "NhoiiiX Bounty", ES = "NhoiiiX Bounty", EN = "NhoiiiX Bounty" },
+    ["NhoiiiX IA"] = { PT = "NhoiiiX IA", TL = "NhoiiiX AI", FR = "NhoiiiX IA", ES = "NhoiiiX IA", EN = "NhoiiiX AI" },
+    ["NhoiiiX VFX Engine"] = { PT = "Motor VFX NhoiiiX", TL = "NhoiiiX VFX Engine", FR = "Moteur VFX NhoiiiX", ES = "Motor NhoiiiX VFX", EN = "NhoiiiX VFX Engine" },
     ["Start Auto Bounty"] = { PT = "Iniciar Auto Bounty", TL = "Simulan ang Auto Bounty", FR = "Demarrer Auto Bounty", ES = "Iniciar Auto Bounty", EN = "Start Auto Bounty" },
     ["Start Fruit Collector"] = { PT = "Iniciar Coletor", TL = "Simulan ang Kolektor", FR = "Lancer Collecteur", ES = "Iniciar Recolector", EN = "Start Fruit Collector" },
     ["Status: Inactive / Stopped"] = { PT = "Status: Inativo / Parado", TL = "Katayuan: Di-aktibo / Nakatigil", FR = "Statut: Inactif / Arrete", ES = "Estado: Inactivo / Detenido", EN = "Status: Inactive / Stopped" },
@@ -3332,11 +3332,11 @@ applyLanguage = function(lang, silent)
     else
         CurrentLang = "EN"
     end
-    _G.Spooky_CurrentLang = CurrentLang
-    if _G.SpookyRefreshFloatingWidgets then _G.SpookyRefreshFloatingWidgets() end
-    if _G.SpookyRefreshControlPicker then _G.SpookyRefreshControlPicker() end
+    _G.NhoiiiX_CurrentLang = CurrentLang
+    if _G.NhoiiiXRefreshFloatingWidgets then _G.NhoiiiXRefreshFloatingWidgets() end
+    if _G.NhoiiiXRefreshControlPicker then _G.NhoiiiXRefreshControlPicker() end
     pcall(function()
-        if writefile then writefile("spooky_lang.txt", CurrentLang) end
+        if writefile then writefile("NhoiiiX_lang.txt", CurrentLang) end
     end)
 
     if NavButtons then
@@ -3398,10 +3398,10 @@ applyLanguage = function(lang, silent)
     end
     if btnToggleTransparent then
         local isTr = (CurrentLang == "ES" and "Transparente: ") or (CurrentLang == "PT" and "Transparente: ") or (CurrentLang == "FR" and "Transparent: ") or "Transparent UI: "
-        btnToggleTransparent.Text = isTr .. (isSpookyTransparentActive and "ON" or "OFF")
+        btnToggleTransparent.Text = isTr .. (isNhoiiiXTransparentActive and "ON" or "OFF")
     end
     if autoBountyMainBtn then
-        local abActive = (getgenv().SpookyAutoBountyEnabled == true) or (FeatureStates["AutoBounty"] == true)
+        local abActive = (getgenv().NhoiiiXAutoBountyEnabled == true) or (FeatureStates["AutoBounty"] == true)
         if CurrentLang == "ES" then
             autoBountyMainBtn.Text = abActive and "Detener Auto Bounty" or "Activar Auto Bounty"
         elseif CurrentLang == "PT" then
@@ -3430,7 +3430,7 @@ applyLanguage = function(lang, silent)
         notifyToggle(msgs[CurrentLang] or "Language switched", true)
     end
 end
-_G.Spooky_ApplyLanguage = applyLanguage
+_G.NhoiiiX_ApplyLanguage = applyLanguage
 local Islands_NightSlayer = {
     Sea1 = {
         { name = "WindMill",          cf = CFrame.new(979.799, 16.516, 1429.047) },
@@ -3932,7 +3932,7 @@ local function openIslandTeleportWindow()
         return
     end
     local gui = Instance.new("ScreenGui")
-    gui.Name = "SpookyIslandTeleport"
+    gui.Name = "NhoiiiXIslandTeleport"
     gui.ResetOnSpawn = false
     safeParent(gui)
     IslandTeleportGui = gui
@@ -4123,24 +4123,24 @@ local openShipModWindow = nil
 local openMacroEditorWindow = nil
 local executeMacroCombo = nil
 
-Spooky.Runtime = {}
-function Spooky.Runtime.number(value, fallback, minimum, maximum)
+NhoiiiX.Runtime = {}
+function NhoiiiX.Runtime.number(value, fallback, minimum, maximum)
     local n = tonumber(value)
     if not n or n ~= n or n == math.huge or n == -math.huge then n = fallback end
     return math.clamp(n, minimum, maximum)
 end
-function Spooky.Runtime.copy(value)
+function NhoiiiX.Runtime.copy(value)
     if type(value) ~= "table" then return value end
     local result = {}
-    for k, v in pairs(value) do result[k] = Spooky.Runtime.copy(v) end
+    for k, v in pairs(value) do result[k] = NhoiiiX.Runtime.copy(v) end
     return result
 end
-function Spooky.Runtime.validWebhook(url)
+function NhoiiiX.Runtime.validWebhook(url)
     if type(url) ~= "string" then return false end
     return url:match("^https://discord%.com/api/webhooks/%d+/[%w_-]+$") ~= nil
         or url:match("^https://discordapp%.com/api/webhooks/%d+/[%w_-]+$") ~= nil
 end
-function Spooky.Runtime.httpStatus(response)
+function NhoiiiX.Runtime.httpStatus(response)
     if type(response) ~= "table" then return false, 0 end
     local status = tonumber(response.StatusCode or response.Status or response.status_code) or 0
     return status >= 200 and status < 300, status
@@ -4152,7 +4152,7 @@ do
     local MacroRunToken = 0
 
     local WeaponHelper = {}
-    _G.SpookyWeaponHelper = WeaponHelper
+    _G.NhoiiiXWeaponHelper = WeaponHelper
     function WeaponHelper.toolToWeaponType(tool)
         if not tool or not tool:IsA("Tool") then return nil end
         if tool:GetAttribute("WeaponType") == "Gun" or tool:FindFirstChild("RemoteFunctionShoot") then return "Gun" end
@@ -4311,14 +4311,14 @@ do
     end
 
     local activeContext
-    Spooky.IsMacroRunning=function() return MacroRunning end
+    NhoiiiX.IsMacroRunning=function() return MacroRunning end
     local syntheticKeys = {}
     _G.IsSyntheticKey = function(key)
         local name = typeof(key) == "EnumItem" and key.Name or tostring(key)
         if (syntheticKeys[name] or 0) > os.clock() then return true end
         return false
     end
-    Spooky.IsMacroSyntheticKey = _G.IsSyntheticKey
+    NhoiiiX.IsMacroSyntheticKey = _G.IsSyntheticKey
 
     local function status(text, running)
         for _, label in pairs({_G.MacroStatusLabel or false, _G.MacroFloatingStatus or false}) do
@@ -4345,22 +4345,22 @@ do
         release(ctx)
         status("READY [" .. (Settings.macroTriggerKey or "T") .. "]", false)
     end
-    _G.SpookyStopMacro = function()
+    _G.NhoiiiXStopMacro = function()
         stopMacro("Stopped")
-        if _G.SpookyStopLegacyMacro then _G.SpookyStopLegacyMacro() end
+        if _G.NhoiiiXStopLegacyMacro then _G.NhoiiiXStopLegacyMacro() end
     end
-    registerConnection(LocalPlayer.CharacterRemoving:Connect(function() _G.SpookyStopMacro() end))
+    registerConnection(LocalPlayer.CharacterRemoving:Connect(function() _G.NhoiiiXStopMacro() end))
 
     executeMacroCombo = function()
         if MacroRunning then stopMacro("Stopped"); return end
         if UserInputService:GetFocusedTextBox() or not isCurrentSession() then return end
-        if _G.SpookyStopLegacyMacro then _G.SpookyStopLegacyMacro() end
+        if _G.NhoiiiXStopLegacyMacro then _G.NhoiiiXStopLegacyMacro() end
         local char = LocalPlayer.Character
         local hum = char and char:FindFirstChildOfClass("Humanoid")
         if not hum or hum.Health <= 0 then return end
-        local index = math.floor(Spooky.Runtime.number(Settings.macroActiveSlot, 1, 1, 5))
+        local index = math.floor(NhoiiiX.Runtime.number(Settings.macroActiveSlot, 1, 1, 5))
         local source = (Settings.macroSlots or {})[index]
-        local slot = Spooky.Runtime.copy(source or {steps = Settings.macroCustomSteps or {}})
+        local slot = NhoiiiX.Runtime.copy(source or {steps = Settings.macroCustomSteps or {}})
         local steps = slot.steps or {}
         MacroRunToken += 1
         MacroRunning = true
@@ -4373,7 +4373,7 @@ do
                     and isCurrentSession() and LocalPlayer.Character == char and hum.Parent and hum.Health > 0
             end
             local function waitFor(seconds)
-                local deadline = os.clock() + Spooky.Runtime.number(seconds, 0, 0, 10)
+                local deadline = os.clock() + NhoiiiX.Runtime.number(seconds, 0, 0, 10)
                 while valid() and os.clock() < deadline do
                     task.wait(math.min(0.02, deadline - os.clock()))
                 end
@@ -4414,7 +4414,7 @@ do
                 if not ready() then return end
                 local ok, tool = equip(weapon or "Melee")
                 if not ok then return end
-                for _ = 1, math.floor(Spooky.Runtime.number(count, 2, 1, 6)) do
+                for _ = 1, math.floor(NhoiiiX.Runtime.number(count, 2, 1, 6)) do
                     if not valid() then break end
                     ctx.tool = tool
                     tool:Activate()
@@ -4425,11 +4425,11 @@ do
             end
             local function extras(position)
                 if not valid() then return end
-                if slot.soruEnabled and Spooky.Runtime.number(slot.soruAfter, 0, 0, 10) == position and ready() then
+                if slot.soruEnabled and NhoiiiX.Runtime.number(slot.soruAfter, 0, 0, 10) == position and ready() then
                     press("R", 0.04); waitFor(0.12)
                 end
-                if slot.m1Enabled and Spooky.Runtime.number(slot.m1After, 0, 0, 10) == position then m1(slot.m1Weapon, slot.m1Count) end
-                if slot.v3Enabled and Spooky.Runtime.number(slot.v3After, 0, 0, 10) == position and ready() then
+                if slot.m1Enabled and NhoiiiX.Runtime.number(slot.m1After, 0, 0, 10) == position then m1(slot.m1Weapon, slot.m1Count) end
+                if slot.v3Enabled and NhoiiiX.Runtime.number(slot.v3After, 0, 0, 10) == position and ready() then
                     local remotes = ReplicatedStorage:FindFirstChild("Remotes")
                     local remote = remotes and remotes:FindFirstChild("CommE")
                     if remote then remote:FireServer("ActivateAbility") end
@@ -4478,17 +4478,17 @@ do
                                     local forms = {dragon=true,gas=true,kitsune=true,leopard=true,mammoth=true,phoenix=true,tiger=true,trex=true,venom=true,yeti=true,empyrean=true,fiend=true,werewolf=true,buddha=true}
                                     local transformOK = not transform or (weapon == "Fruit" and skill == "V" and forms[name] and not WeaponHelper.isTransformed())
                                     if transformOK and ready() then
-                                        local duration = mode == "hold" and Spooky.Runtime.number(hold, 0.35, 0.03, 5) or 0.05
+                                        local duration = mode == "hold" and NhoiiiX.Runtime.number(hold, 0.35, 0.03, 5) or 0.05
                                         press(skill, duration)
                                         if valid() then
-                                            for _ = 1, math.floor(Spooky.Runtime.number(block.jumpsAfter or block.postJumps, 0, 0, 5)) do
+                                            for _ = 1, math.floor(NhoiiiX.Runtime.number(block.jumpsAfter or block.postJumps, 0, 0, 5)) do
                                                 if not press("Space", 0.035) then break end
                                                 waitFor(0.08)
                                             end
                                         end
                                     end
                                 end
-                                waitFor(Spooky.Runtime.number(block.delay, 0.12, 0, 5))
+                                waitFor(NhoiiiX.Runtime.number(block.delay, 0.12, 0, 5))
                             end
                         end
                         extras(i)
@@ -4498,7 +4498,7 @@ do
             end)
             if activeContext == ctx then
                 stopMacro(ok and "Completed" or "Error")
-                if not ok then warn("[Spooky Macro] " .. tostring(err)); status("STOPPED: playback error", false) end
+                if not ok then warn("[NhoiiiX Macro] " .. tostring(err)); status("STOPPED: playback error", false) end
             end
         end)
     end
@@ -4673,12 +4673,12 @@ do
                 zHasMoved = false
                 zDragStart = input.Position
                 zStartPos = card.Position
-                local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+                local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
                 zDragging = not isLocked
             end
         end)
         UserInputService.InputChanged:Connect(function(input)
-            local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+            local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
             if isLocked then zDragging = false return end
             if zDragging and zDragStart and zStartPos and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                 local delta = input.Position - zDragStart
@@ -4771,12 +4771,12 @@ do
                 lHasMoved = false
                 lDragStart = input.Position
                 lStartPos = card.Position
-                local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+                local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
                 lDragging = not isLocked
             end
         end)
         UserInputService.InputChanged:Connect(function(input)
-            local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+            local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
             if isLocked then lDragging = false return end
             if lDragging and lDragStart and lStartPos and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                 local delta = input.Position - lDragStart
@@ -4947,7 +4947,7 @@ do
         local hasMoved = false
 
         local function updateDrag(input)
-            local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+            local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
             if isLocked then
                 dragging = false
                 return
@@ -4983,7 +4983,7 @@ do
                 hasMoved = false
                 dragStart = input.Position
                 startPos = card.Position
-                local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+                local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
                 dragging = not isLocked
                 input.Changed:Connect(function()
                     if input.UserInputState == Enum.UserInputState.End then
@@ -5018,7 +5018,7 @@ do
         end)
     end
 
-    _G.SpookySuperJumpRequestHooked = true
+    _G.NhoiiiXSuperJumpRequestHooked = true
 
     FeatureCallbacks["SuperJump"] = function(v)
         if v then
@@ -5044,7 +5044,7 @@ do
             waterPlatform.Transparency = 1
             waterPlatform.Anchored = true
             waterPlatform.CanCollide = false
-            waterPlatform.Name = "SpookyWaterPlatform"
+            waterPlatform.Name = "NhoiiiXWaterPlatform"
             waterPlatform.Parent = workspace
         end
         return waterPlatform
@@ -5287,7 +5287,7 @@ do
     openShipModWindow = function()
         if ShipModGui and ShipModGui.Parent then ShipModGui:Destroy() end
         local gui = Instance.new("ScreenGui")
-        gui.Name = "SpookyShipModWindow"
+        gui.Name = "NhoiiiXShipModWindow"
         gui.ResetOnSpawn = false
         safeParent(gui)
         ShipModGui = gui
@@ -5415,8 +5415,8 @@ do
     local SelectedSequenceName = Settings.macroName or "Custom Combo"
     local function loadSavedSequences()
         pcall(function()
-            if readfile and isfile and isfile("ProjectSpooky_MacroSequences.json") then
-                local raw = readfile("ProjectSpooky_MacroSequences.json")
+            if readfile and isfile and isfile("ProjectNhoiiiX_MacroSequences.json") then
+                local raw = readfile("ProjectNhoiiiX_MacroSequences.json")
                 local data = HttpService:JSONDecode(raw)
                 if type(data) == "table" then
                     for k, v in pairs(data) do
@@ -5433,7 +5433,7 @@ do
         pcall(function()
             if writefile then
                 local json = HttpService:JSONEncode(Sequences)
-                writefile("ProjectSpooky_MacroSequences.json", json)
+                writefile("ProjectNhoiiiX_MacroSequences.json", json)
             end
         end)
     end
@@ -5463,7 +5463,7 @@ do
     end
     _G.MarkSyntheticKey = markSyntheticKey
     _G.IsSyntheticKey = function(key)
-        return (Spooky.IsMacroSyntheticKey and Spooky.IsMacroSyntheticKey(key)) or isSyntheticKey(key)
+        return (NhoiiiX.IsMacroSyntheticKey and NhoiiiX.IsMacroSyntheticKey(key)) or isSyntheticKey(key)
     end
 
     local CooldownCache = {}
@@ -5759,7 +5759,7 @@ do
         end
         if not MacroRunning then return false end
 
-        if _G.SpookySetSkillKey then _G.SpookySetSkillKey(skill) end
+        if _G.NhoiiiXSetSkillKey then _G.NhoiiiXSetSkillKey(skill) end
         _G.CurrentSkillKey = skill
 
         local isHold = (customHold == true) or (type(customHold) == "number" and customHold > 0.15)
@@ -5852,7 +5852,7 @@ do
         task.delay(0.08, restoreMacroMobility)
     end
 
-    _G.SpookyStopLegacyMacro = StopSequence
+    _G.NhoiiiXStopLegacyMacro = StopSequence
 
     local function RunSmartSteps()
         if MacroRunning then return end
@@ -5939,7 +5939,7 @@ do
                     end
                 until not Settings.macroLoop or not MacroRunning or MacroRunToken ~= myToken
             end)
-            if not ok then warn("[SpookyMacro]:", tostring(err)) end
+            if not ok then warn("[NhoiiiXMacro]:", tostring(err)) end
             ReleaseAll()
             MacroRunning = false
             isSimulatingKeys = false
@@ -5996,7 +5996,7 @@ do
                     end
                 until not Settings.macroLoop or not MacroRunning or MacroRunToken ~= myToken
             end)
-            if not ok then warn("[SpookyMacro]:", tostring(err)) end
+            if not ok then warn("[NhoiiiXMacro]:", tostring(err)) end
             ReleaseAll()
             MacroRunning = false
             isSimulatingKeys = false
@@ -6023,7 +6023,7 @@ do
         end
         if not show then return end
         floatingTriggerGui = Instance.new("ScreenGui")
-        floatingTriggerGui.Name = "Spooky_Macro_Floating_Combo"
+        floatingTriggerGui.Name = "NhoiiiX_Macro_Floating_Combo"
         floatingTriggerGui.ResetOnSpawn = false
         safeParent(floatingTriggerGui)
         local floatBtn = Instance.new("TextButton", floatingTriggerGui)
@@ -6055,12 +6055,12 @@ do
                 mHasMoved = false
                 mDragStart = input.Position
                 mStartPos = floatBtn.Position
-                local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+                local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
                 mDragging = not isLocked
             end
         end)
         UserInputService.InputChanged:Connect(function(input)
-            local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+            local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
             if isLocked then mDragging = false return end
             if mDragging and mDragStart and mStartPos and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                 local delta = input.Position - mDragStart
@@ -6096,7 +6096,7 @@ do
             return
         end
         local gui = Instance.new("ScreenGui")
-        gui.Name = "SpookyMacroEditorWindow"
+        gui.Name = "NhoiiiXMacroEditorWindow"
         gui.ResetOnSpawn = false
         safeParent(gui)
         MacroEditorGui = gui
@@ -6167,7 +6167,7 @@ do
         NameBox.TextSize = 11
         NameBox.Font = Enum.Font.Gotham
         NameBox.ClearTextOnFocus = false
-    styleSpookyTextBox(NameBox)
+    styleNhoiiiXTextBox(NameBox)
         Instance.new("UICorner", NameBox).CornerRadius = UDim.new(0, 6)
         local nbStroke = Instance.new("UIStroke", NameBox)
         nbStroke.Color = Color3.fromRGB(50, 45, 65)
@@ -6194,7 +6194,7 @@ do
         InputBox.TextXAlignment = Enum.TextXAlignment.Left
         InputBox.TextYAlignment = Enum.TextYAlignment.Top
         InputBox.ClearTextOnFocus = false
-    styleSpookyTextBox(InputBox)
+    styleNhoiiiXTextBox(InputBox)
         Instance.new("UICorner", InputBox).CornerRadius = UDim.new(0, 6)
         local ibStroke = Instance.new("UIStroke", InputBox)
         ibStroke.Color = Color3.fromRGB(48, 48, 55)
@@ -6358,12 +6358,12 @@ do
         runBtn.MouseButton1Click:Connect(function()
             if not MacroRunning then
                 Settings.macroSequence = InputBox.Text
-                if _G.SpookyStopMacro then _G.SpookyStopMacro() end
+                if _G.NhoiiiXStopMacro then _G.NhoiiiXStopMacro() end
                 RunSequence(InputBox.Text)
             end
         end)
         stopBtn.MouseButton1Click:Connect(function()
-            if _G.SpookyStopMacro then _G.SpookyStopMacro() end
+            if _G.NhoiiiXStopMacro then _G.NhoiiiXStopMacro() end
             StopSequence()
             MacroRunning = false
             TapHeld = false
@@ -6465,7 +6465,7 @@ do
         renderSavedCombos()
     end
     FeatureCallbacks["MacroBeta"] = function(v)
-        if not v and _G.SpookyStopMacro then _G.SpookyStopMacro() end
+        if not v and _G.NhoiiiXStopMacro then _G.NhoiiiXStopMacro() end
         notifyToggle("Macro Sequence Pro: " .. (v and "ON" or "OFF"), v)
         showFloatingComboTrigger(v and Settings.macroMode == "Combo")
     end
@@ -6475,7 +6475,7 @@ do
     local function createTrackerWidget()
         if TrackerGui and TrackerGui.Parent then pcall(function() TrackerGui:Destroy() end) end
         local gui = Instance.new("ScreenGui")
-        gui.Name = "SpookyTrackerWidget"
+        gui.Name = "NhoiiiXTrackerWidget"
         gui.ResetOnSpawn = false
         gui.DisplayOrder = 9999
         gui.IgnoreGuiInset = true
@@ -6504,7 +6504,7 @@ do
 
         local trackerIsPressed, trackerDragging, trackerDragStart, trackerStartPos, trackerHasMoved = false, false, nil, nil, false
         local function updateTrackerDrag(input)
-            local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+            local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
             if isLocked then trackerDragging = false return end
             if trackerDragging and trackerDragStart and trackerStartPos then
                 local delta = input.Position - trackerDragStart
@@ -6519,7 +6519,7 @@ do
                 trackerHasMoved = false
                 trackerDragStart = input.Position
                 trackerStartPos = floatBtn.Position
-                local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+                local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
                 trackerDragging = not isLocked
             end
         end)
@@ -6656,8 +6656,8 @@ local function _initCamLockSystem()
     local stopCamLockTracking
 
     local function getBestCamLockTarget(excludeCurrent)
-        if not Spooky.SelectAimPlayer then return nil end
-        return Spooky.SelectAimPlayer(750, excludeCurrent and camLockTargetPlayer or nil)
+        if not NhoiiiX.SelectAimPlayer then return nil end
+        return NhoiiiX.SelectAimPlayer(750, excludeCurrent and camLockTargetPlayer or nil)
     end
 
     local camLockNextScan=0
@@ -6668,13 +6668,13 @@ local function _initCamLockSystem()
             if os.clock()<camLockNextScan then return end
             camLockNextScan=os.clock()+0.25
             camLockTargetPlayer=getBestCamLockTarget(false)
-            if not camLockTargetPlayer then Spooky.Diagnostics.statuses.CamLock="Waiting for a valid target";return end
+            if not camLockTargetPlayer then NhoiiiX.Diagnostics.statuses.CamLock="Waiting for a valid target";return end
             if updateCamLockVisual then updateCamLockVisual(true) end
         end
-        Spooky.Diagnostics.statuses.CamLock="Tracking " .. camLockTargetPlayer.Name
+        NhoiiiX.Diagnostics.statuses.CamLock="Tracking " .. camLockTargetPlayer.Name
         local currentRoot = camLockTargetPlayer.Character and camLockTargetPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if not _G.SpookyCombatTargetValid or not _G.SpookyCombatTargetValid(camLockTargetPlayer,750)
-            or not currentRoot or (Spooky.AimScore and not Spooky.AimScore(currentRoot,0))
+        if not _G.NhoiiiXCombatTargetValid or not _G.NhoiiiXCombatTargetValid(camLockTargetPlayer,750)
+            or not currentRoot or (NhoiiiX.AimScore and not NhoiiiX.AimScore(currentRoot,0))
             or (Settings.aimTargetPolicy == "Selected" and tostring(camLockTargetPlayer.UserId) ~= tostring(Settings.aimTargetUserId)) then
             camLockTargetPlayer = getBestCamLockTarget(true)
             if not camLockTargetPlayer then return end
@@ -6746,11 +6746,11 @@ local function _initCamLockSystem()
 
     stopCamLockTracking = function()
         camLockActive = false
-        Spooky.Diagnostics.statuses.CamLock="Off"
+        NhoiiiX.Diagnostics.statuses.CamLock="Off"
         camLockTargetPlayer = nil
         if camLockStepBound then
             camLockStepBound = false
-            pcall(function() RunService:UnbindFromRenderStep("SpookyCamLockExecution") end)
+            pcall(function() RunService:UnbindFromRenderStep("NhoiiiXCamLockExecution") end)
         end
         if updateCamLockVisual then updateCamLockVisual(false) end
     end
@@ -6762,9 +6762,9 @@ local function _initCamLockSystem()
         if updateCamLockVisual then updateCamLockVisual(true) end
         if not camLockStepBound then
             camLockStepBound = true
-            RunService:BindToRenderStep("SpookyCamLockExecution", Enum.RenderPriority.Camera.Value + 1, function(dt)
+            RunService:BindToRenderStep("NhoiiiXCamLockExecution", Enum.RenderPriority.Camera.Value + 1, function(dt)
                 local ok, err = pcall(camLockCameraStep,dt)
-                if not ok then Spooky.ReportIssue("CamLock",err) end
+                if not ok then NhoiiiX.ReportIssue("CamLock",err) end
             end)
         end
         local tName = target and (target.DisplayName or target.Name) or "waiting for target"
@@ -6790,7 +6790,7 @@ local function _initCamLockSystem()
         disconnectCamWidget()
         if CamLockGui then CamLockGui:Destroy() end
         local gui = Instance.new("ScreenGui")
-        gui.Name = "SpookyCamLockWidget"
+        gui.Name = "NhoiiiXCamLockWidget"
         gui.ResetOnSpawn, gui.IgnoreGuiInset, gui.Enabled = false, true, true
         gui.DisplayOrder = 1000000
         gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -6824,7 +6824,7 @@ local function _initCamLockSystem()
             end
         end))
         table.insert(camWidgetConnections, UserInputService.InputChanged:Connect(function(input)
-            if not dragInput or _G.SpookyLockFloatingButtons or FeatureStates["LockFloatingButtons"] then return end
+            if not dragInput or _G.NhoiiiXLockFloatingButtons or FeatureStates["LockFloatingButtons"] then return end
             if input ~= dragInput and input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
             local delta = input.Position - dragStart
             if delta.Magnitude > 6 then moved = true end
@@ -6843,7 +6843,7 @@ local function _initCamLockSystem()
             if not moved then toggleCamLockTracking() end
         end))
         registerConnection(gui.Destroying:Connect(disconnectCamWidget))
-        Spooky.Diagnostics.statuses["CamLock control"] = "Visible in PlayerGui"
+        NhoiiiX.Diagnostics.statuses["CamLock control"] = "Visible in PlayerGui"
     end
 
     local function destroyCamLockWidget()
@@ -6886,7 +6886,7 @@ local function _initCamLockSystem()
         if camWidgetClock < 0.3 then return end
         camWidgetClock = 0
         local ok, err = pcall(reconcileCamLockWidget)
-        if not ok then Spooky.ReportIssue("CamLock control",err) end
+        if not ok then NhoiiiX.ReportIssue("CamLock control",err) end
     end))
     FeatureCallbacks["SwitchCamLock"] = function()
         if not FeatureStates["CamLock"] then
@@ -6897,7 +6897,7 @@ local function _initCamLockSystem()
         camLockActive=true
         if not camLockStepBound then
             camLockStepBound=true
-            RunService:BindToRenderStep("SpookyCamLockExecution",Enum.RenderPriority.Camera.Value+1,camLockCameraStep)
+            RunService:BindToRenderStep("NhoiiiXCamLockExecution",Enum.RenderPriority.Camera.Value+1,camLockCameraStep)
         end
         if updateCamLockVisual then updateCamLockVisual(camLockTargetPlayer~=nil) end
     end
@@ -6915,7 +6915,7 @@ local currentUIFontName = "GothamBold"
 local function setPanelTransparency(alpha)
     currentPanelTransparency = math.clamp(alpha or 0, 0, 0.95)
     pcall(function()
-        local el = _G.SpookyThemedElements
+        local el = _G.NhoiiiXThemedElements
         if el then
             if el.leftSideImg then el.leftSideImg.BackgroundTransparency = currentPanelTransparency end
             if el.rightSideImg then el.rightSideImg.BackgroundTransparency = currentPanelTransparency end
@@ -6928,14 +6928,14 @@ local function setPanelTransparency(alpha)
         end
     end)
 end
-_G.SpookySetPanelTransparency = setPanelTransparency
+_G.NhoiiiXSetPanelTransparency = setPanelTransparency
 
 local function applyBorderColor(color)
-    if getgenv().SpookyUIStroke then
-        getgenv().SpookyUIStroke.Color = color
+    if getgenv().NhoiiiXUIStroke then
+        getgenv().NhoiiiXUIStroke.Color = color
     end
 end
-_G.SpookyApplyBorderColor = applyBorderColor
+_G.NhoiiiXApplyBorderColor = applyBorderColor
 
 local function applyFontToAll(fontEnum, fontName)
     if fontName then currentUIFontName = fontName end
@@ -6949,15 +6949,15 @@ local function applyFontToAll(fontEnum, fontName)
         end
     end
 end
-_G.SpookyApplyFontToAll = applyFontToAll
+_G.NhoiiiXApplyFontToAll = applyFontToAll
 
 local function applyBorderThickness(thickness)
     currentBorderThickness = thickness
-    if getgenv().SpookyUIStroke then
-        getgenv().SpookyUIStroke.Thickness = thickness
+    if getgenv().NhoiiiXUIStroke then
+        getgenv().NhoiiiXUIStroke.Thickness = thickness
     end
 end
-_G.SpookyApplyBorderThickness = applyBorderThickness
+_G.NhoiiiXApplyBorderThickness = applyBorderThickness
 
 local function applyCornerRadius(radiusPx)
     currentCornerRadius = radiusPx
@@ -6971,11 +6971,11 @@ local function applyCornerRadius(radiusPx)
         end
     end
 end
-_G.SpookyApplyCornerRadius = applyCornerRadius
+_G.NhoiiiXApplyCornerRadius = applyCornerRadius
 
 applyWallpaper = function(assetId, opacity)
     if opacity then currentWallpaperOpacity = opacity end
-    local wp = getgenv().SpookyUIWallpaper
+    local wp = getgenv().NhoiiiXUIWallpaper
     if wp then
         if assetId == false or assetId == "" or assetId == "0" or assetId == "None (Def)" or assetId == "none" then
             wp.Image = ""
@@ -6998,7 +6998,7 @@ applyWallpaper = function(assetId, opacity)
             currentCustomWallpaperId = cleanId
             wp.Image = cleanId
             wp.Visible = true
-            wp.ImageTransparency = isSpookyTransparentActive and 0 or (1 - (currentWallpaperOpacity or 0.85))
+            wp.ImageTransparency = isNhoiiiXTransparentActive and 0 or (1 - (currentWallpaperOpacity or 0.85))
             if currentPanelTransparency == 0 then
                 setPanelTransparency(0.40)
             end
@@ -7008,36 +7008,36 @@ applyWallpaper = function(assetId, opacity)
         end
     end
 end
-_G.SpookyApplyWallpaper = applyWallpaper
+_G.NhoiiiXApplyWallpaper = applyWallpaper
 
 local function applyOverlayEffect(effectType)
-    if getgenv().SpookyUIOverlay then
+    if getgenv().NhoiiiXUIOverlay then
         if effectType == "Tech Grid Pattern" then
-            getgenv().SpookyUIOverlay.Image = "rbxassetid://12975543160"
-            getgenv().SpookyUIOverlay.ImageTransparency = 0.88
-            getgenv().SpookyUIOverlay.ScaleType = Enum.ScaleType.Tile
-            getgenv().SpookyUIOverlay.TileSize = UDim2.new(0, 64, 0, 64)
-            getgenv().SpookyUIOverlay.Visible = true
+            getgenv().NhoiiiXUIOverlay.Image = "rbxassetid://12975543160"
+            getgenv().NhoiiiXUIOverlay.ImageTransparency = 0.88
+            getgenv().NhoiiiXUIOverlay.ScaleType = Enum.ScaleType.Tile
+            getgenv().NhoiiiXUIOverlay.TileSize = UDim2.new(0, 64, 0, 64)
+            getgenv().NhoiiiXUIOverlay.Visible = true
         elseif effectType == "Carbon Weave" then
-            getgenv().SpookyUIOverlay.Image = "rbxassetid://2151741365"
-            getgenv().SpookyUIOverlay.ImageTransparency = 0.90
-            getgenv().SpookyUIOverlay.ScaleType = Enum.ScaleType.Tile
-            getgenv().SpookyUIOverlay.TileSize = UDim2.new(0, 100, 0, 100)
-            getgenv().SpookyUIOverlay.Visible = true
+            getgenv().NhoiiiXUIOverlay.Image = "rbxassetid://2151741365"
+            getgenv().NhoiiiXUIOverlay.ImageTransparency = 0.90
+            getgenv().NhoiiiXUIOverlay.ScaleType = Enum.ScaleType.Tile
+            getgenv().NhoiiiXUIOverlay.TileSize = UDim2.new(0, 100, 0, 100)
+            getgenv().NhoiiiXUIOverlay.Visible = true
         elseif effectType == "Vignette Dark Radial" then
-            getgenv().SpookyUIOverlay.Image = "rbxassetid://6015897843"
-            getgenv().SpookyUIOverlay.ImageTransparency = 0.70
-            getgenv().SpookyUIOverlay.ScaleType = Enum.ScaleType.Stretch
-            getgenv().SpookyUIOverlay.Visible = true
+            getgenv().NhoiiiXUIOverlay.Image = "rbxassetid://6015897843"
+            getgenv().NhoiiiXUIOverlay.ImageTransparency = 0.70
+            getgenv().NhoiiiXUIOverlay.ScaleType = Enum.ScaleType.Stretch
+            getgenv().NhoiiiXUIOverlay.Visible = true
         elseif effectType == "Hexagon Tech" then
-            getgenv().SpookyUIOverlay.Image = "rbxassetid://300122283"
-            getgenv().SpookyUIOverlay.ImageTransparency = 0.92
-            getgenv().SpookyUIOverlay.ScaleType = Enum.ScaleType.Tile
-            getgenv().SpookyUIOverlay.TileSize = UDim2.new(0, 80, 0, 80)
-            getgenv().SpookyUIOverlay.Visible = true
+            getgenv().NhoiiiXUIOverlay.Image = "rbxassetid://300122283"
+            getgenv().NhoiiiXUIOverlay.ImageTransparency = 0.92
+            getgenv().NhoiiiXUIOverlay.ScaleType = Enum.ScaleType.Tile
+            getgenv().NhoiiiXUIOverlay.TileSize = UDim2.new(0, 80, 0, 80)
+            getgenv().NhoiiiXUIOverlay.Visible = true
         else
-            getgenv().SpookyUIOverlay.Image = ""
-            getgenv().SpookyUIOverlay.Visible = false
+            getgenv().NhoiiiXUIOverlay.Image = ""
+            getgenv().NhoiiiXUIOverlay.Visible = false
         end
     end
 end
@@ -7055,8 +7055,8 @@ local originalUILayout = {
     CenterPagesBg = { Position = UDim2.new(0, 128, 0, 0), Size = UDim2.new(0, 404, 0, 369) },
     PagesFolder = { Position = UDim2.new(0, 128, 0, 8), Size = UDim2.new(0, 404, 0, 353) },
     RightSidebar = { Position = UDim2.new(0.811, 0, 0, 0), Size = UDim2.new(0, 122, 0, 369) },
-    SpookyIcon = { Position = UDim2.new(0, 24, 0, 12), Size = UDim2.new(0, 80, 0, 80) },
-    SpookyLabel = { Position = UDim2.new(0, 0, 0, 96), Size = UDim2.new(0, 128, 0, 24) },
+    NhoiiiXIcon = { Position = UDim2.new(0, 24, 0, 12), Size = UDim2.new(0, 80, 0, 80) },
+    NhoiiiXLabel = { Position = UDim2.new(0, 0, 0, 96), Size = UDim2.new(0, 128, 0, 24) },
     SidebarScroll = { Position = UDim2.new(0, 8, 0, 126), Size = UDim2.new(0, 112, 0, 235) },
     CloseBtn = { Position = UDim2.new(0.938, 0, 0, 8), Size = UDim2.new(0, 26, 0, 26) },
     MinimizeBtn = { Position = UDim2.new(0.888, 0, 0, 8), Size = UDim2.new(0, 26, 0, 26) },
@@ -7068,7 +7068,7 @@ local function saveUILayout()
     pcall(function()
         if writefile then
             local layoutData = {}
-            for name, el in pairs(SpookyEditableElements) do
+            for name, el in pairs(NhoiiiXEditableElements) do
                 if el and el.Parent then
                     if not originalUILayout[name] then
                         originalUILayout[name] = { Position = el.Position, Size = el.Size, AnchorPoint = el.AnchorPoint }
@@ -7081,20 +7081,20 @@ local function saveUILayout()
                     }
                 end
             end
-            writefile("ProjectSpooky_UILayout.json", HttpService:JSONEncode(layoutData))
+            writefile("ProjectNhoiiiX_UILayout.json", HttpService:JSONEncode(layoutData))
             notifyToggle("UI Layout Saved Successfully!", true)
         end
     end)
 end
-_G.SpookySaveLayout = saveUILayout
+_G.NhoiiiXSaveLayout = saveUILayout
 
 local function resetUILayout()
     pcall(function()
-        if _G.SpookySideLayout then
-            _G.SpookySideLayout.Enabled = true
+        if _G.NhoiiiXSideLayout then
+            _G.NhoiiiXSideLayout.Enabled = true
         end
         for name, data in pairs(originalUILayout) do
-            local el = SpookyEditableElements[name]
+            local el = NhoiiiXEditableElements[name]
             if el and el.Parent then
                 el.Position = data.Position
                 if data.Size then el.Size = data.Size end
@@ -7106,26 +7106,26 @@ local function resetUILayout()
             MAINUIframe.AnchorPoint = Vector2.new(0.5, 0.5)
             lastUIPos = UDim2.new(0.5, 0, 0.5, 0)
         end
-        if _G.SpookyThemedElements.MobileToggle then
-            _G.SpookyThemedElements.MobileToggle.Position = UDim2.new(0, 20, 0, 80)
+        if _G.NhoiiiXThemedElements.MobileToggle then
+            _G.NhoiiiXThemedElements.MobileToggle.Position = UDim2.new(0, 20, 0, 80)
         end
-        if delfile and isfile and isfile("ProjectSpooky_UILayout.json") then
-            delfile("ProjectSpooky_UILayout.json")
+        if delfile and isfile and isfile("ProjectNhoiiiX_UILayout.json") then
+            delfile("ProjectNhoiiiX_UILayout.json")
         end
         notifyToggle("UI Layout Reset to Default!", true)
     end)
 end
-_G.SpookyResetLayout = resetUILayout
+_G.NhoiiiXResetLayout = resetUILayout
 
 local function loadUILayout()
     pcall(function()
-        if isfile and isfile("ProjectSpooky_UILayout.json") and readfile then
-            local raw = readfile("ProjectSpooky_UILayout.json")
+        if isfile and isfile("ProjectNhoiiiX_UILayout.json") and readfile then
+            local raw = readfile("ProjectNhoiiiX_UILayout.json")
             if raw and #raw > 10 then
                 local data = HttpService:JSONDecode(raw)
                 if data and type(data) == "table" then
                     for name, pos in pairs(data) do
-                        local el = SpookyEditableElements[name]
+                        local el = NhoiiiXEditableElements[name]
                         if el and el.Parent and pos.XS ~= nil and pos.XO ~= nil and pos.YS ~= nil and pos.YO ~= nil then
                             el.Position = UDim2.new(pos.XS, pos.XO, pos.YS, pos.YO)
                             if name == "MainFrame" then
@@ -7147,10 +7147,10 @@ local function toggleEditUIMode(enable)
         studioToolbar = nil
     end
 end
-_G.SpookyToggleEditUI = toggleEditUIMode
+_G.NhoiiiXToggleEditUI = toggleEditUIMode
 do
     local function applyHomeCharacter(assetId)
-        local img = getgenv().SpookyAnimeImage
+        local img = getgenv().NhoiiiXAnimeImage
         if img then
             local cleanId = string.match(tostring(assetId), "%d+") or tostring(assetId)
             img.Image = "rbxassetid://" .. cleanId
@@ -7196,7 +7196,7 @@ do
         }
     }
 
-    local function cancelSpookyRainbowUI()
+    local function cancelNhoiiiXRainbowUI()
     end
 
     local function applyTheme(themeName)
@@ -7208,16 +7208,16 @@ do
         _G.CurrentAccentColorBright = th.bright
 
         pcall(function()
-            local el = _G.SpookyThemedElements
+            local el = _G.NhoiiiXThemedElements
             if el then
                 if el.titleBanner then el.titleBanner.ImageColor3 = th.accent end
 
-                if el.spookyIcon and el.spookyIcon.Parent then el.spookyIcon.ImageColor3 = th.accent end
-                if el.spookyIconStroke and el.spookyIconStroke.Parent then el.spookyIconStroke.Color = th.accent end
-                if el.spookyFireAura and el.spookyFireAura.Parent then el.spookyFireAura.ImageColor3 = th.accent end
-                if el.spookyAuraStroke and el.spookyAuraStroke.Parent then el.spookyAuraStroke.Color = th.accent end
+                if el.NhoiiiXIcon and el.NhoiiiXIcon.Parent then el.NhoiiiXIcon.ImageColor3 = th.accent end
+                if el.NhoiiiXIconStroke and el.NhoiiiXIconStroke.Parent then el.NhoiiiXIconStroke.Color = th.accent end
+                if el.NhoiiiXFireAura and el.NhoiiiXFireAura.Parent then el.NhoiiiXFireAura.ImageColor3 = th.accent end
+                if el.NhoiiiXAuraStroke and el.NhoiiiXAuraStroke.Parent then el.NhoiiiXAuraStroke.Color = th.accent end
 
-                if el.spookyLbl then el.spookyLbl.TextColor3 = th.accent end
+                if el.NhoiiiXLbl then el.NhoiiiXLbl.TextColor3 = th.accent end
 
                 if el.CloseBtn then el.CloseBtn.TextColor3 = th.accent end
                 if el.MinimizeBtn then el.MinimizeBtn.TextColor3 = th.accent end
@@ -7250,20 +7250,20 @@ do
                 _G.UpdateSidebarVisual(_G.CurrentActiveTab or "Home")
             end
 
-            if getgenv().SpookyUIStroke then
-                getgenv().SpookyUIStroke.Color = Color3.fromRGB(0, 0, 0)
+            if getgenv().NhoiiiXUIStroke then
+                getgenv().NhoiiiXUIStroke.Color = Color3.fromRGB(0, 0, 0)
             end
-            if _G.SpookyUpdateAnimButtonsVisual and _G.SpookyGetUIAnimation then
-                _G.SpookyUpdateAnimButtonsVisual((_G.SpookyGetUIAnimation()))
+            if _G.NhoiiiXUpdateAnimButtonsVisual and _G.NhoiiiXGetUIAnimation then
+                _G.NhoiiiXUpdateAnimButtonsVisual((_G.NhoiiiXGetUIAnimation()))
             end
-            if _G.SpookyESPCustomizerIcon and _G.SpookyESPCustomizerIcon.Parent then
-                _G.SpookyESPCustomizerIcon.ImageColor3 = th.accent
+            if _G.NhoiiiXESPCustomizerIcon and _G.NhoiiiXESPCustomizerIcon.Parent then
+                _G.NhoiiiXESPCustomizerIcon.ImageColor3 = th.accent
             end
-            if _G.SpookyESPCustomizerBorder and _G.SpookyESPCustomizerBorder.Parent then
-                _G.SpookyESPCustomizerBorder.Color = th.accent
+            if _G.NhoiiiXESPCustomizerBorder and _G.NhoiiiXESPCustomizerBorder.Parent then
+                _G.NhoiiiXESPCustomizerBorder.Color = th.accent
             end
-            if _G.SpookyDockStroke and _G.SpookyDockStroke.Parent then
-                _G.SpookyDockStroke.Color = th.accent
+            if _G.NhoiiiXDockStroke and _G.NhoiiiXDockStroke.Parent then
+                _G.NhoiiiXDockStroke.Color = th.accent
             end
 
             if ToggleButtons and updateToggleVisual then
@@ -7278,13 +7278,13 @@ do
     local applyThemeBase = applyTheme
     applyTheme = function(themeName)
         applyThemeBase(themeName)
-        if _G.SpookyRefreshFloatingWidgets then _G.SpookyRefreshFloatingWidgets() end
-        if _G.SpookyRefreshControlPicker then _G.SpookyRefreshControlPicker() end
+        if _G.NhoiiiXRefreshFloatingWidgets then _G.NhoiiiXRefreshFloatingWidgets() end
+        if _G.NhoiiiXRefreshControlPicker then _G.NhoiiiXRefreshControlPicker() end
     end
     _G.ApplyTheme = applyTheme
 
-    local themesList = { "White", "Purple", "Red", "Cyan", "Green", "Blue", "Yellow", "Orange", "Pink", "Gold", "Spooky Dark" }
-    local function cycleSpookyTheme()
+    local themesList = { "White", "Purple", "Red", "Cyan", "Green", "Blue", "Yellow", "Orange", "Pink", "Gold", "NhoiiiX Dark" }
+    local function cycleNhoiiiXTheme()
         local nextTheme = "White"
         for i, t in ipairs(themesList) do
             if t == CurrentTheme then
@@ -7295,14 +7295,14 @@ do
         applyTheme(nextTheme)
         notifyToggle("Theme: " .. tostring(nextTheme), true)
     end
-    _G.CycleSpookyTheme = cycleSpookyTheme
+    _G.CycleNhoiiiXTheme = cycleNhoiiiXTheme
 
     local function saveUIConfig()
         pcall(function()
             if writefile then
                 local animName, animDur = "Pop", 0.28
-                if _G.SpookyGetUIAnimation then
-                    animName, animDur = _G.SpookyGetUIAnimation()
+                if _G.NhoiiiXGetUIAnimation then
+                    animName, animDur = _G.NhoiiiXGetUIAnimation()
                 end
                 local data = {
                     theme = CurrentTheme or "White",
@@ -7317,7 +7317,7 @@ do
                     panelTransparency = currentPanelTransparency or 0,
                     customAvatarId = currentCustomAvatarId or ""
                 }
-                writefile("ProjectSpooky_UIConfig.json", HttpService:JSONEncode(data))
+                writefile("ProjectNhoiiiX_UIConfig.json", HttpService:JSONEncode(data))
             end
         end)
     end
@@ -7328,10 +7328,10 @@ do
             currentCustomAvatarId = ""
             pcall(function()
                 local thumb = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
-                if thumb and _G.SpookyThemedElements and _G.SpookyThemedElements.playerProfile then
-                    _G.SpookyThemedElements.playerProfile.Image = thumb
-                elseif _G.SpookyThemedElements and _G.SpookyThemedElements.playerProfile then
-                    _G.SpookyThemedElements.playerProfile.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(LocalPlayer.UserId) .. "&w=150&h=150"
+                if thumb and _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.playerProfile then
+                    _G.NhoiiiXThemedElements.playerProfile.Image = thumb
+                elseif _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.playerProfile then
+                    _G.NhoiiiXThemedElements.playerProfile.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(LocalPlayer.UserId) .. "&w=150&h=150"
                 end
             end)
             saveUIConfig()
@@ -7348,20 +7348,20 @@ do
             local num = tonumber(cleanDigits)
             if num and num > 0 and num < 100000000000 then
                 local thumb = Players:GetUserThumbnailAsync(num, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
-                if thumb and thumb ~= "" and _G.SpookyThemedElements and _G.SpookyThemedElements.playerProfile then
-                    _G.SpookyThemedElements.playerProfile.Image = thumb
+                if thumb and thumb ~= "" and _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.playerProfile then
+                    _G.NhoiiiXThemedElements.playerProfile.Image = thumb
                     applied = true
                 end
             end
         end)
-        if not applied and _G.SpookyThemedElements and _G.SpookyThemedElements.playerProfile then
-            _G.SpookyThemedElements.playerProfile.Image = "rbxassetid://" .. cleanDigits
+        if not applied and _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.playerProfile then
+            _G.NhoiiiXThemedElements.playerProfile.Image = "rbxassetid://" .. cleanDigits
         end
         currentCustomAvatarId = cleanDigits
         saveUIConfig()
         notifyToggle("Avatar Set: " .. cleanDigits, true)
     end
-    _G.SpookyApplyCustomAvatar = applyCustomAvatar
+    _G.NhoiiiXApplyCustomAvatar = applyCustomAvatar
 
     local function resetUISettingsOnly()
         pcall(function()
@@ -7379,7 +7379,7 @@ do
                 MAINUIframe.BackgroundTransparency = 0
                 lastUIPos = UDim2.new(0.5, 0, 0.5, 0)
             end
-            local mobileToggle=_G.SpookyThemedElements.MobileToggle
+            local mobileToggle=_G.NhoiiiXThemedElements.MobileToggle
             if mobileToggle then
                 mobileToggle.Position=UDim2.new(0,20,0,80);mobileToggle.Size=UDim2.fromOffset(52,52);mobileToggle.Visible=true
             end
@@ -7399,17 +7399,17 @@ do
             currentCustomWallpaperId = ""
             currentPanelTransparency = 0
             currentWallpaperOpacity = 0.85
-            if getgenv().SpookyUIWallpaper then
-                getgenv().SpookyUIWallpaper.Image = ""
-                getgenv().SpookyUIWallpaper.Visible = false
-                getgenv().SpookyUIWallpaper.ImageTransparency = 1
+            if getgenv().NhoiiiXUIWallpaper then
+                getgenv().NhoiiiXUIWallpaper.Image = ""
+                getgenv().NhoiiiXUIWallpaper.Visible = false
+                getgenv().NhoiiiXUIWallpaper.ImageTransparency = 1
             end
-            if getgenv().SpookyUIOverlay then
-                getgenv().SpookyUIOverlay.Image = ""
-                getgenv().SpookyUIOverlay.Visible = false
+            if getgenv().NhoiiiXUIOverlay then
+                getgenv().NhoiiiXUIOverlay.Image = ""
+                getgenv().NhoiiiXUIOverlay.Visible = false
             end
-            if _G.SpookyWallpaperBox then
-                _G.SpookyWallpaperBox.Text = ""
+            if _G.NhoiiiXWallpaperBox then
+                _G.NhoiiiXWallpaperBox.Text = ""
             end
             for _, card in ipairs(AllCardFrames) do
                 if card and card.Parent then
@@ -7417,25 +7417,25 @@ do
                     card.BackgroundTransparency = 0
                 end
             end
-            if _G.SpookyThemedElements then
-                local el = _G.SpookyThemedElements
+            if _G.NhoiiiXThemedElements then
+                local el = _G.NhoiiiXThemedElements
                 if el.leftSideImg then el.leftSideImg.BackgroundColor3 = Color3.fromRGB(9, 9, 13); el.leftSideImg.BackgroundTransparency = 0 end
                 if el.rightSideImg then el.rightSideImg.BackgroundColor3 = Color3.fromRGB(9, 9, 13); el.rightSideImg.BackgroundTransparency = 0 end
                 if el.centerPagesBg then el.centerPagesBg.BackgroundColor3 = Color3.fromRGB(11, 11, 16); el.centerPagesBg.BackgroundTransparency = 0 end
             end
-            if _G.SpookySetUIAnimation then
-                _G.SpookySetUIAnimation("Pop", 0.28)
+            if _G.NhoiiiXSetUIAnimation then
+                _G.NhoiiiXSetUIAnimation("Pop", 0.28)
             end
             pcall(function()
                 if delfile and isfile then
-                    if isfile("ProjectSpooky_UIConfig.json") then delfile("ProjectSpooky_UIConfig.json") end
-                    if isfile("ProjectSpooky_UILayout.json") then delfile("ProjectSpooky_UILayout.json") end
+                    if isfile("ProjectNhoiiiX_UIConfig.json") then delfile("ProjectNhoiiiX_UIConfig.json") end
+                    if isfile("ProjectNhoiiiX_UILayout.json") then delfile("ProjectNhoiiiX_UILayout.json") end
                 end
             end)
             notifyToggle("UI Reset to Defaults Successfully!", true)
         end)
     end
-    _G.SpookyResetUISettingsToDefault = resetUISettingsOnly
+    _G.NhoiiiXResetUISettingsToDefault = resetUISettingsOnly
 
     resetAllToFactoryDefaults = function()
         pcall(function()
@@ -7447,7 +7447,7 @@ do
                 local hrp = char:FindFirstChild("HumanoidRootPart")
                 if hrp then
                     for _, c in ipairs(hrp:GetChildren()) do
-                        if c.Name == "Spooky_FlyVelocity" or c.Name == "Spooky_FlyGyro" then
+                        if c.Name == "NhoiiiX_FlyVelocity" or c.Name == "NhoiiiX_FlyGyro" then
                             pcall(function() c:Destroy() end)
                         end
                     end
@@ -7460,24 +7460,24 @@ do
             resetUISettingsOnly()
             pcall(function()
                 if delfile and isfile then
-                    if isfile("ProjectSpooky_QuickToggles.json") then delfile("ProjectSpooky_QuickToggles.json") end
-                    if isfile("ProjectSpooky_PCKeybinds.json") then delfile("ProjectSpooky_PCKeybinds.json") end
-                    if isfile("ProjectSpooky_ESPConfig.json") then delfile("ProjectSpooky_ESPConfig.json") end
-                    if isfile("spooky_ui_config.txt") then delfile("spooky_ui_config.txt") end
-                    if isfile("spooky_theme.txt") then delfile("spooky_theme.txt") end
-                    if isfile("spooky_config.txt") then delfile("spooky_config.txt") end
+                    if isfile("ProjectNhoiiiX_QuickToggles.json") then delfile("ProjectNhoiiiX_QuickToggles.json") end
+                    if isfile("ProjectNhoiiiX_PCKeybinds.json") then delfile("ProjectNhoiiiX_PCKeybinds.json") end
+                    if isfile("ProjectNhoiiiX_ESPConfig.json") then delfile("ProjectNhoiiiX_ESPConfig.json") end
+                    if isfile("NhoiiiX_ui_config.txt") then delfile("NhoiiiX_ui_config.txt") end
+                    if isfile("NhoiiiX_theme.txt") then delfile("NhoiiiX_theme.txt") end
+                    if isfile("NhoiiiX_config.txt") then delfile("NhoiiiX_config.txt") end
                 end
             end)
             notifyToggle("ALL SETTINGS & UI RESET TO FACTORY DEFAULTS!", true)
         end)
     end
-    _G.SpookyResetAllToFactoryDefaults = resetAllToFactoryDefaults
+    _G.NhoiiiXResetAllToFactoryDefaults = resetAllToFactoryDefaults
 
     local function loadUIConfig()
         local applied = false
         pcall(function()
-            if isfile and isfile("ProjectSpooky_UIConfig.json") and readfile then
-                local raw = readfile("ProjectSpooky_UIConfig.json")
+            if isfile and isfile("ProjectNhoiiiX_UIConfig.json") and readfile then
+                local raw = readfile("ProjectNhoiiiX_UIConfig.json")
                 if raw and #raw > 5 then
                     local data = HttpService:JSONDecode(raw)
                     if data and type(data) == "table" then
@@ -7488,8 +7488,8 @@ do
                             userCustomScale = data.scale
                             _G.InitialUIScaleVal = data.scale
                         end
-                        if data.animation and _G.SpookySetUIAnimation then
-                            _G.SpookySetUIAnimation(data.animation, data.animationDuration)
+                        if data.animation and _G.NhoiiiXSetUIAnimation then
+                            _G.NhoiiiXSetUIAnimation(data.animation, data.animationDuration)
                         end
                         if data.font then
                             local fontEnum = Enum.Font[data.font] or Enum.Font.GothamBold
@@ -7514,8 +7514,8 @@ do
                     end
                 end
             end
-            if not applied and isfile and isfile("spooky_ui_config.txt") and readfile then
-                local raw = readfile("spooky_ui_config.txt")
+            if not applied and isfile and isfile("NhoiiiX_ui_config.txt") and readfile then
+                local raw = readfile("NhoiiiX_ui_config.txt")
                 if raw and #raw > 2 then
                     local parts = string.split(raw, "|")
                     local savedTheme = parts[1]
@@ -7535,7 +7535,7 @@ do
         loadUILayout()
         return applied
     end
-    _G.Spooky_LoadUIConfig = loadUIConfig
+    _G.NhoiiiX_LoadUIConfig = loadUIConfig
 
     local UIPage = createScrollPage("UI_Page", 1380)
 
@@ -7564,14 +7564,14 @@ do
         _G.CurrentAccentColorBright = brightCol
         CurrentTheme = "Custom"
         pcall(function()
-            local el = _G.SpookyThemedElements
+            local el = _G.NhoiiiXThemedElements
             if el then
                 if el.titleBanner then el.titleBanner.ImageColor3 = col end
-                if el.spookyIcon then el.spookyIcon.ImageColor3 = col end
-                if el.spookyIconStroke then el.spookyIconStroke.Color = col end
-                if el.spookyFireAura and el.spookyFireAura.Parent then el.spookyFireAura.ImageColor3 = col end
-                if el.spookyAuraStroke and el.spookyAuraStroke.Parent then el.spookyAuraStroke.Color = col end
-                if el.spookyLbl then el.spookyLbl.TextColor3 = col end
+                if el.NhoiiiXIcon then el.NhoiiiXIcon.ImageColor3 = col end
+                if el.NhoiiiXIconStroke then el.NhoiiiXIconStroke.Color = col end
+                if el.NhoiiiXFireAura and el.NhoiiiXFireAura.Parent then el.NhoiiiXFireAura.ImageColor3 = col end
+                if el.NhoiiiXAuraStroke and el.NhoiiiXAuraStroke.Parent then el.NhoiiiXAuraStroke.Color = col end
+                if el.NhoiiiXLbl then el.NhoiiiXLbl.TextColor3 = col end
                 if el.CloseBtn then el.CloseBtn.TextColor3 = col end
                 if el.MinimizeBtn then el.MinimizeBtn.TextColor3 = col end
                 if el.changeHudBtn then
@@ -7596,24 +7596,24 @@ do
                 end
             end
             if _G.UpdateSidebarVisual then _G.UpdateSidebarVisual(_G.CurrentActiveTab or "Home") end
-            if _G.SpookyUpdateAnimButtonsVisual and _G.SpookyGetUIAnimation then
-                _G.SpookyUpdateAnimButtonsVisual((_G.SpookyGetUIAnimation()))
+            if _G.NhoiiiXUpdateAnimButtonsVisual and _G.NhoiiiXGetUIAnimation then
+                _G.NhoiiiXUpdateAnimButtonsVisual((_G.NhoiiiXGetUIAnimation()))
             end
 
-            if _G.SpookyESPCustomizerIcon and _G.SpookyESPCustomizerIcon.Parent then
-                _G.SpookyESPCustomizerIcon.ImageColor3 = col
+            if _G.NhoiiiXESPCustomizerIcon and _G.NhoiiiXESPCustomizerIcon.Parent then
+                _G.NhoiiiXESPCustomizerIcon.ImageColor3 = col
             end
-            if _G.SpookyESPCustomizerBorder and _G.SpookyESPCustomizerBorder.Parent then
-                _G.SpookyESPCustomizerBorder.Color = col
+            if _G.NhoiiiXESPCustomizerBorder and _G.NhoiiiXESPCustomizerBorder.Parent then
+                _G.NhoiiiXESPCustomizerBorder.Color = col
             end
-            if _G.SpookyDockStroke and _G.SpookyDockStroke.Parent then
-                _G.SpookyDockStroke.Color = col
+            if _G.NhoiiiXDockStroke and _G.NhoiiiXDockStroke.Parent then
+                _G.NhoiiiXDockStroke.Color = col
             end
         end)
         saveUIConfig()
         notifyToggle("UI Accent Color Updated!", true)
     end
-    _G.SpookyApplyCustomAccent = applyCustomAccent
+    _G.NhoiiiXApplyCustomAccent = applyCustomAccent
 
     local cThemes = makeCard(UIPage, "UI Theme & Accent Colors", "Temas y Acentos UI", 160, 2)
     local tBW = UDim2.new(0, 124, 0, 26)
@@ -7678,7 +7678,7 @@ do
     end)
 
     createActionButton(cThemes, "Cycle Theme", "Cambiar Tema", UDim2.new(0, 124, 0, 28), UDim2.new(0, X2, 0, 118), function()
-        if _G.CycleSpookyTheme then _G.CycleSpookyTheme() end
+        if _G.CycleNhoiiiXTheme then _G.CycleNhoiiiXTheme() end
         saveUIConfig()
     end)
 
@@ -7755,49 +7755,49 @@ do
             btn.TextColor3 = isSel and curBright or Color3.fromRGB(175, 175, 195)
         end
     end
-    _G.SpookyUpdateAnimButtonsVisual = updateAnimButtonsVisual
+    _G.NhoiiiXUpdateAnimButtonsVisual = updateAnimButtonsVisual
 
     animButtons["Pop"] = createActionButton(cAnim, "Pop (Back)", "Pop (Rebote)", aBW, UDim2.new(0, X1, 0, 26), function()
-        if _G.SpookySetUIAnimation then _G.SpookySetUIAnimation("Pop") end
+        if _G.NhoiiiXSetUIAnimation then _G.NhoiiiXSetUIAnimation("Pop") end
         updateAnimButtonsVisual("Pop")
         saveUIConfig()
         notifyToggle("Animation: Pop (Back)", true)
     end)
     animButtons["Bounce"] = createActionButton(cAnim, "Bounce", "Muelle", aBW, UDim2.new(0, X2, 0, 26), function()
-        if _G.SpookySetUIAnimation then _G.SpookySetUIAnimation("Bounce") end
+        if _G.NhoiiiXSetUIAnimation then _G.NhoiiiXSetUIAnimation("Bounce") end
         updateAnimButtonsVisual("Bounce")
         saveUIConfig()
         notifyToggle("Animation: Bounce", true)
     end)
     animButtons["SlideUp"] = createActionButton(cAnim, "Slide Up", "Deslizar Arriba", aBW, UDim2.new(0, X3, 0, 26), function()
-        if _G.SpookySetUIAnimation then _G.SpookySetUIAnimation("SlideUp") end
+        if _G.NhoiiiXSetUIAnimation then _G.NhoiiiXSetUIAnimation("SlideUp") end
         updateAnimButtonsVisual("SlideUp")
         saveUIConfig()
         notifyToggle("Animation: Slide Up", true)
     end)
 
     animButtons["SlideDown"] = createActionButton(cAnim, "Slide Down", "Deslizar Abajo", aBW, UDim2.new(0, X1, 0, 56), function()
-        if _G.SpookySetUIAnimation then _G.SpookySetUIAnimation("SlideDown") end
+        if _G.NhoiiiXSetUIAnimation then _G.NhoiiiXSetUIAnimation("SlideDown") end
         updateAnimButtonsVisual("SlideDown")
         saveUIConfig()
         notifyToggle("Animation: Slide Down", true)
     end)
     animButtons["ZoomSmooth"] = createActionButton(cAnim, "Smooth Zoom", "Zoom Suave", aBW, UDim2.new(0, X2, 0, 56), function()
-        if _G.SpookySetUIAnimation then _G.SpookySetUIAnimation("ZoomSmooth") end
+        if _G.NhoiiiXSetUIAnimation then _G.NhoiiiXSetUIAnimation("ZoomSmooth") end
         updateAnimButtonsVisual("ZoomSmooth")
         saveUIConfig()
         notifyToggle("Animation: Smooth Zoom", true)
     end)
     animButtons["Fade"] = createActionButton(cAnim, "Fade", "Desvanecer", aBW, UDim2.new(0, X3, 0, 56), function()
-        if _G.SpookySetUIAnimation then _G.SpookySetUIAnimation("Fade") end
+        if _G.NhoiiiXSetUIAnimation then _G.NhoiiiXSetUIAnimation("Fade") end
         updateAnimButtonsVisual("Fade")
         saveUIConfig()
         notifyToggle("Animation: Fade", true)
     end)
 
     local previewBtn = createActionButton(cAnim, "PREVIEW ANIMATION", "PREVISUALIZAR ANIMACION", UDim2.new(1, -12, 0, 28), UDim2.new(0, 6, 0, 88), function()
-        if _G.SpookyPreviewAnimation then
-            _G.SpookyPreviewAnimation()
+        if _G.NhoiiiXPreviewAnimation then
+            _G.NhoiiiXPreviewAnimation()
         end
     end)
     pcall(function()
@@ -7807,17 +7807,17 @@ do
     end)
 
     local curAnimName, curAnimDur = "Pop", 0.28
-    if _G.SpookyGetUIAnimation then curAnimName, curAnimDur = _G.SpookyGetUIAnimation() end
+    if _G.NhoiiiXGetUIAnimation then curAnimName, curAnimDur = _G.NhoiiiXGetUIAnimation() end
     updateAnimButtonsVisual(curAnimName or "Pop")
 
     createSlider(cAnim, "Animation Speed", "Velocidad de Animación", 0.15, 0.50, curAnimDur or 0.28, true, 0.02, "s", function(val)
-        if _G.SpookySetUIAnimation then _G.SpookySetUIAnimation(nil, val) end
+        if _G.NhoiiiXSetUIAnimation then _G.NhoiiiXSetUIAnimation(nil, val) end
         saveUIConfig()
     end, UDim2.new(0, 6, 0, 126))
 
     local cWallpaper = makeCard(UIPage, "UI Wallpaper", "Fondo de Pantalla", 280, 488)
 
-    local SPOOKY_WALLPAPERS = {
+    local NhoiiiX_WALLPAPERS = {
         ["Pikachu Starry Night"]      = "rbxassetid://121128577777470",
         ["Knight in Cherry Blossoms"] = "rbxassetid://71827928567053",
         ["Crimson Angel"]             = "rbxassetid://108707236134250",
@@ -7839,14 +7839,14 @@ do
         ["Neon Lights"]               = "rbxassetid://83813882888748",
         ["Miku"]                      = "rbxassetid://82101506647749",
         ["Sunset Waves"]              = "rbxassetid://137543963570634",
-        ["Spooky Anime"]              = "rbxassetid://129497751007547"
+        ["NhoiiiX Anime"]              = "rbxassetid://129497751007547"
     }
     local cbWallpaperNames = {
         "Pikachu Starry Night", "Knight in Cherry Blossoms", "Crimson Angel", "Eren Freedom",
         "Animated Eyes", "Miyamoto Musashi", "Gengar Moonlight", "Guts Crimson Eclipse",
         "Griffith White Hawk", "Light Yagami Judgment", "Rukia White Dance", "Rize Dragon",
         "Subaru Dark Resolve", "Gojo vs Sukuna", "Unlimited Blade Works", "Troll",
-        "Sorrow", "Snow Angel", "Neon Lights", "Miku", "Sunset Waves", "Spooky Anime"
+        "Sorrow", "Snow Angel", "Neon Lights", "Miku", "Sunset Waves", "NhoiiiX Anime"
     }
 
     local wpIdLbl = Instance.new("TextLabel", cWallpaper)
@@ -7865,7 +7865,7 @@ do
     })
 
     local assetBox = Instance.new("TextBox", cWallpaper)
-    _G.SpookyWallpaperBox = assetBox
+    _G.NhoiiiXWallpaperBox = assetBox
     assetBox.Name = "WallpaperIdTextBox"
     assetBox.Size = UDim2.new(1, -114, 0, 26)
     assetBox.Position = UDim2.new(0, 6, 0, 42)
@@ -7902,7 +7902,7 @@ do
     local applyAssetBtn = createActionButton(cWallpaper, "APPLY BY ID", "APLICAR POR ID", UDim2.new(0, 96, 0, 26), UDim2.new(1, -102, 0, 42), onApplyCustomAsset)
 
     createCycleButton(cWallpaper, "Preset Wallpaper", "Fondo Predeterminado", cbWallpaperNames, 1, UDim2.new(1, -12, 0, 26), UDim2.new(0, 6, 0, 74), function(choice)
-        local assetId = SPOOKY_WALLPAPERS[choice]
+        local assetId = NhoiiiX_WALLPAPERS[choice]
         if assetId then
             assetBox.Text = assetId:gsub("rbxassetid://", "")
             applyWallpaper(assetId)
@@ -7944,8 +7944,8 @@ do
 
     createSlider(cWallpaper, "Wallpaper Brightness", "Brillo de Fondo", 0.15, 1.0, currentWallpaperOpacity or 0.85, true, 0.05, "", function(val)
         currentWallpaperOpacity = val
-        if getgenv().SpookyUIWallpaper and getgenv().SpookyUIWallpaper.Visible then
-            getgenv().SpookyUIWallpaper.ImageTransparency = 1 - val
+        if getgenv().NhoiiiXUIWallpaper and getgenv().NhoiiiXUIWallpaper.Visible then
+            getgenv().NhoiiiXUIWallpaper.ImageTransparency = 1 - val
         end
         saveUIConfig()
     end, UDim2.new(0, 6, 0, 184))
@@ -8032,8 +8032,8 @@ do
     end)
 
     local uiResetBtn = createActionButton(cWindowLayout, "RESET UI SETTINGS (DEFAULT)", "RESTABLECER UI POR DEFECTO", UDim2.new(1, -12, 0, 28), UDim2.new(0, 6, 0, 58), function()
-        if _G.SpookyResetUISettingsToDefault then
-            _G.SpookyResetUISettingsToDefault()
+        if _G.NhoiiiXResetUISettingsToDefault then
+            _G.NhoiiiXResetUISettingsToDefault()
         end
     end)
     pcall(function()
@@ -8057,12 +8057,12 @@ local function mathClamp(val, minV, maxV)
     return val
 end
 
-local function showSpookyNotice(title, desc, isSuccess)
+local function showNhoiiiXNotice(title, desc, isSuccess)
     pcall(function()
         if notifyToggle then
             notifyToggle(title .. ": " .. desc, isSuccess)
         else
-            print(string.format("[Project Spooky] %s: %s (%s)", title, desc, isSuccess and "SUCCESS" or "WARN"))
+            print(string.format("[Project NhoiiiX] %s: %s (%s)", title, desc, isSuccess and "SUCCESS" or "WARN"))
         end
     end)
     pcall(function()
@@ -8196,17 +8196,17 @@ local function exportMacroConfig()
     local encoded = "SPK_MACRO:" .. base64Encode(json)
     local ok = universalCopy(encoded)
     if ok then
-        showSpookyNotice("Macro Config", "Configuración de Macro copiada al portapapeles!", true)
+        showNhoiiiXNotice("Macro Config", "Configuración de Macro copiada al portapapeles!", true)
     else
-        showSpookyNotice("Macro Config", "Código generado (Error de portapapeles)", false)
+        showNhoiiiXNotice("Macro Config", "Código generado (Error de portapapeles)", false)
     end
     return encoded
 end
 
 local function exportUIConfig()
     local animName, animDur = "Pop", 0.28
-    if _G.SpookyGetUIAnimation then
-        pcall(function() animName, animDur = _G.SpookyGetUIAnimation() end)
+    if _G.NhoiiiXGetUIAnimation then
+        pcall(function() animName, animDur = _G.NhoiiiXGetUIAnimation() end)
     end
     local payload = {
         type = "UI",
@@ -8226,9 +8226,9 @@ local function exportUIConfig()
     local encoded = "SPK_UI:" .. base64Encode(json)
     local ok = universalCopy(encoded)
     if ok then
-        showSpookyNotice("UI Config", "Configuración de UI copiada al portapapeles!", true)
+        showNhoiiiXNotice("UI Config", "Configuración de UI copiada al portapapeles!", true)
     else
-        showSpookyNotice("UI Config", "Código generado (Error de portapapeles)", false)
+        showNhoiiiXNotice("UI Config", "Código generado (Error de portapapeles)", false)
     end
     return encoded
 end
@@ -8242,17 +8242,17 @@ local function exportFullConfig()
     end
 
     local animName, animDur = "Pop", 0.28
-    if _G.SpookyGetUIAnimation then
-        pcall(function() animName, animDur = _G.SpookyGetUIAnimation() end)
+    if _G.NhoiiiXGetUIAnimation then
+        pcall(function() animName, animDur = _G.NhoiiiXGetUIAnimation() end)
     end
 
     local payload = {
         type = "GLOBAL",
         version = 2,
         features = activeFeats,
-        PlayerBlacklist = Spooky.ExportPlayerBlacklist(),
-        CustomControls = _G.SpookyGetCustomControls and _G.SpookyGetCustomControls() or {},
-        FloatPos = _G.SpookyGetFloatingPositions and _G.SpookyGetFloatingPositions() or {},
+        PlayerBlacklist = NhoiiiX.ExportPlayerBlacklist(),
+        CustomControls = _G.NhoiiiXGetCustomControls and _G.NhoiiiXGetCustomControls() or {},
+        FloatPos = _G.NhoiiiXGetFloatingPositions and _G.NhoiiiXGetFloatingPositions() or {},
         language = CurrentLang,
         settings = {
             aimMode = Settings.aimMode,
@@ -8336,9 +8336,9 @@ local function exportFullConfig()
     local encoded = "SPK_GLOBAL:" .. base64Encode(json)
     local ok = universalCopy(encoded)
     if ok then
-        showSpookyNotice("Global Config", "Configuración Global copiada al portapapeles!", true)
+        showNhoiiiXNotice("Global Config", "Configuración Global copiada al portapapeles!", true)
     else
-        showSpookyNotice("Global Config", "Código generado (Error de portapapeles)", false)
+        showNhoiiiXNotice("Global Config", "Código generado (Error de portapapeles)", false)
     end
     return encoded
 end
@@ -8346,21 +8346,21 @@ end
 Agent2_MacroConfigs.exportMacroConfig = exportMacroConfig
 Agent2_MacroConfigs.exportUIConfig = exportUIConfig
 Agent2_MacroConfigs.exportFullConfig = exportFullConfig
-_G.SpookyExportMacroConfig = exportMacroConfig
-_G.SpookyExportUIConfig = exportUIConfig
-_G.SpookyExportFullConfig = exportFullConfig
+_G.NhoiiiXExportMacroConfig = exportMacroConfig
+_G.NhoiiiXExportUIConfig = exportUIConfig
+_G.NhoiiiXExportFullConfig = exportFullConfig
 
-Spooky.CreateDefaultBlock=function()
+NhoiiiX.CreateDefaultBlock=function()
     return {enabled=false,weapon="Melee",skill="Z",mode="Tap",hold=0.35,delay=0.22,jumpsAfter=0,
         fallbackEnabled=false,fallbackWeapon="Sword",fallbackSkill="X",fallbackMode="Tap",fallbackHold=0.35}
 end
-Spooky.CreateDefaultSlot=function(name)
+NhoiiiX.CreateDefaultSlot=function(name)
     local slot={name=name or "Slot",soruEnabled=false,soruAfter=0,m1Enabled=false,m1Weapon="Melee",m1Count=2,m1After=1,v3Enabled=false,v3After=0,steps={}}
-    for i=1,10 do slot.steps[i]=Spooky.CreateDefaultBlock() end
+    for i=1,10 do slot.steps[i]=NhoiiiX.CreateDefaultBlock() end
     return slot
 end
 local function applyMacroConfigData(data)
-    if _G.SpookyStopMacro then _G.SpookyStopMacro() end
+    if _G.NhoiiiXStopMacro then _G.NhoiiiXStopMacro() end
     if not data or type(data) ~= "table" then return false end
 
     local slots = data.slots or data.macroSlots
@@ -8368,8 +8368,8 @@ local function applyMacroConfigData(data)
         Settings.macroSlots = slots
         for sIdx = 1, 5 do
             if not Settings.macroSlots[sIdx] then
-                if Spooky.CreateDefaultSlot then
-                    Settings.macroSlots[sIdx] = Spooky.CreateDefaultSlot("Slot " .. sIdx)
+                if NhoiiiX.CreateDefaultSlot then
+                    Settings.macroSlots[sIdx] = NhoiiiX.CreateDefaultSlot("Slot " .. sIdx)
                 else
                     Settings.macroSlots[sIdx] = { name = "Slot " .. sIdx, steps = {} }
                 end
@@ -8377,8 +8377,8 @@ local function applyMacroConfigData(data)
             Settings.macroSlots[sIdx].steps = Settings.macroSlots[sIdx].steps or {}
             for st = 1, 10 do
                 if not Settings.macroSlots[sIdx].steps[st] then
-                    if Spooky.CreateDefaultBlock then
-                        Settings.macroSlots[sIdx].steps[st] = Spooky.CreateDefaultBlock()
+                    if NhoiiiX.CreateDefaultBlock then
+                        Settings.macroSlots[sIdx].steps[st] = NhoiiiX.CreateDefaultBlock()
                     else
                         Settings.macroSlots[sIdx].steps[st] = { enabled = false, weapon = "Melee", skill = "Z", mode = "Tap", hold = 0.35, delay = 0.22 }
                     end
@@ -8388,7 +8388,7 @@ local function applyMacroConfigData(data)
     end
 
     if data.activeSlot or data.macroActiveSlot then
-        Settings.macroActiveSlot = math.floor(Spooky.Runtime.number(data.activeSlot or data.macroActiveSlot, 1, 1, 5))
+        Settings.macroActiveSlot = math.floor(NhoiiiX.Runtime.number(data.activeSlot or data.macroActiveSlot, 1, 1, 5))
     end
 
     if Settings.macroSlots and Settings.macroSlots[Settings.macroActiveSlot] then
@@ -8412,8 +8412,8 @@ local function applyMacroConfigData(data)
         if slotNameBox and Settings.macroSlots[Settings.macroActiveSlot] then
             slotNameBox.Text = Settings.macroSlots[Settings.macroActiveSlot].name or ("Slot " .. Settings.macroActiveSlot)
         end
-        if _G.SpookySelectMacroSlot then
-            _G.SpookySelectMacroSlot(Settings.macroActiveSlot)
+        if _G.NhoiiiXSelectMacroSlot then
+            _G.NhoiiiXSelectMacroSlot(Settings.macroActiveSlot)
         end
         if _G.UpdateMacroBannerFunc then _G.UpdateMacroBannerFunc() end
         if _G.RefreshMacroStepsUI then _G.RefreshMacroStepsUI() end
@@ -8435,7 +8435,7 @@ local function applyMacroConfigData(data)
                 triggerKey = Settings.macroTriggerKey or "T",
                 slots = Settings.macroSlots
             }
-            writefile("Spooky_MacroSteps.json", HttpService:JSONEncode(sv))
+            writefile("NhoiiiX_MacroSteps.json", HttpService:JSONEncode(sv))
         end
     end)
     return true
@@ -8457,24 +8457,24 @@ local function applyUIConfigData(data)
 
         local a = data.animation or data.a
         local ad = tonumber(data.animationDuration or data.ad) or 0.28
-        if a and _G.SpookySetUIAnimation then
-            _G.SpookySetUIAnimation(a, ad)
+        if a and _G.NhoiiiXSetUIAnimation then
+            _G.NhoiiiXSetUIAnimation(a, ad)
         end
 
         local f = data.font or data.f
-        if f and _G.SpookyApplyFontToAll then
+        if f and _G.NhoiiiXApplyFontToAll then
             local fEnum = Enum.Font[f] or Enum.Font.GothamBold
-            _G.SpookyApplyFontToAll(fEnum, f)
+            _G.NhoiiiXApplyFontToAll(fEnum, f)
         end
 
         local bt = tonumber(data.borderThickness or data.bt)
-        if bt and _G.SpookyApplyBorderThickness then
-            _G.SpookyApplyBorderThickness(bt)
+        if bt and _G.NhoiiiXApplyBorderThickness then
+            _G.NhoiiiXApplyBorderThickness(bt)
         end
 
         local cr = tonumber(data.cornerRadius or data.cr)
-        if cr and _G.SpookyApplyCornerRadius then
-            _G.SpookyApplyCornerRadius(cr)
+        if cr and _G.NhoiiiXApplyCornerRadius then
+            _G.NhoiiiXApplyCornerRadius(cr)
         end
 
         local w = data.wallpaper or data.w
@@ -8490,13 +8490,13 @@ local function applyUIConfigData(data)
 
         if _G.saveUIConfig then _G.saveUIConfig() end
     end)
-    if not success then Spooky.ReportIssue("UI config",configError);return false end
+    if not success then NhoiiiX.ReportIssue("UI config",configError);return false end
     return true
 end
 
 local function applyGlobalConfigData(data)
     if not data or type(data) ~= "table" then return false end
-    if data.PlayerBlacklist then Spooky.RestorePlayerBlacklist(data.PlayerBlacklist) end
+    if data.PlayerBlacklist then NhoiiiX.RestorePlayerBlacklist(data.PlayerBlacklist) end
 
     local s = data.settings or data.S
     if s and type(s) == "table" then
@@ -8527,8 +8527,8 @@ local function applyGlobalConfigData(data)
 
     if data.language and applyLanguage then applyLanguage(data.language,true) end
     if type(data.CustomControls) == "table" then
-        if _G.SpookySetCustomControls then _G.SpookySetCustomControls(data.CustomControls)
-        else Spooky.PendingCustomControls = data.CustomControls end
+        if _G.NhoiiiXSetCustomControls then _G.NhoiiiXSetCustomControls(data.CustomControls)
+        else NhoiiiX.PendingCustomControls = data.CustomControls end
     end
 
     if data.ui then
@@ -8536,8 +8536,8 @@ local function applyGlobalConfigData(data)
     end
 
     if type(data.FloatPos) == "table" then
-        if _G.SpookySetFloatingPositions then _G.SpookySetFloatingPositions(data.FloatPos)
-        else Spooky.PendingFloatingPositions = data.FloatPos end
+        if _G.NhoiiiXSetFloatingPositions then _G.NhoiiiXSetFloatingPositions(data.FloatPos)
+        else NhoiiiX.PendingFloatingPositions = data.FloatPos end
     end
 
     if data.macro then
@@ -8551,7 +8551,7 @@ local function applyGlobalConfigData(data)
             table.clear(targetKBs)
             for _, s in ipairs(kbData) do
                 for _, def in ipairs(_G.ALL_KEYBIND_DEFS) do
-                    if Spooky.ResolveFeature(def.id) == Spooky.ResolveFeature(s.id) then
+                    if NhoiiiX.ResolveFeature(def.id) == NhoiiiX.ResolveFeature(s.id) then
                         table.insert(targetKBs, {
                             id = def.id,
                             name = def.name,
@@ -8573,13 +8573,13 @@ end
 
 local function importConfigString(str)
     if not str or type(str) ~= "string" then
-        showSpookyNotice("Import Config", "Pega un código de configuración válido!", false)
+        showNhoiiiXNotice("Import Config", "Pega un código de configuración válido!", false)
         return false, "No data provided"
     end
 
     str = string.match(str, "^%s*(.-)%s*$")
     if #str < 4 then
-        showSpookyNotice("Import Config", "Código de configuración demasiado corto!", false)
+        showNhoiiiXNotice("Import Config", "Código de configuración demasiado corto!", false)
         return false, "String too short"
     end
 
@@ -8626,7 +8626,7 @@ local function importConfigString(str)
     end
 
     if not decodedTable or type(decodedTable) ~= "table" then
-        showSpookyNotice("Import Config", "Código de configuración inválido o dañado!", false)
+        showNhoiiiXNotice("Import Config", "Código de configuración inválido o dañado!", false)
         return false, "Decode failed"
     end
 
@@ -8636,19 +8636,19 @@ local function importConfigString(str)
     if cfgType == "MACRO" or isPrefixedMacro or decodedTable.slots or decodedTable.macroSlots or decodedTable.customSteps then
         handled = applyMacroConfigData(decodedTable)
         if handled then
-            showSpookyNotice("Configuración Importada", "Configuración de Macro importada con éxito!", true)
+            showNhoiiiXNotice("Configuración Importada", "Configuración de Macro importada con éxito!", true)
             return true, "Macro"
         end
     elseif cfgType == "UI" or isPrefixedUI or (decodedTable.theme and decodedTable.scale) or decodedTable.t then
         handled = applyUIConfigData(decodedTable)
         if handled then
-            showSpookyNotice("Configuración Importada", "Configuración UI importada con éxito!", true)
+            showNhoiiiXNotice("Configuración Importada", "Configuración UI importada con éxito!", true)
             return true, "UI"
         end
     elseif cfgType == "GLOBAL" or isPrefixedGlobal or decodedTable.features or decodedTable.F or decodedTable.settings then
         handled = applyGlobalConfigData(decodedTable)
         if handled then
-            showSpookyNotice("Configuración Importada", "Configuración Global importada con éxito!", true)
+            showNhoiiiXNotice("Configuración Importada", "Configuración Global importada con éxito!", true)
             return true, "Global"
         end
     end
@@ -8668,18 +8668,18 @@ local function importConfigString(str)
     end
 
     if ranAny then
-        showSpookyNotice("Configuración Importada", "Configuración importada con éxito!", true)
+        showNhoiiiXNotice("Configuración Importada", "Configuración importada con éxito!", true)
         return true, "Generic"
     else
-        showSpookyNotice("Import Config", "Formato de configuración no reconocido!", false)
+        showNhoiiiXNotice("Import Config", "Formato de configuración no reconocido!", false)
         return false, "Unrecognized format"
     end
 end
 
 Agent2_MacroConfigs.importConfigString = importConfigString
-_G.SpookyImportConfig = importConfigString
-_G.SpookyApplyMacroConfig = applyMacroConfigData
-_G.SpookyApplyGlobalConfig = applyGlobalConfigData
+_G.NhoiiiXImportConfig = importConfigString
+_G.NhoiiiXApplyMacroConfig = applyMacroConfigData
+_G.NhoiiiXApplyGlobalConfig = applyGlobalConfigData
 _G.applyMacroStepsData = applyMacroConfigData
 _G.applyFullConfigSnapshot = applyGlobalConfigData
 
@@ -8702,7 +8702,7 @@ _G.CreateShareConfigsCard = function(parentPage, cardY)
     end)
 
     local configInput = Instance.new("TextBox", cShare)
-    configInput.Name = "SpookyConfigShareInput"
+    configInput.Name = "NhoiiiXConfigShareInput"
     configInput.Size = UDim2.new(1, -12, 0, 30)
     configInput.Position = UDim2.new(0, 6, 0, 58)
     configInput.BackgroundColor3 = Color3.fromRGB(16, 16, 24)
@@ -8722,16 +8722,16 @@ _G.CreateShareConfigsCard = function(parentPage, cardY)
         local clip = universalPaste()
         if clip and #clip > 0 then
             configInput.Text = clip
-            showSpookyNotice("Portapapeles", "Texto pegado desde portapapeles!", true)
+            showNhoiiiXNotice("Portapapeles", "Texto pegado desde portapapeles!", true)
         else
-            showSpookyNotice("Portapapeles", "Portapapeles vacío o no accesible", false)
+            showNhoiiiXNotice("Portapapeles", "Portapapeles vacío o no accesible", false)
         end
     end)
 
     local btnImport = createActionButton(cShare, "IMPORT CONFIG", "IMPORTAR CONFIG", UDim2.new(0.50, -4, 0, 28), UDim2.new(0.25, 4, 0, 96), function()
         local code = configInput.Text
         if not code or #code < 4 then
-            showSpookyNotice("Import Config", "Pega un código de config primero!", false)
+            showNhoiiiXNotice("Import Config", "Pega un código de config primero!", false)
             return
         end
         importConfigString(code)
@@ -8744,7 +8744,7 @@ _G.CreateShareConfigsCard = function(parentPage, cardY)
 
     createActionButton(cShare, "Clear", "Limpiar", UDim2.new(0.23, -4, 0, 28), UDim2.new(0.76, 2, 0, 96), function()
         configInput.Text = ""
-        showSpookyNotice("TextBox", "Caja de texto limpiada", true)
+        showNhoiiiXNotice("TextBox", "Caja de texto limpiada", true)
     end)
 
     return cShare
@@ -8759,46 +8759,46 @@ end
     createToggleButton(cTopAuto, "AutoLoadGlobal", "AutoLoad Global", "AutoCargar Global", autoBtnW, UDim2.new(0, 6, 0, 28))
     FeatureCallbacks["AutoLoadGlobal"] = function(v)
         if v then
-            pcall(function() if writefile then writefile("Spooky_AutoLoad_FullConfig.txt", "true") end end)
-            _G.Spooky_AutoLoadEnabled = true
+            pcall(function() if writefile then writefile("NhoiiiX_AutoLoad_FullConfig.txt", "true") end end)
+            _G.NhoiiiX_AutoLoadEnabled = true
         else
-            pcall(function() if delfile then delfile("Spooky_AutoLoad_FullConfig.txt") end end)
-            _G.Spooky_AutoLoadEnabled = false
+            pcall(function() if delfile then delfile("NhoiiiX_AutoLoad_FullConfig.txt") end end)
+            _G.NhoiiiX_AutoLoadEnabled = false
         end
         notifyToggle("AutoLoad Global: " .. (v and "ON" or "OFF"), v)
     end
-    if isfile and isfile("Spooky_AutoLoad_FullConfig.txt") then
+    if isfile and isfile("NhoiiiX_AutoLoad_FullConfig.txt") then
         setFeatureState("AutoLoadGlobal", true, true)
     end
 
     createToggleButton(cTopAuto, "AutoLoadMacro", "AutoLoad Macro", "AutoCargar Macro", autoBtnW, UDim2.new(0.33, 4, 0, 28))
     FeatureCallbacks["AutoLoadMacro"] = function(v)
         if v then
-            pcall(function() if writefile then writefile("Spooky_AutoLoad_Macro.txt", "true") end end)
+            pcall(function() if writefile then writefile("NhoiiiX_AutoLoad_Macro.txt", "true") end end)
         else
-            pcall(function() if delfile then delfile("Spooky_AutoLoad_Macro.txt") end end)
+            pcall(function() if delfile then delfile("NhoiiiX_AutoLoad_Macro.txt") end end)
         end
         notifyToggle("AutoLoad Macro: " .. (v and "ON" or "OFF"), v)
     end
-    if isfile and isfile("Spooky_AutoLoad_Macro.txt") then
+    if isfile and isfile("NhoiiiX_AutoLoad_Macro.txt") then
         setFeatureState("AutoLoadMacro", true, true)
     end
 
     createToggleButton(cTopAuto, "AutoLoadUI", "AutoLoad UI", "AutoCargar UI", autoBtnW, UDim2.new(0.66, 4, 0, 28))
     FeatureCallbacks["AutoLoadUI"] = function(v)
         if v then
-            pcall(function() if writefile then writefile("Spooky_AutoLoad_UI.txt", "true") end end)
+            pcall(function() if writefile then writefile("NhoiiiX_AutoLoad_UI.txt", "true") end end)
         else
-            pcall(function() if delfile then delfile("Spooky_AutoLoad_UI.txt") end end)
+            pcall(function() if delfile then delfile("NhoiiiX_AutoLoad_UI.txt") end end)
         end
         notifyToggle("AutoLoad UI: " .. (v and "ON" or "OFF"), v)
     end
-    if isfile and isfile("Spooky_AutoLoad_UI.txt") then
+    if isfile and isfile("NhoiiiX_AutoLoad_UI.txt") then
         setFeatureState("AutoLoadUI", true, true)
     end
 
     local importModal = Instance.new("Frame", MAINUIframe or PagesFolder)
-    importModal.Name = "Spooky_ImportModal"
+    importModal.Name = "NhoiiiX_ImportModal"
     importModal.Size = UDim2.new(0, 360, 0, 195)
     importModal.Position = UDim2.new(0.5, -180, 0.5, -97)
     importModal.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
@@ -8839,7 +8839,7 @@ end
 
     local function getCompactUIConfigString()
         local animName, animDur = "Pop", 0.28
-        if _G.SpookyGetUIAnimation then animName, animDur = _G.SpookyGetUIAnimation() end
+        if _G.NhoiiiXGetUIAnimation then animName, animDur = _G.NhoiiiXGetUIAnimation() end
         local pack = {
             t = CurrentTheme or "White",
             s = currentBaseScale or 0.85,
@@ -8864,18 +8864,18 @@ end
                 currentBaseScale = data.s
                 userCustomScale = data.s
             end
-            if data.a and _G.SpookySetUIAnimation then
-                _G.SpookySetUIAnimation(data.a, data.ad or 0.28)
+            if data.a and _G.NhoiiiXSetUIAnimation then
+                _G.NhoiiiXSetUIAnimation(data.a, data.ad or 0.28)
             end
-            if data.f and _G.SpookyApplyFontToAll then
+            if data.f and _G.NhoiiiXApplyFontToAll then
                 local fEnum = Enum.Font[data.f] or Enum.Font.GothamBold
-                _G.SpookyApplyFontToAll(fEnum, data.f)
+                _G.NhoiiiXApplyFontToAll(fEnum, data.f)
             end
-            if data.bt and _G.SpookyApplyBorderThickness then
-                _G.SpookyApplyBorderThickness(data.bt)
+            if data.bt and _G.NhoiiiXApplyBorderThickness then
+                _G.NhoiiiXApplyBorderThickness(data.bt)
             end
-            if data.cr and _G.SpookyApplyCornerRadius then
-                _G.SpookyApplyCornerRadius(data.cr)
+            if data.cr and _G.NhoiiiXApplyCornerRadius then
+                _G.NhoiiiXApplyCornerRadius(data.cr)
             end
             if data.w ~= nil and applyWallpaper then
                 applyWallpaper(data.w, data.wo or 0.85)
@@ -8904,17 +8904,17 @@ end
         end
         local floatPos = nil
         pcall(function()
-            if _G.SpookyGetFloatingPositions then floatPos = _G.SpookyGetFloatingPositions() end
+            if _G.NhoiiiXGetFloatingPositions then floatPos = _G.NhoiiiXGetFloatingPositions() end
         end)
-        local isLocked = (_G.SpookyLockFloatingButtons == true) or (FeatureStates and FeatureStates["LockFloatingButtons"] == true)
+        local isLocked = (_G.NhoiiiXLockFloatingButtons == true) or (FeatureStates and FeatureStates["LockFloatingButtons"] == true)
         local pack = {
             F = activeFeats,
-            PlayerBlacklist = Spooky.ExportPlayerBlacklist(),
+            PlayerBlacklist = NhoiiiX.ExportPlayerBlacklist(),
             Toggles = allToggles,
             Locked = isLocked,
             FloatPos = floatPos,
-            CustomControls = _G.SpookyGetCustomControls and _G.SpookyGetCustomControls() or {},
-            CustomFunctions = _G.SpookyGetCustomFunctions and _G.SpookyGetCustomFunctions() or {},
+            CustomControls = _G.NhoiiiXGetCustomControls and _G.NhoiiiXGetCustomControls() or {},
+            CustomFunctions = _G.NhoiiiXGetCustomFunctions and _G.NhoiiiXGetCustomFunctions() or {},
             language = CurrentLang,
             S = {
                 aimMode = Settings.aimMode,
@@ -8956,7 +8956,7 @@ end
         end
         local ok, data = pcall(function() return HttpService:JSONDecode(str) end)
         if ok and data and (data.F or data.Toggles) then
-            if data.PlayerBlacklist then Spooky.RestorePlayerBlacklist(data.PlayerBlacklist) end
+            if data.PlayerBlacklist then NhoiiiX.RestorePlayerBlacklist(data.PlayerBlacklist) end
             if data.S then
                 for _, key in ipairs({"aimMode","aimFovRadius","aimFovOrigin","aimTargetPolicy","aimTargetUserId"}) do
                     if data.S[key] ~= nil then Settings[key] = data.S[key] end
@@ -8988,16 +8988,16 @@ end
             end
             if data.Locked ~= nil then
                 setFeatureState("LockFloatingButtons", data.Locked)
-                _G.SpookyLockFloatingButtons = data.Locked
+                _G.NhoiiiXLockFloatingButtons = data.Locked
             end
     if data.language and applyLanguage then applyLanguage(data.language,true) end
     if type(data.CustomControls) == "table" then
-        if _G.SpookySetCustomControls then _G.SpookySetCustomControls(data.CustomControls)
-        else Spooky.PendingCustomControls = data.CustomControls end
+        if _G.NhoiiiXSetCustomControls then _G.NhoiiiXSetCustomControls(data.CustomControls)
+        else NhoiiiX.PendingCustomControls = data.CustomControls end
     end
             if type(data.FloatPos) == "table" then
-                if _G.SpookySetFloatingPositions then _G.SpookySetFloatingPositions(data.FloatPos)
-                else Spooky.PendingFloatingPositions = data.FloatPos end
+                if _G.NhoiiiXSetFloatingPositions then _G.NhoiiiXSetFloatingPositions(data.FloatPos)
+                else NhoiiiX.PendingFloatingPositions = data.FloatPos end
             end
             if data.KB and type(data.KB) == "table" and _G.ALL_KEYBIND_DEFS then
                 local targetKBs = _G.PCKeybinds or PCKeybinds
@@ -9005,7 +9005,7 @@ end
                     table.clear(targetKBs)
                     for _, s in ipairs(data.KB) do
                         for _, def in ipairs(_G.ALL_KEYBIND_DEFS) do
-                            if Spooky.ResolveFeature(def.id) == Spooky.ResolveFeature(s.id) then
+                            if NhoiiiX.ResolveFeature(def.id) == NhoiiiX.ResolveFeature(s.id) then
                                 table.insert(targetKBs, {
                                     id = def.id,
                                     name = def.name,
@@ -9062,7 +9062,7 @@ end
             else
                 local ok, data = pcall(function() return HttpService:JSONDecode(text) end)
                 if ok and data then
-                    if data.steps and _G.SpookyApplyMacroConfig then _G.SpookyApplyMacroConfig(data) end
+                    if data.steps and _G.NhoiiiXApplyMacroConfig then _G.NhoiiiXApplyMacroConfig(data) end
                     if data.scale and UIScale then UIScale.Scale = data.scale; currentBaseScale = data.scale end
                     notifyToggle("Config Applied!", true)
                     importModal.Visible = false
@@ -9090,16 +9090,16 @@ end
     local masterCard = makeCard(ConfigsPage, "Profiles", "Perfiles", 144, 82)
     masterCard.ZIndex = 4
 
-    _G.Spooky_LoadFullConfig = function()
+    _G.NhoiiiX_LoadFullConfig = function()
         pcall(function()
             local json = nil
-            if isfile and isfile("Spooky_GlobalFullConfig.json") and readfile then
-                json = readfile("Spooky_GlobalFullConfig.json")
+            if isfile and isfile("NhoiiiX_GlobalFullConfig.json") and readfile then
+                json = readfile("NhoiiiX_GlobalFullConfig.json")
             end
             if json and json ~= "" then
                 if applyCompactConfigString(json) then return end
                 local ok, data = pcall(function() return HttpService:JSONDecode(json) end)
-                if ok and data and _G.SpookyApplyGlobalConfig then _G.SpookyApplyGlobalConfig(data) end
+                if ok and data and _G.NhoiiiXApplyGlobalConfig then _G.NhoiiiXApplyGlobalConfig(data) end
             end
         end)
     end
@@ -9107,15 +9107,15 @@ end
     createActionButton(masterCard, "Save Global Config", "Guardar Global", UDim2.new(0.48, -4, 0, 26), UDim2.new(0, 8, 0, 28), function()
         local ok, res = pcall(function()
             local str = getCompactConfigString()
-            if writefile then writefile("Spooky_GlobalFullConfig.json", str) end
+            if writefile then writefile("NhoiiiX_GlobalFullConfig.json", str) end
             notifyToggle("Global Config Saved Successfully!", true)
         end)
         if not ok then notifyToggle("Save Error: " .. tostring(res), false) end
     end)
 
     createActionButton(masterCard, "Load Global Config", "Cargar Global", UDim2.new(0.48, -4, 0, 26), UDim2.new(0.5, 4, 0, 28), function()
-        if _G.Spooky_LoadFullConfig then
-            _G.Spooky_LoadFullConfig()
+        if _G.NhoiiiX_LoadFullConfig then
+            _G.NhoiiiX_LoadFullConfig()
             notifyToggle("Global Config Loaded!", true)
         end
     end)
@@ -9159,11 +9159,11 @@ end
     end)
 
     local macroCard = makeCard(ConfigsPage, "Macro Profile", "Perfil Macro", 108, 232)
-    _G.Spooky_LoadMacroConfig = function()
+    _G.NhoiiiX_LoadMacroConfig = function()
         pcall(function()
             local json = nil
-            if isfile and isfile("Spooky_MacroSteps.json") and readfile then
-                json = readfile("Spooky_MacroSteps.json")
+            if isfile and isfile("NhoiiiX_MacroSteps.json") and readfile then
+                json = readfile("NhoiiiX_MacroSteps.json")
             end
             if json and json ~= "" then
                 local ok, data = pcall(function() return HttpService:JSONDecode(json) end)
@@ -9189,14 +9189,14 @@ end
                 triggerKey = Settings.macroTriggerKey or "C"
             }
             local json = HttpService:JSONEncode(data)
-            if writefile then writefile("Spooky_MacroSteps.json", json) end
+            if writefile then writefile("NhoiiiX_MacroSteps.json", json) end
             notifyToggle("Macro Profile Saved Successfully!", true)
         end)
     end)
 
     createActionButton(macroCard, "Load Macro", "Cargar Macro", UDim2.new(0.48, -4, 0, 26), UDim2.new(0.5, 4, 0, 28), function()
-        if _G.Spooky_LoadMacroConfig then
-            _G.Spooky_LoadMacroConfig()
+        if _G.NhoiiiX_LoadMacroConfig then
+            _G.NhoiiiX_LoadMacroConfig()
             notifyToggle("Macro Profile Loaded!", true)
         end
     end)
@@ -9214,11 +9214,11 @@ end
     end)
 
     local uiCard = makeCard(ConfigsPage, "UI Profile", "Perfil UI", 120, 346)
-    _G.Spooky_LoadUIConfig = function()
+    _G.NhoiiiX_LoadUIConfig = function()
         pcall(function()
 
-            if isfile and isfile("ProjectSpooky_UIConfig.json") and readfile then
-                local raw = readfile("ProjectSpooky_UIConfig.json")
+            if isfile and isfile("ProjectNhoiiiX_UIConfig.json") and readfile then
+                local raw = readfile("ProjectNhoiiiX_UIConfig.json")
                 if raw and #raw > 10 then
                     local ok, data = pcall(function() return HttpService:JSONDecode(raw) end)
                     if ok and data then
@@ -9228,8 +9228,8 @@ end
                 end
             end
 
-            if isfile and isfile("spooky_ui_config.txt") and readfile then
-                local raw = readfile("spooky_ui_config.txt")
+            if isfile and isfile("NhoiiiX_ui_config.txt") and readfile then
+                local raw = readfile("NhoiiiX_ui_config.txt")
                 if raw and #raw > 2 then
                     local parts = string.split(raw, "|")
                     local savedTheme = parts[1]
@@ -9253,8 +9253,8 @@ end
     end)
 
     createActionButton(uiCard, "LOAD CONFIG UI", "CARGAR CONFIG UI", UDim2.new(0.48, -4, 0, 26), UDim2.new(0.5, 4, 0, 26), function()
-        if _G.Spooky_LoadUIConfig then
-            _G.Spooky_LoadUIConfig()
+        if _G.NhoiiiX_LoadUIConfig then
+            _G.NhoiiiX_LoadUIConfig()
             notifyToggle("UI Profile Loaded: " .. tostring(CurrentTheme), true)
         end
     end)
@@ -9278,8 +9278,8 @@ end
     end)
 
     createActionButton(uiCard, "RESET UI SETTINGS (DEFAULT)", "RESTABLECER UI POR DEFECTO", UDim2.new(1, -16, 0, 26), UDim2.new(0, 8, 0, 86), function()
-        if _G.SpookyResetUISettingsToDefault then
-            _G.SpookyResetUISettingsToDefault()
+        if _G.NhoiiiXResetUISettingsToDefault then
+            _G.NhoiiiXResetUISettingsToDefault()
         end
     end)
 
@@ -9409,7 +9409,7 @@ do
         if not pGui then return end
 
         oneShotWidgetGui = Instance.new("ScreenGui")
-        oneShotWidgetGui.Name = "Spooky_OneShotKitsune_Widget"
+        oneShotWidgetGui.Name = "NhoiiiX_OneShotKitsune_Widget"
         oneShotWidgetGui.ResetOnSpawn = false
         safeParent(oneShotWidgetGui)
 
@@ -9524,7 +9524,7 @@ do
         if not AntiStunActive or not CurrentRoot then return end
         pcall(function()
             for _, m in ipairs(CurrentRoot:GetChildren()) do
-                if (m:IsA("BodyVelocity") or m:IsA("BodyPosition") or m:IsA("BodyGyro")) and m.Name ~= "RootVelocity" and m.Name ~= "Keep" and not m.Name:match("^Spooky_") then
+                if (m:IsA("BodyVelocity") or m:IsA("BodyPosition") or m:IsA("BodyGyro")) and m.Name ~= "RootVelocity" and m.Name ~= "Keep" and not m.Name:match("^NhoiiiX_") then
                     pcall(function() m:Destroy() end)
                 end
             end
@@ -9611,7 +9611,7 @@ do
         end
     end
 
-    function _G.SpookySetAntiStun(enabled)
+    function _G.NhoiiiXSetAntiStun(enabled)
         AntiStunActive = (enabled == true)
         if AntiStunActive then
             bindAntiStun(LocalPlayer.Character)
@@ -9675,7 +9675,7 @@ end
     end
     FeatureCallbacks["AntiStun"] = function(v)
         Settings.antiStun = v
-        if _G.SpookySetAntiStun then _G.SpookySetAntiStun(v) end
+        if _G.NhoiiiXSetAntiStun then _G.NhoiiiXSetAntiStun(v) end
         notifyToggle("Anti Stun: " .. (v and "ENABLED" or "DISABLED"), v)
     end
     FeatureCallbacks["AutoBuso"] = function(v)
@@ -9726,7 +9726,7 @@ do
         end)
     end)
 
-    function _G.SpookySetHitboxExpander(v)
+    function _G.NhoiiiXSetHitboxExpander(v)
         HitboxExpanderActive = (v == true)
     end
 end
@@ -9746,10 +9746,10 @@ end
             Pink = Color3.fromRGB(255, 105, 180),
             White = Color3.fromRGB(255, 255, 255)
         }
-        if _G.SpookyHitbox then
-            _G.SpookyHitbox.Color = colMap[cName] or Color3.fromRGB(255, 30, 30)
-            if _G.SpookyHitbox.UpdateVisuals then
-                _G.SpookyHitbox.UpdateVisuals()
+        if _G.NhoiiiXHitbox then
+            _G.NhoiiiXHitbox.Color = colMap[cName] or Color3.fromRGB(255, 30, 30)
+            if _G.NhoiiiXHitbox.UpdateVisuals then
+                _G.NhoiiiXHitbox.UpdateVisuals()
             end
         end
         notifyToggle("Hitbox Color set to " .. cName, true)
@@ -9874,12 +9874,12 @@ end
                 local hum = p.Character:FindFirstChildOfClass("Humanoid")
                 local hrp = p.Character:FindFirstChild("HumanoidRootPart")
                 local head = p.Character:FindFirstChild("Head") or hrp
-                if hum and hum.Health > 0 and hrp and head and _G.SpookyCombatTargetValid and _G.SpookyCombatTargetValid(p,120) then
+                if hum and hum.Health > 0 and hrp and head and _G.NhoiiiXCombatTargetValid and _G.NhoiiiXCombatTargetValid(p,120) then
                     table.insert(hitList, { p.Character, head })
                 end
             end
         end
-        if #hitList > 0 and Spooky.TakeAttackBudget("M1", Settings.fastAttackDelay) then
+        if #hitList > 0 and NhoiiiX.TakeAttackBudget("M1", Settings.fastAttackDelay) then
             local trimmedList = {}
             for i = 1, math.min(#hitList, 3) do
                 table.insert(trimmedList, hitList[i])
@@ -9986,9 +9986,9 @@ end
             if not head then return end
 
             local owner = Players:GetPlayerFromCharacter(target)
-            if owner and (not _G.SpookyCombatTargetValid or not _G.SpookyCombatTargetValid(owner,100)) then return end
+            if owner and (not _G.NhoiiiXCombatTargetValid or not _G.NhoiiiXCombatTargetValid(owner,100)) then return end
             if tool.ToolTip == "Gun" or myChar:GetAttribute("UsingSkill") or myChar:GetAttribute("isUsingSkill") or myChar:GetAttribute("Busy") then return end
-            if not Spooky.TakeAttackBudget("M1",0.15) then return end
+            if not NhoiiiX.TakeAttackBudget("M1",0.15) then return end
             local myHRP = myChar:FindFirstChild("HumanoidRootPart")
             if myHRP and tool:FindFirstChild("LeftClickRemote") then
                 local dir = (head.Position - myHRP.Position).Unit
@@ -10167,7 +10167,7 @@ end
                             local hrp = model:FindFirstChild("HumanoidRootPart")
                             local hum = model:FindFirstChildOfClass("Humanoid")
                             local player = Players:GetPlayerFromCharacter(model)
-                            local excluded = player and (not _G.SpookyCombatTargetValid or not _G.SpookyCombatTargetValid(player,500))
+                            local excluded = player and (not _G.NhoiiiXCombatTargetValid or not _G.NhoiiiXCombatTargetValid(player,500))
                             if model ~= char and not excluded and hrp and hum and hum.Health > 0 and (hrp.Position-root.Position).Magnitude < 500 then
                                 remote:FireServer(Vector3.new(9e30, 9e30, 9e30), 5, false)
                                 return
@@ -10413,7 +10413,7 @@ do
         local pGui = LocalPlayer:FindFirstChild("PlayerGui")
         if not pGui then return end
         floatingMacroGui = Instance.new("ScreenGui", pGui)
-        floatingMacroGui.Name = "Spooky_Macro_FloatingBtn"
+        floatingMacroGui.Name = "NhoiiiX_Macro_FloatingBtn"
         floatingMacroGui.ResetOnSpawn = false
         local fBtn = Instance.new("TextButton", floatingMacroGui)
         fBtn.Size = UDim2.new(0, 56, 0, 56)
@@ -10524,7 +10524,7 @@ do
         table.clear(ControlConnections)
     end
 
-    function _G.SpookySetHideControlEffects(enabled)
+    function _G.NhoiiiXSetHideControlEffects(enabled)
         HideControlActive = (enabled == true)
         stopControlWatchers()
         if HideControlActive then
@@ -10605,7 +10605,7 @@ do
         end
     end
 
-    function _G.SpookySetHideV4Effects(enabled)
+    function _G.NhoiiiXSetHideV4Effects(enabled)
         HideV4Active = (enabled == true)
         if HideV4Active then
             pcall(function()
@@ -10647,7 +10647,7 @@ end
 
     FeatureCallbacks["HideV4Effects"] = function(v)
         Settings.hideV4Effects = v
-        if _G.SpookySetHideV4Effects then _G.SpookySetHideV4Effects(v) end
+        if _G.NhoiiiXSetHideV4Effects then _G.NhoiiiXSetHideV4Effects(v) end
         notifyToggle("Hide V4 FX: " .. (v and "ENABLED" or "DISABLED"), v)
     end
 
@@ -10676,14 +10676,14 @@ end
         if v then
             pcall(function()
                 for _, s in ipairs(lighting:GetChildren()) do
-                    if s:IsA("Sky") and s.Name ~= "SpookyGraySky" then
+                    if s:IsA("Sky") and s.Name ~= "NhoiiiXGraySky" then
                         s.Parent = nil
                     end
                 end
-                graySkyObj = lighting:FindFirstChild("SpookyGraySky")
+                graySkyObj = lighting:FindFirstChild("NhoiiiXGraySky")
                 if not graySkyObj then
                     graySkyObj = Instance.new("Sky")
-                    graySkyObj.Name = "SpookyGraySky"
+                    graySkyObj.Name = "NhoiiiXGraySky"
                     local grayTex = "rbxassetid://11457548274"
                     graySkyObj.SkyboxBk = grayTex
                     graySkyObj.SkyboxDn = grayTex
@@ -10703,7 +10703,7 @@ end
                     graySkyObj:Destroy()
                     graySkyObj = nil
                 end
-                local existing = lighting:FindFirstChild("SpookyGraySky")
+                local existing = lighting:FindFirstChild("NhoiiiXGraySky")
                 if existing then existing:Destroy() end
             end)
             notifyToggle((CurrentLang == "ES") and "Cielo Gris: DESACTIVADO" or "Gray Sky: DISABLED", false)
@@ -10721,7 +10721,7 @@ end
     flagNameBox.Font = Enum.Font.Gotham
     flagNameBox.TextSize = 11
     flagNameBox.TextColor3 = Color3.fromRGB(240, 240, 250)
-    styleSpookyTextBox(flagNameBox)
+    styleNhoiiiXTextBox(flagNameBox)
     Instance.new("UICorner", flagNameBox).CornerRadius = UDim.new(0, 6)
     local fStk1 = Instance.new("UIStroke", flagNameBox)
     fStk1.Color = Color3.fromRGB(48, 48, 60)
@@ -10735,7 +10735,7 @@ end
     flagValBox.Font = Enum.Font.Gotham
     flagValBox.TextSize = 11
     flagValBox.TextColor3 = Color3.fromRGB(240, 240, 250)
-    styleSpookyTextBox(flagValBox)
+    styleNhoiiiXTextBox(flagValBox)
     Instance.new("UICorner", flagValBox).CornerRadius = UDim.new(0, 6)
     local fStk2 = Instance.new("UIStroke", flagValBox)
     fStk2.Color = Color3.fromRGB(48, 48, 60)
@@ -10771,14 +10771,14 @@ end
         end
     end)
 
-    createActionButton(ff2, "Spooky Full Flags", "Spooky Full Flags", UDim2.new(0.50, -8, 0, 28), UDim2.new(0, 8, 0, 62), function()
-        fflagStatusLbl.Text = "[INJECTING] Applying Spooky Full Flags..."
+    createActionButton(ff2, "NhoiiiX Full Flags", "NhoiiiX Full Flags", UDim2.new(0.50, -8, 0, 28), UDim2.new(0, 8, 0, 62), function()
+        fflagStatusLbl.Text = "[INJECTING] Applying NhoiiiX Full Flags..."
         fflagStatusLbl.TextColor3 = Color3.fromRGB(255, 220, 120)
         task.spawn(function()
             local appliedCount, failedCount = 0, 0
-            local flagsToApply = _G.SpookyFullFlags or _G.SpookyFFlags
-            if _G.SpookyApplyFastFlagsList and flagsToApply then
-                appliedCount, failedCount = _G.SpookyApplyFastFlagsList(flagsToApply, function(current, total)
+            local flagsToApply = _G.NhoiiiXFullFlags or _G.NhoiiiXFFlags
+            if _G.NhoiiiXApplyFastFlagsList and flagsToApply then
+                appliedCount, failedCount = _G.NhoiiiXApplyFastFlagsList(flagsToApply, function(current, total)
                     fflagStatusLbl.Text = string.format("[PROGRESS] Injected %d/%d flags...", current, total)
                 end)
             end
@@ -10803,7 +10803,7 @@ end
         if combatHUDConn then combatHUDConn:Disconnect(); combatHUDConn = nil end
 
         CombatHUDWidgetGui = Instance.new("ScreenGui")
-        CombatHUDWidgetGui.Name = "SpookyCombatHUDWidget"
+        CombatHUDWidgetGui.Name = "NhoiiiXCombatHUDWidget"
         CombatHUDWidgetGui.ResetOnSpawn = false
         CombatHUDWidgetGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         CombatHUDWidgetGui.DisplayOrder = 9999
@@ -10821,7 +10821,7 @@ end
 
         local hudStroke = Instance.new("UIStroke", hudMain)
         hudStroke.Thickness = 1.3
-        local accent = (_G.CurrentAccentColor or (_G.SpookyThemeAccents and CurrentTheme and _G.SpookyThemeAccents[CurrentTheme] and _G.SpookyThemeAccents[CurrentTheme].accent)) or Color3.fromRGB(65, 145, 255)
+        local accent = (_G.CurrentAccentColor or (_G.NhoiiiXThemeAccents and CurrentTheme and _G.NhoiiiXThemeAccents[CurrentTheme] and _G.NhoiiiXThemeAccents[CurrentTheme].accent)) or Color3.fromRGB(65, 145, 255)
         hudStroke.Color = accent
 
         local hudGrad = Instance.new("UIGradient", hudMain)
@@ -10835,10 +10835,10 @@ end
         spkIcon.Size = UDim2.new(0, 15, 0, 15)
         spkIcon.Position = UDim2.new(0, 6, 0, 5)
         spkIcon.BackgroundTransparency = 1
-        spkIcon.Image = (CurrentTheme == "Red Spooky") and "rbxassetid://88089153116193" or "rbxassetid://124747708335361"
+        spkIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or "rbxassetid://124747708335361"
         spkIcon.ImageColor3 = accent
-        if _G.SpookyThemedElements and _G.SpookyThemedElements.AllHeaderEmblems then
-            table.insert(_G.SpookyThemedElements.AllHeaderEmblems, spkIcon)
+        if _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.AllHeaderEmblems then
+            table.insert(_G.NhoiiiXThemedElements.AllHeaderEmblems, spkIcon)
         end
 
         local titleLbl = Instance.new("TextLabel", hudMain)
@@ -10846,7 +10846,7 @@ end
         titleLbl.Position = UDim2.new(0, 24, 0, 5)
         titleLbl.BackgroundTransparency = 1
         titleLbl.Font = Enum.Font.GothamBold
-        titleLbl.Text = "SPOOKY"
+        titleLbl.Text = "NhoiiiX"
         titleLbl.TextColor3 = Color3.fromRGB(240, 240, 255)
         titleLbl.TextSize = 10
         titleLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -11048,7 +11048,7 @@ do
 
     createToggleButton(cMacroMaster, "MacroMasterToggle", "Enable Macro", "Activar Macro", macroBtnWidth, UDim2.new(0, mX1, 0, 26))
     FeatureCallbacks["MacroMasterToggle"] = function(enabled)
-        if not enabled and _G.SpookyStopMacro then _G.SpookyStopMacro() end
+        if not enabled and _G.NhoiiiXStopMacro then _G.NhoiiiXStopMacro() end
     end
 
     local keyChoices = { "T", "G", "B", "V", "C", "X", "Q", "E", "R", "Z" }
@@ -11059,7 +11059,7 @@ do
 
     createCycleButton(cMacroMaster, "Trigger Key", "Tecla", keyChoices, curKeyIdx, macroBtnWidth, UDim2.new(0, mX2, 0, 26), function(choice)
         Settings.macroTriggerKey = choice
-        if _G.MacroStatusLabel and not (Spooky.IsMacroRunning and Spooky.IsMacroRunning()) then
+        if _G.MacroStatusLabel and not (NhoiiiX.IsMacroRunning and NhoiiiX.IsMacroRunning()) then
             _G.MacroStatusLabel.Text = "STATUS: READY [Key: " .. choice .. "]"
         end
         if _G.MacroFloatingStatus then
@@ -11255,7 +11255,7 @@ do
         sBtn.MouseButton1Click:Connect(function() selectSlot(sIdx) end)
         slotBtns[sIdx] = sBtn
     end
-    _G.SpookySelectMacroSlot = selectSlot
+    _G.NhoiiiXSelectMacroSlot = selectSlot
     selectSlot(Settings.macroActiveSlot)
 
     local cMacroSteps = makeCard(MacroPage, "Combo Steps Pipeline (10 Blocks)", "Secuencia de Pasos (10 Bloques)", 516, 210)
@@ -11572,7 +11572,7 @@ do
     for i, field in ipairs({"soruAfter", "m1After", "v3After"}) do
         createActionButton(advanced, "After block +1", "Tras bloque +1", size, UDim2.fromOffset(6 + (i-1)*128, 64), function()
             local current = slot()
-            current[field] = (math.floor(Spooky.Runtime.number(current[field], 0, 0, 10)) + 1) % 11
+            current[field] = (math.floor(NhoiiiX.Runtime.number(current[field], 0, 0, 10)) + 1) % 11
             notifyToggle(field .. " = " .. current[field] .. " (0 = before combo)", true)
         end)
     end
@@ -11607,7 +11607,7 @@ do
         notifyToggle("Macro loop: " .. tostring(Settings.macroLoop), Settings.macroLoop)
     end)
     createActionButton(advanced, "STOP / Release Inputs", "PARAR / Soltar Teclas", UDim2.new(1,-12,0,30), UDim2.fromOffset(6,222), function()
-        if _G.SpookyStopMacro then _G.SpookyStopMacro() end
+        if _G.NhoiiiXStopMacro then _G.NhoiiiXStopMacro() end
     end)
 
     local floatingMacroGui = nil
@@ -11621,12 +11621,12 @@ do
         end
         if floatingMacroGui then return end
         floatingMacroGui = Instance.new("ScreenGui")
-        floatingMacroGui.Name = "Spooky_Macro_FloatingBtn"
+        floatingMacroGui.Name = "NhoiiiX_Macro_FloatingBtn"
         floatingMacroGui.ResetOnSpawn = false
         safeParent(floatingMacroGui)
 
         local fBtn = Instance.new("TextButton", floatingMacroGui)
-        fBtn.Name = "SpookyFloatingMacroBtn"
+        fBtn.Name = "NhoiiiXFloatingMacroBtn"
         fBtn.Size = UDim2.new(0, 114, 0, 44)
         fBtn.Position = UDim2.new(0.85, -57, 0.65, -22)
         fBtn.BackgroundColor3 = Color3.fromRGB(16, 13, 26)
@@ -11696,10 +11696,10 @@ do
         updateFloatingMacroBtn(state)
     end
 
-    Spooky.TryMacroInput = function(input)
-        if not isCurrentSession() or Spooky.LastMacroInput == input then return end
+    NhoiiiX.TryMacroInput = function(input)
+        if not isCurrentSession() or NhoiiiX.LastMacroInput == input then return end
         if not FeatureStates["MacroMasterToggle"] then return end
-        Spooky.LastMacroInput = input
+        NhoiiiX.LastMacroInput = input
         if executeMacroCombo then executeMacroCombo() end
     end
 
@@ -11711,7 +11711,7 @@ do
         local tKeyCode = Enum.KeyCode[tKeyName] or Enum.KeyCode.T
         if FeatureStates["MacroMasterToggle"] and input.KeyCode == tKeyCode then
 
-            if Spooky.IsMacroRunning and Spooky.IsMacroRunning() then
+            if NhoiiiX.IsMacroRunning and NhoiiiX.IsMacroRunning() then
                 if isSimulatingKeys or (_G.IsSyntheticKey and (_G.IsSyntheticKey(input.KeyCode) or _G.IsSyntheticKey(tKeyName))) then
                     return
                 end
@@ -11719,7 +11719,7 @@ do
                     return
                 end
             end
-            Spooky.TryMacroInput(input)
+            NhoiiiX.TryMacroInput(input)
         end
     end)
 end
@@ -11747,7 +11747,7 @@ do
             end
         end)
     end
-    _G.SpookyTriggerAwakeningV4 = triggerAwakeningV4
+    _G.NhoiiiXTriggerAwakeningV4 = triggerAwakeningV4
 
     local function triggerInstantSoru()
         pcall(function()
@@ -11807,7 +11807,7 @@ do
             end
         end)
     end
-    _G.SpookyTriggerInstantSoru = triggerInstantSoru
+    _G.NhoiiiXTriggerInstantSoru = triggerInstantSoru
 
     local cFloatingToggles = makeCard(KeybindsPage, "Floating Toggles (Draggable On-Screen)", "Toggles Flotantes (En Pantalla)", 218, 2)
 
@@ -11832,14 +11832,14 @@ do
     createToggleButton(cFloatingToggles, "Tracker",             "Tracker Button", "Boton Rastreador", BW_F, UDim2.new(0, X2_F, 0, 84))
 
     createActionButton(cFloatingToggles, "+ Add Control", "+ Añadir control", BW_F, UDim2.new(0, X3_F, 0, 84), function()
-        if _G.SpookyOpenControlPicker then _G.SpookyOpenControlPicker() end
+        if _G.NhoiiiXOpenControlPicker then _G.NhoiiiXOpenControlPicker() end
     end)
 
     createToggleButton(cFloatingToggles, "SuperJump",           "Super Jump",     "Súper Salto",    BW_F, UDim2.new(0, X1_F, 0, 122))
     createToggleButton(cFloatingToggles, "LockFloatingButtons", "Lock Buttons",   "Bloquear Botones", BW_F, UDim2.new(0, X2_F, 0, 122))
     createActionButton(cFloatingToggles, "RESET POS", "REINICIAR POS", BW_F, UDim2.new(0, X3_F, 0, 122), function()
-        if _G.SpookyResetFloatingPositions then
-            _G.SpookyResetFloatingPositions()
+        if _G.NhoiiiXResetFloatingPositions then
+            _G.NhoiiiXResetFloatingPositions()
             notifyToggle("Floating button positions reset", true)
         end
     end)
@@ -11895,7 +11895,7 @@ do
         { id = "Tracers2",          name = "Combat Tracers",           mode = "Toggle", defaultKey = "None" },
         { id = "WhiteScreen",       name = "White Screen (Boost FPS)", mode = "Toggle", defaultKey = "None" },
         { id = "NoAnimation",       name = "Disable Animations",       mode = "Toggle", defaultKey = "None" },
-        { id = "ServerHop",         name = "Server Hop",               mode = "Action", defaultKey = "None", run = function() if _G.SpookyServerHop then _G.SpookyServerHop() else notifyToggle("Server Hopping...", true) end end },
+        { id = "ServerHop",         name = "Server Hop",               mode = "Action", defaultKey = "None", run = function() if _G.NhoiiiXServerHop then _G.NhoiiiXServerHop() else notifyToggle("Server Hopping...", true) end end },
         { id = "RejoinServer",      name = "Rejoin Server",            mode = "Action", defaultKey = "None", run = function() pcall(function() game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end) end }
     }
     _G.ALL_KEYBIND_DEFS = ALL_KEYBIND_DEFS
@@ -11907,20 +11907,20 @@ do
                 for _, ent in ipairs(PCKeybinds) do
                     table.insert(saved, { id = ent.id, key = ent.key })
                 end
-                writefile("ProjectSpooky_PCKeybinds.json", HttpService:JSONEncode(saved))
+                writefile("ProjectNhoiiiX_PCKeybinds.json", HttpService:JSONEncode(saved))
             end
         end)
     end
     _G.savePCKeybinds = savePCKeybinds
 
     pcall(function()
-        if isfile and isfile("ProjectSpooky_PCKeybinds.json") and readfile and HttpService then
-            local raw = readfile("ProjectSpooky_PCKeybinds.json")
+        if isfile and isfile("ProjectNhoiiiX_PCKeybinds.json") and readfile and HttpService then
+            local raw = readfile("ProjectNhoiiiX_PCKeybinds.json")
             local list = HttpService:JSONDecode(raw)
             if type(list) == "table" and #list > 0 then
                 for _, s in ipairs(list) do
                     for _, def in ipairs(ALL_KEYBIND_DEFS) do
-                        if Spooky.ResolveFeature(def.id) == Spooky.ResolveFeature(s.id) then
+                        if NhoiiiX.ResolveFeature(def.id) == NhoiiiX.ResolveFeature(s.id) then
                             table.insert(PCKeybinds, {
                                 id = def.id,
                                 name = def.name,
@@ -11938,7 +11938,7 @@ do
 
     local function openAddKeybindPicker()
         local pickerGui = Instance.new("Frame", ScreenGui)
-        pickerGui.Name = "Spooky_AddKeybindPicker"
+        pickerGui.Name = "NhoiiiX_AddKeybindPicker"
         pickerGui.Size = UDim2.new(0, 340, 0, 380)
         pickerGui.Position = UDim2.new(0.5, -170, 0.5, -190)
         pickerGui.BackgroundColor3 = Color3.fromRGB(15, 14, 22)
@@ -12588,7 +12588,7 @@ do
             task.spawn(function()
                 local ok, err = pcall(sData.exec)
                 if not ok then
-                    warn("[Project Spooky] Failed to execute " .. sData.name .. ": " .. tostring(err))
+                    warn("[Project NhoiiiX] Failed to execute " .. sData.name .. ": " .. tostring(err))
                 end
             end)
         end)
@@ -12888,7 +12888,7 @@ do
         end
 
         local sg = Instance.new("ScreenGui")
-        sg.Name = "Spooky_ESPCustomizer"
+        sg.Name = "NhoiiiX_ESPCustomizer"
         sg.ResetOnSpawn = false
         sg.DisplayOrder = 999999
         sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -12905,7 +12905,7 @@ do
         local mwStk = Instance.new("UIStroke", mainW)
         mwStk.Color = _G.CurrentAccentColor or Color3.fromRGB(140, 115, 235)
         mwStk.Thickness = 1.4
-        _G.SpookyESPCustomizerBorder = mwStk
+        _G.NhoiiiXESPCustomizerBorder = mwStk
 
         local topBar = Instance.new("Frame", mainW)
         topBar.Size = UDim2.new(1, 0, 0, 32)
@@ -12940,12 +12940,12 @@ do
         spkIcon.Size = UDim2.new(0, 16, 0, 16)
         spkIcon.Position = UDim2.new(0, 10, 0.5, -8)
         spkIcon.BackgroundTransparency = 1
-        spkIcon.Image = (CurrentTheme == "Red Spooky") and "rbxassetid://88089153116193" or "rbxassetid://124747708335361"
+        spkIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or "rbxassetid://124747708335361"
         spkIcon.ImageColor3 = _G.CurrentAccentColor or Color3.fromRGB(140, 115, 235)
         spkIcon.ZIndex = 5002
-        _G.SpookyESPCustomizerIcon = spkIcon
-        if _G.SpookyThemedElements and _G.SpookyThemedElements.AllHeaderEmblems then
-            table.insert(_G.SpookyThemedElements.AllHeaderEmblems, spkIcon)
+        _G.NhoiiiXESPCustomizerIcon = spkIcon
+        if _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.AllHeaderEmblems then
+            table.insert(_G.NhoiiiXThemedElements.AllHeaderEmblems, spkIcon)
         end
 
         local titleLbl = Instance.new("TextLabel", topBar)
@@ -13145,7 +13145,7 @@ do
             _G.G_ESP_TagOffsetY = 0
             tagContainer.Position = UDim2.new(0.5, 0, 0.5, -60)
             offsetInfoLbl.Text = "Tag Offset: X: +0.0 | Y: +0.0"
-            if _G.RebuildSpookyESPs then pcall(_G.RebuildSpookyESPs) end
+            if _G.RebuildNhoiiiXESPs then pcall(_G.RebuildNhoiiiXESPs) end
         end)
 
         pcall(function()
@@ -13243,14 +13243,14 @@ do
             local isSimple = (_G.G_ESP_SimpleMode == true or (FeatureStates and FeatureStates["SimpleEsp"] == true))
             local parts = {}
             if isSimple then
-                parts[#parts+1] = "[SpookyTarget]\nHP: 12450/12450 (100%)"
+                parts[#parts+1] = "[NhoiiiXTarget]\nHP: 12450/12450 (100%)"
                 tagContainer.Size = UDim2.new(0, 140, 0, 32)
                 previewAvatar.Visible = false
             else
                 tagContainer.Size = UDim2.new(0, 190, 0, 75)
                 previewAvatar.Visible = (_G.G_ESP_AvatarPhoto ~= false)
                 if _G.G_ESP_Name ~= false then
-                    parts[#parts+1] = "[Pirates] <font color=\"rgb(255,255,0)\">SpookyTarget</font>"
+                    parts[#parts+1] = "[Pirates] <font color=\"rgb(255,255,0)\">NhoiiiXTarget</font>"
                 end
                 if _G.G_ESP_Level ~= false then
                     parts[#parts+1] = " [Lv.2550]"
@@ -13371,7 +13371,7 @@ do
         createCustomizerToggle("SimpleEsp", "Simple ESP Mode", function() return _G.G_ESP_SimpleMode == true or (FeatureStates and FeatureStates["SimpleEsp"] == true) end, function(v)
             _G.G_ESP_SimpleMode = v
             if FeatureStates then FeatureStates["SimpleEsp"] = v end
-            if _G.RebuildSpookyESPs then pcall(_G.RebuildSpookyESPs) end
+            if _G.RebuildNhoiiiXESPs then pcall(_G.RebuildNhoiiiXESPs) end
         end)
         createCustomizerToggle("Name", "Show Player Name", function() return _G.G_ESP_Name ~= false end, function(v) _G.G_ESP_Name = v end)
         createCustomizerToggle("Health", "Show Health", function() return _G.G_ESP_HP ~= false end, function(v) _G.G_ESP_HP = v end)
@@ -13629,7 +13629,7 @@ do
 
         applyBtn.MouseButton1Click:Connect(function()
             pcall(function()
-                if _G.RebuildSpookyESPs then _G.RebuildSpookyESPs() end
+                if _G.RebuildNhoiiiXESPs then _G.RebuildNhoiiiXESPs() end
                 if writefile and HttpService then
                     local cfg = {
                         name = _G.G_ESP_Name,
@@ -13651,7 +13651,7 @@ do
                         textSize = _G.G_ESP_TextSize,
                         simpleMode = _G.G_ESP_SimpleMode
                     }
-                    writefile("ProjectSpooky_ESPConfig.json", HttpService:JSONEncode(cfg))
+                    writefile("ProjectNhoiiiX_ESPConfig.json", HttpService:JSONEncode(cfg))
                 end
             end)
             notifyToggle("ESP Configuration Saved & Applied!", true)
@@ -14180,7 +14180,7 @@ do
         AffectTransform = true,
         AffectEnvironment = true
     }
-    Spooky.VFX = VFXSettings
+    NhoiiiX.VFX = VFXSettings
 
     local VFXPresets = {
 
@@ -14496,7 +14496,7 @@ do
         stopVFXWatchers()
         table.clear(activeRainbowVisuals)
     end
-    getgenv().SpookyColorVFX_Cleanup = cleanupVFX
+    getgenv().NhoiiiXColorVFX_Cleanup = cleanupVFX
 
     task.spawn(function()
         while isCurrentSession() do
@@ -14523,9 +14523,9 @@ do
 
     do
 
-    local sc1 = makeCard(SacredVFXPage, "Spooky VFX Engine", "Motor Spooky VFX", 108, 2)
+    local sc1 = makeCard(SacredVFXPage, "NhoiiiX VFX Engine", "Motor NhoiiiX VFX", 108, 2)
 
-    createToggleButton(sc1, "MasterVFX", ":spooky vfx:", ":spooky vfx:", UDim2.new(0.48, -4, 0, 36), UDim2.new(0, 8, 0, 38))
+    createToggleButton(sc1, "MasterVFX", ":NhoiiiX vfx:", ":NhoiiiX vfx:", UDim2.new(0.48, -4, 0, 36), UDim2.new(0, 8, 0, 38))
     createActionButton(sc1, "Reset Original", "Restablecer Original", UDim2.new(0.48, -4, 0, 36), UDim2.new(0.5, 4, 0, 38), function()
         VFXSettings.Enabled = false
         setFeatureState("MasterVFX", false)
@@ -14543,11 +14543,11 @@ do
         if v then
             startVFXWatchers()
             refreshAllVFX()
-            notifyToggle(":spooky vfx: ACTIVADO", true)
+            notifyToggle(":NhoiiiX vfx: ACTIVADO", true)
         else
             resetOriginalVFX()
             stopVFXWatchers()
-            notifyToggle(":spooky vfx: DESACTIVADO", false)
+            notifyToggle(":NhoiiiX vfx: DESACTIVADO", false)
         end
     end
     end
@@ -14589,7 +14589,7 @@ do
     createCycleButton(sc2, "Preset", "Preset", presetList, 1, UDim2.new(0.48, -4, 0, 30), UDim2.new(0, X1, 0, 32), function(choice)
         VFXSettings.Preset = choice
         if VFXSettings.Enabled then refreshAllVFX() end
-        if _G.SpookyRefreshPortalSkin then _G.SpookyRefreshPortalSkin() end
+        if _G.NhoiiiXRefreshPortalSkin then _G.NhoiiiXRefreshPortalSkin() end
         notifyToggle("VFX Preset: " .. choice, true)
     end)
 
@@ -14603,7 +14603,7 @@ do
     local function applyVFXQuick(name)
         VFXSettings.Preset = name
         if VFXSettings.Enabled then refreshAllVFX() end
-        if _G.SpookyRefreshPortalSkin then _G.SpookyRefreshPortalSkin() end
+        if _G.NhoiiiXRefreshPortalSkin then _G.NhoiiiXRefreshPortalSkin() end
         notifyToggle("VFX Preset: " .. name, true)
     end
 
@@ -14668,7 +14668,7 @@ do
     assetBox.Text = CURRENT_ASSET
     assetBox.TextSize = 11
     assetBox.TextColor3 = Color3.fromRGB(240, 240, 255)
-    styleSpookyTextBox(assetBox)
+    styleNhoiiiXTextBox(assetBox)
     Instance.new("UICorner", assetBox).CornerRadius = UDim.new(0, 6)
     local abStk = Instance.new("UIStroke", assetBox)
     abStk.Color = Color3.fromRGB(48, 48, 60)
@@ -14895,7 +14895,7 @@ do
 
     local function syncPortalVSceneRGB(enable)
         local lighting = game:GetService("Lighting")
-        local fxName = "SpookyPortalVRGB"
+        local fxName = "NhoiiiXPortalVRGB"
         local fx = lighting:FindFirstChild(fxName)
         if not enable then
             if fx then pcall(function() fx:Destroy() end) end
@@ -14923,7 +14923,7 @@ do
         if portalPaletteActive then syncPortalPalette(true) end
         if portalVRGBActive then syncPortalVSceneRGB(true) end
     end
-    _G.SpookyRefreshPortalSkin = refreshAllPortalSkin
+    _G.NhoiiiXRefreshPortalSkin = refreshAllPortalSkin
 
     task.spawn(function()
         local pGui = LocalPlayer:WaitForChild("PlayerGui", 5)
@@ -14965,7 +14965,7 @@ do
         notifyToggle("Portal V Scene Color: " .. (v and "ENABLED" or "DISABLED"), v)
     end
 
-    print("[Project Spooky]: Spooky Color VFX y Spooky Skin Changer cargados exitosamente.")
+    print("[Project NhoiiiX]: NhoiiiX Color VFX y NhoiiiX Skin Changer cargados exitosamente.")
 end
 do
     local DungeonsPage = createScrollPage("Dungeons_Page", 450)
@@ -15132,12 +15132,12 @@ do
             end
         end
         if closestPlayerObj then
-            Spooky.Diagnostics.statuses.Target = closestPlayerObj.Name
+            NhoiiiX.Diagnostics.statuses.Target = closestPlayerObj.Name
         else
             local reasons={}
             for reason,count in pairs(rejected) do table.insert(reasons,reason .. "=" .. count) end
             table.sort(reasons)
-            Spooky.Diagnostics.statuses.Target="No target: " .. table.concat(reasons,", ")
+            NhoiiiX.Diagnostics.statuses.Target="No target: " .. table.concat(reasons,", ")
         end
         return closestEnemy
     end
@@ -15383,8 +15383,8 @@ do
                         local notBusy = not busy or (busy.Value ~= true)
 
                         if hasEnergy and notTransformed and notStunned and notBusy then
-                            if _G.SpookyTriggerAwakeningV4 then
-                                _G.SpookyTriggerAwakeningV4(true)
+                            if _G.NhoiiiXTriggerAwakeningV4 then
+                                _G.NhoiiiXTriggerAwakeningV4(true)
                             else
                                 pcall(function()
                                     local rem = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
@@ -15443,7 +15443,7 @@ do
     end
 end
 do
-    local DungeonsPage = _G.SpookyPagesFolder and _G.SpookyPagesFolder:FindFirstChild("Dungeons_Page")
+    local DungeonsPage = _G.NhoiiiXPagesFolder and _G.NhoiiiXPagesFolder:FindFirstChild("Dungeons_Page")
     local BW = UDim2.new(0, 124, 0, 30)
     local X1, X2, X3 = 6, 134, 262
     _G.AutoCollectHop       = false
@@ -15766,7 +15766,7 @@ do
             setFeatureState("AutoStoreFruit", true)
             _G.AutoStoreFruit = true
             pcall(function()
-                if writefile then writefile("Spooky_FruitCollectorState.txt", "1") end
+                if writefile then writefile("NhoiiiX_FruitCollectorState.txt", "1") end
             end)
             notifyToggle("Fruit Collector: ACTIVE (Auto Store: ON)", true)
         else
@@ -15775,7 +15775,7 @@ do
             setFeatureState("AutoStoreFruit", false)
             _G.AutoStoreFruit = false
             pcall(function()
-                if writefile then writefile("Spooky_FruitCollectorState.txt", "0") end
+                if writefile then writefile("NhoiiiX_FruitCollectorState.txt", "0") end
             end)
             notifyToggle("Fruit Collector: STOPPED", false)
         end
@@ -15929,8 +15929,8 @@ do
     end)
 
     pcall(function()
-        if isfile and isfile("Spooky_FruitCollectorState.txt") and readfile then
-            local state = readfile("Spooky_FruitCollectorState.txt")
+        if isfile and isfile("NhoiiiX_FruitCollectorState.txt") and readfile then
+            local state = readfile("NhoiiiX_FruitCollectorState.txt")
             if state == "1" then
                 _G.AutoCollectHop = true
                 _G.HopEnabled = false
@@ -16014,13 +16014,13 @@ do
             local flySpeed = _G.FlySpeed or 280
 
             local bv = Instance.new("BodyVelocity")
-            bv.Name = "SpookyFruitBV"
+            bv.Name = "NhoiiiXFruitBV"
             bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
             bv.Velocity = Vector3.zero
             bv.Parent = hrp
 
             local bg = Instance.new("BodyGyro")
-            bg.Name = "SpookyFruitBG"
+            bg.Name = "NhoiiiXFruitBG"
             bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
             bg.CFrame = hrp.CFrame
             bg.Parent = hrp
@@ -16288,9 +16288,9 @@ do
         for _, conn in ipairs(bountyConnections) do pcall(function() conn:Disconnect() end) end
         table.clear(bountyConnections)
     end
-    local function stopSpookyAutoBountyExact()
+    local function stopNhoiiiXAutoBountyExact()
         disconnectBounty()
-        getgenv().SpookyAutoBountyRunning = false
+        getgenv().NhoiiiXAutoBountyRunning = false
         getgenv().targ = nil
         pcall(function()
             if tween then
@@ -16316,7 +16316,7 @@ do
         end)
         pcall(function()
             local pGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
-            local existing = pGui and pGui:FindFirstChild("Spooky_AutoBounty")
+            local existing = pGui and pGui:FindFirstChild("NhoiiiX_AutoBounty")
             if existing then
                 existing.Enabled = false
                 existing:Destroy()
@@ -16350,18 +16350,18 @@ do
             abStatusLblRef.Text = (CurrentLang == "ES") and "Estado: Inactivo / Detenido" or "Status: Inactive / Stopped"
             abStatusLblRef.TextColor3 = Color3.fromRGB(190, 190, 205)
         end
-        notifyToggle("Spooky Auto Bounty Stopped!", false)
+        notifyToggle("NhoiiiX Auto Bounty Stopped!", false)
     end
-    _G.stopSpookyAutoBountyExact = stopSpookyAutoBountyExact
-    getgenv().StopSpookyAutoBountyExact = stopSpookyAutoBountyExact
-    local function runSpookyAutoBountyExact()
-        if getgenv().SpookyAutoBountyRunning then
+    _G.stopNhoiiiXAutoBountyExact = stopNhoiiiXAutoBountyExact
+    getgenv().StopNhoiiiXAutoBountyExact = stopNhoiiiXAutoBountyExact
+    local function runNhoiiiXAutoBountyExact()
+        if getgenv().NhoiiiXAutoBountyRunning then
             notifyToggle("Auto Bounty is already running!", true)
             return
         end
         disconnectBounty()
         local runEpoch = bountyEpoch
-        getgenv().SpookyAutoBountyRunning = true
+        getgenv().NhoiiiXAutoBountyRunning = true
         getgenv().checked = {}
         getgenv().targ = nil
         getgenv().target = nil
@@ -16371,7 +16371,7 @@ do
         getgenv().AutoBountyReachedTarget = false
         getgenv().safeZoneWaitRetries = 0
         local function isBountyCurrent()
-            return isCurrentSession() and bountyEpoch == runEpoch and getgenv().SpookyAutoBountyRunning == true
+            return isCurrentSession() and bountyEpoch == runEpoch and getgenv().NhoiiiXAutoBountyRunning == true
         end
         local function bountyConnect(signal, callback)
             if not isBountyCurrent() then return nil end
@@ -16418,7 +16418,7 @@ function hasValue(array, targetString)
 end
 getgenv().hasValue = hasValue
 local function AX_ReadPvPState(target)
-    if _G.SpookyPvPAllowed then return _G.SpookyPvPAllowed(target) end
+    if _G.NhoiiiXPvPAllowed then return _G.NhoiiiXPvPAllowed(target) end
     if not target then return false end
     local ok, pvpOn = pcall(function()
         if target:IsA("Player") and target:GetAttribute("PvpDisabled") == true then
@@ -16442,7 +16442,7 @@ local function isTargetProtected(targetPlayer)
     return not AX_ReadPvPState(targetPlayer)
 end
 local function AX_InSafeZone(target)
-    if _G.SpookyInSafeZone then return _G.SpookyInSafeZone(target) end
+    if _G.NhoiiiXInSafeZone then return _G.NhoiiiXInSafeZone(target) end
     if not target then return false end
     local ok, inZone = pcall(function()
         local char = target.Character or (target:IsA("Model") and target)
@@ -16493,7 +16493,7 @@ local function isAllyWithMe(targetplayer)
     return false
 end
 local function isEnemy(targetplayer)
-    if _G.SpookyIsEnemy then return _G.SpookyIsEnemy(targetplayer) end
+    if _G.NhoiiiXIsEnemy then return _G.NhoiiiXIsEnemy(targetplayer) end
     if not targetplayer or targetplayer == LocalPlayer then return false end
     local myTeam = LocalPlayer.Team
     local targetTeam = targetplayer.Team
@@ -16569,7 +16569,7 @@ local function createESP(player)
     if not head then return end
     local team, color = getTeamInfo(player)
     local billboard = Instance.new("BillboardGui")
-    billboard.Name = "Spooky_PlayerESP"
+    billboard.Name = "NhoiiiX_PlayerESP"
     billboard.Adornee = head
     billboard.Size = UDim2.new(0, 220, 0, 80)
     billboard.StudsOffset = Vector3.new(0, 3.2, 0)
@@ -16851,8 +16851,8 @@ local UI = (function()
             if earnedBox then
                 earnedBox.Text = (CurrentLang == "ES") and ("Ganado: " .. tostring(EarnedVal or 0)) or ("Earned: " .. tostring(EarnedVal or 0))
             end
-            if Spooky.UI.targetBountyBox and BountyVal then
-                Spooky.UI.targetBountyBox.Text = "Bounty: " .. tostring(BountyVal)
+            if NhoiiiX.UI.targetBountyBox and BountyVal then
+                NhoiiiX.UI.targetBountyBox.Text = "Bounty: " .. tostring(BountyVal)
             end
         end)
     end
@@ -16861,8 +16861,8 @@ local UI = (function()
             if abStatusLblRef then
                 abStatusLblRef.Text = tostring(text or "")
             end
-            if _G.Spooky_Log then
-                _G.Spooky_Log(tostring(text or ""))
+            if _G.NhoiiiX_Log then
+                _G.NhoiiiX_Log(tostring(text or ""))
             end
         end)
     end
@@ -17209,7 +17209,7 @@ do
             if hrp and hrp.Position.Y < 4 then
                 if not waterPlatform or not waterPlatform.Parent then
                     local p = Instance.new("Part")
-                    p.Name = "SpookyWaterPlatform"
+                    p.Name = "NhoiiiXWaterPlatform"
                     p.Size = Vector3.new(28, 2, 28)
                     p.Anchored = true
                     p.CanCollide = true
@@ -17283,7 +17283,7 @@ local function isCandidateTarget(v)
     if not ((vLevel >= 2400) or (vLevel == 0 and bVal >= 2400000)) then
         return false
     end
-    local abSetting = _G.SpookyAutoBountySettings
+    local abSetting = _G.NhoiiiXAutoBountySettings
     if abSetting then
         if abSetting.Hunt and (bVal < (abSetting.Hunt.Min or 0) or bVal > (abSetting.Hunt.Max or 30000000)) then
             return false
@@ -17337,7 +17337,7 @@ do
             local enemy = isEnemy(player)
             local pvpState = pvpOn and "PvP: ON" or "PvP: OFF"
             local zoneState = inSafe and "In SafeZone" or "Free Zone"
-            print(string.format("[Spooky Monitor] %s: %s | %s | %s | %s",
+            print(string.format("[NhoiiiX Monitor] %s: %s | %s | %s | %s",
                 tag or "Info", player.Name, pvpState, zoneState, enemy and "Enemy" or "Neutral/Ally"))
         end)
     end
@@ -17427,7 +17427,7 @@ do
         end
     end)
 end
-local Setting = _G.SpookyAutoBountySettings
+local Setting = _G.NhoiiiXAutoBountySettings
 if not Setting then
     Setting = {
         ["Set"] = {
@@ -17608,7 +17608,7 @@ do
         World1 = true
         Notify("Detected Sea 1!")
     else
-        Notify("Spooky Bounty Ready!")
+        Notify("NhoiiiX Bounty Ready!")
     end
 
     local tween = nil
@@ -17753,7 +17753,7 @@ do
                 local now = os.clock()
                 local dt = math.clamp(now - lastTrackAt, 0, 0.1)
                 lastTrackAt = now
-                local speed = Spooky.Runtime.number(getgenv().AutoBountyNearSpeed, 350, 25, 1000)
+                local speed = NhoiiiX.Runtime.number(getgenv().AutoBountyNearSpeed, 350, 25, 1000)
                 local newCF = currentCF:Lerp(targetPos, math.min(1, speed * dt / math.max(distance, 0.001)))
                 hrp.CFrame = newCF
                 if cachedPartTele and cachedPartTele.Parent == char then
@@ -17812,8 +17812,8 @@ do
                 partTele.CFrame = hrp.CFrame
             end
 
-            local farSpeed = Spooky.Runtime.number(getgenv().AutoBountyFarSpeed, 160, 25, 1000)
-            local nearSpeed = Spooky.Runtime.number(getgenv().AutoBountyNearSpeed, 350, 25, 1000)
+            local farSpeed = NhoiiiX.Runtime.number(getgenv().AutoBountyFarSpeed, 160, 25, 1000)
+            local nearSpeed = NhoiiiX.Runtime.number(getgenv().AutoBountyNearSpeed, 350, 25, 1000)
             local speed = nearSpeed
 
             local curTarg = getgenv().targ
@@ -17852,7 +17852,7 @@ do
             )
             tween:Play()
         end)
-        if not okMove then Spooky.ReportIssue("Auto Bounty tween",moveError) end
+        if not okMove then NhoiiiX.ReportIssue("Auto Bounty tween",moveError) end
     end
     getgenv().to = to
 
@@ -17868,7 +17868,7 @@ do
     end
 
     function down(use, waitTime)
-        if not isBountyCurrent() or (_G.SpookySkillBlocked and _G.SpookySkillBlocked(use)) then return end
+        if not isBountyCurrent() or (_G.NhoiiiXSkillBlocked and _G.NhoiiiXSkillBlocked(use)) then return end
         pcall(function()
 
             if string.upper(tostring(use)) == "V" then return end
@@ -18051,7 +18051,7 @@ do
 
                 for _, Enemy in ipairs(Folder:GetChildren()) do
                     local targetPlayer = Players:GetPlayerFromCharacter(Enemy)
-                    local allowed = not targetPlayer or (_G.SpookyCombatTargetValid and _G.SpookyCombatTargetValid(targetPlayer,150))
+                    local allowed = not targetPlayer or (_G.NhoiiiXCombatTargetValid and _G.NhoiiiXCombatTargetValid(targetPlayer,150))
                     if Enemy ~= myChar and IsAlive(Enemy) and allowed then
                         local Head = Enemy:FindFirstChild("Head") or Enemy:FindFirstChild("HumanoidRootPart")
                         if Head and (Head.Position - myPos).Magnitude < FastAttack.Distance then
@@ -18070,7 +18070,7 @@ do
             end
 
             function FastAttack:AttackNearest()
-                if not isBountyCurrent() or not Spooky.TakeAttackBudget("M1",0.15) then return end
+                if not isBountyCurrent() or not NhoiiiX.TakeAttackBudget("M1",0.15) then return end
                 local OthersEnemies = {}
                 local Part1 = ProcessEnemies(OthersEnemies, Enemies)
                 local Part2 = ProcessEnemies(OthersEnemies, Characters)
@@ -18286,7 +18286,7 @@ do
             local enemiesInSafeZone = 0
 
             local checkedList = getgenv().checked or {}
-            local abSetting = _G.SpookyAutoBountySettings or Setting
+            local abSetting = _G.NhoiiiXAutoBountySettings or Setting
             local huntMin = (abSetting and abSetting.Hunt and abSetting.Hunt.Min) or 0
             local huntMax = (abSetting and abSetting.Hunt and abSetting.Hunt.Max) or 30000000
             local skipFruit = (abSetting and abSetting.Skip and abSetting.Skip.Fruit)
@@ -18749,9 +18749,9 @@ do
                         end
 
                         local maxHp = myHum.MaxHealth > 0 and myHum.MaxHealth or 12000
-                        local healThreshold = tonumber(getgenv().SpookyHealThreshold) or (Setting.SafeHealth and Setting.SafeHealth.Health) or 5000
+                        local healThreshold = tonumber(getgenv().NhoiiiXHealThreshold) or (Setting.SafeHealth and Setting.SafeHealth.Health) or 5000
 
-                        local returnHP = tonumber(getgenv().SpookyHealReturnHP) or 6000
+                        local returnHP = tonumber(getgenv().NhoiiiXHealReturnHP) or 6000
                         if myHum.Health >= returnHP then
                             getgenv().CancelHealing = false
                             if getgenv().HealingInSky then
@@ -18772,7 +18772,7 @@ do
                             end
                         else
 
-                            if getgenv().CancelHealing or myHum.Health >= (tonumber(getgenv().SpookyHealReturnHP) or 6000) then
+                            if getgenv().CancelHealing or myHum.Health >= (tonumber(getgenv().NhoiiiXHealReturnHP) or 6000) then
                                 getgenv().HealingInSky = false
                                 pcall(function()
                                     if tween then tween:Cancel() end
@@ -18955,7 +18955,7 @@ do
                             ["url"] = "https://cdn.discordapp.com/attachments/1417144752167452874/1443316299248963735/file_00000000161c7206a557007160088d00.png?ex=6928a08d&is=69274f0d&hm=decc168419a57692fd26a0afcf23c58bcbfc3b9fbcb92fb7d290713581b32932&",
                         },
                         ["footer"] = {
-                            ["text"] = "Spooky Bounty Auto Hunt",
+                            ["text"] = "NhoiiiX Bounty Auto Hunt",
                         },
                         ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                     }
@@ -19017,19 +19017,19 @@ do
     end)
 
     if UI and UI.ShowNotification then
-        UI.ShowNotification("Spooky Bounty Active & Hunting!", "success")
+        UI.ShowNotification("NhoiiiX Bounty Active & Hunting!", "success")
     end
 end
     end)
     if not initialized and isBountyCurrent() then
-        stopSpookyAutoBountyExact()
-        Spooky.ReportIssue("Auto Bounty initialization",initError)
+        stopNhoiiiXAutoBountyExact()
+        NhoiiiX.ReportIssue("Auto Bounty initialization",initError)
         if abStatusLblRef then abStatusLblRef.Text="Auto Bounty: initialization failed; see Diagnostics" end
     end
         end)
-        notifyToggle("Spooky Auto Bounty Started!", true)
+        notifyToggle("NhoiiiX Auto Bounty Started!", true)
     end
-    getgenv().RunSpookyAutoBountyExact = runSpookyAutoBountyExact
+    getgenv().RunNhoiiiXAutoBountyExact = runNhoiiiXAutoBountyExact
     local AutoBountyPage = createScrollPage("AutoBounty_Page", 980)
     local c1 = makeCard(AutoBountyPage, "Auto Bounty", "Auto Bounty", 146, 2)
     abStatusLblRef = Instance.new("TextLabel", c1)
@@ -19047,10 +19047,10 @@ end
         es = "Estado: Inactivo / Detenido"
     })
     abToggleBtnRef = createActionButton(c1, "Start Auto Bounty", "Iniciar Auto Bounty", UDim2.new(1, -20, 0, 42), UDim2.new(0, 10, 0, 50), function()
-        if getgenv().SpookyAutoBountyRunning then
-            stopSpookyAutoBountyExact()
+        if getgenv().NhoiiiXAutoBountyRunning then
+            stopNhoiiiXAutoBountyExact()
         else
-            runSpookyAutoBountyExact()
+            runNhoiiiXAutoBountyExact()
         end
     end)
     abToggleBtnRef.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
@@ -19099,7 +19099,7 @@ end
     tbStk1.Color = Color3.fromRGB(38, 38, 48)
 
     local targetBountyBox = Instance.new("TextLabel", c2)
-    Spooky.UI.targetBountyBox=targetBountyBox
+    NhoiiiX.UI.targetBountyBox=targetBountyBox
     targetBountyBox.Size = UDim2.new(0.48, 0, 0, 30)
     targetBountyBox.Position = UDim2.new(0.51, 0, 0, 26)
     targetBountyBox.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
@@ -19138,7 +19138,7 @@ end
     task.spawn(function()
         while isCurrentSession() and task.wait(0.5) do
             pcall(function()
-                if getgenv().SpookyAutoBountyRunning then
+                if getgenv().NhoiiiXAutoBountyRunning then
                     local t = getgenv().targ
                     if t and t.Character then
                         local hrp = t.Character:FindFirstChild("HumanoidRootPart")
@@ -19224,11 +19224,11 @@ end
     healLabel.TextSize = 11.5
     healLabel.TextColor3 = Color3.fromRGB(215, 215, 230)
     healLabel.TextXAlignment = Enum.TextXAlignment.Left
-    healLabel.Text = (CurrentLang == "ES") and ("Límite Curación: " .. tostring(getgenv().SpookyHealThreshold or 6000)) or ("Heal Threshold: " .. tostring(getgenv().SpookyHealThreshold or 6000))
+    healLabel.Text = (CurrentLang == "ES") and ("Límite Curación: " .. tostring(getgenv().NhoiiiXHealThreshold or 6000)) or ("Heal Threshold: " .. tostring(getgenv().NhoiiiXHealThreshold or 6000))
     table.insert(TranslatableUI, {
         label = healLabel,
-        en = "Heal Threshold: " .. tostring(getgenv().SpookyHealThreshold or 6000),
-        es = "Límite Curación: " .. tostring(getgenv().SpookyHealThreshold or 6000)
+        en = "Heal Threshold: " .. tostring(getgenv().NhoiiiXHealThreshold or 6000),
+        es = "Límite Curación: " .. tostring(getgenv().NhoiiiXHealThreshold or 6000)
     })
 
     local healInput = Instance.new("TextBox", c4)
@@ -19238,7 +19238,7 @@ end
     healInput.Font = Enum.Font.GothamBold
     healInput.TextSize = 13
     healInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-    healInput.Text = tostring(getgenv().SpookyHealThreshold or 6000)
+    healInput.Text = tostring(getgenv().NhoiiiXHealThreshold or 6000)
     healInput.PlaceholderText = "HP"
     healInput.ClearTextOnFocus = false
     Instance.new("UICorner", healInput).CornerRadius = UDim.new(0, 6)
@@ -19246,10 +19246,10 @@ end
     healInput.FocusLost:Connect(function()
         local val = tonumber(healInput.Text)
         if val and val > 0 then
-            getgenv().SpookyHealThreshold = val
+            getgenv().NhoiiiXHealThreshold = val
             healLabel.Text = (CurrentLang == "ES") and ("Límite Curación: " .. tostring(val)) or ("Heal Threshold: " .. tostring(val))
         else
-            healInput.Text = tostring(getgenv().SpookyHealThreshold or 6000)
+            healInput.Text = tostring(getgenv().NhoiiiXHealThreshold or 6000)
         end
     end)
 
@@ -19355,8 +19355,8 @@ end
 
     local currentAutoTeam = "Pirates"
     pcall(function()
-        if isfile and isfile("Spooky_AutoTeam.txt") and readfile then
-            local raw = readfile("Spooky_AutoTeam.txt")
+        if isfile and isfile("NhoiiiX_AutoTeam.txt") and readfile then
+            local raw = readfile("NhoiiiX_AutoTeam.txt")
             if raw then
                 local t = string.match(raw, "%a+")
                 if t == "Marines" or t == "Pirates" or t == "None" then
@@ -19364,7 +19364,7 @@ end
                 end
             end
         else
-            if writefile then writefile("Spooky_AutoTeam.txt", "Pirates") end
+            if writefile then writefile("NhoiiiX_AutoTeam.txt", "Pirates") end
         end
     end)
 
@@ -19410,13 +19410,13 @@ end
             statusLbl.Text = (CurrentLang == "ES") and ("Auto-Unirse: " .. selDescES) or ("Auto-Join: " .. selDescEN)
         end
     end
-    _G.SpookyUpdateTeamVisuals = updateTeamVisuals
+    _G.NhoiiiXUpdateTeamVisuals = updateTeamVisuals
 
     local function switchAndSaveTeam(teamName)
         currentAutoTeam = teamName
         pcall(function()
             if writefile then
-                writefile("Spooky_AutoTeam.txt", teamName)
+                writefile("NhoiiiX_AutoTeam.txt", teamName)
             end
         end)
         if teamName == "Marines" or teamName == "Pirates" then
@@ -19472,9 +19472,9 @@ end
 
     FeatureCallbacks["AutoBounty"] = function(v)
         if v then
-            runSpookyAutoBountyExact()
+            runNhoiiiXAutoBountyExact()
         else
-            stopSpookyAutoBountyExact()
+            stopNhoiiiXAutoBountyExact()
         end
     end
 
@@ -19568,7 +19568,7 @@ do
         notifyToggle("Discord link copied: " .. link, true)
     end)
     createActionButton(m2, "TikTok Official", "TikTok Oficial", UDim2.new(0.48, -4, 0, 30), UDim2.new(0.5, 4, 0, 28), function()
-        local user = "projectspookyoficial"
+        local user = "projectNhoiiiXoficial"
         universalCopy(user)
         notifyToggle("TikTok copied: @" .. user, true)
     end)
@@ -19631,7 +19631,7 @@ do
     fbPad.PaddingBottom = UDim.new(0, 8)
     fbPad.PaddingLeft = UDim.new(0, 10)
     fbPad.PaddingRight = UDim.new(0, 10)
-    styleSpookyTextBox(fbInput)
+    styleNhoiiiXTextBox(fbInput)
     Instance.new("UICorner", fbInput).CornerRadius = UDim.new(0, 6)
     local fbStk = Instance.new("UIStroke", fbInput)
     fbStk.Color = Color3.fromRGB(48, 48, 62)
@@ -19646,8 +19646,8 @@ do
             notifyToggle((CurrentLang == "ES") and "Por favor escribe un mensaje!" or "Please enter a message first!", false)
             return
         end
-        local wh = _G.SpookyReportWebhook or ""
-        if not Spooky.Runtime.validWebhook(wh) then notifyToggle("Configure SpookyReportWebhook to send a report", false); return end
+        local wh = _G.NhoiiiXReportWebhook or ""
+        if not NhoiiiX.Runtime.validWebhook(wh) then notifyToggle("Configure NhoiiiXReportWebhook to send a report", false); return end
         local reqFunc = (syn and syn.request) or (http and http.request) or http_request or request
         if reqFunc then
             task.spawn(function()
@@ -19661,7 +19661,7 @@ do
                                     { name = "User", value = tostring(LocalPlayer.Name), inline = true },
                                     { name = "Message", value = tostring(text), inline = false },
                                 },
-                                footer = { text = "Project Spooky - Bug Report" },
+                                footer = { text = "Project NhoiiiX - Bug Report" },
                                 timestamp = DateTime.now():ToIsoDate()
                             }
                         }
@@ -19685,7 +19685,7 @@ do
     logDesc.Position = UDim2.new(0, 10, 0, 26)
     logDesc.BackgroundTransparency = 1
     logDesc.Font = Enum.Font.Gotham
-    logDesc.Text = (CurrentLang == "ES") and "Version 1.3 - Project Spooky | Official Release | Full Optimization | Standalone Aimbot Soru | Enhanced UI & Keybinds." or "Version 1.3 - Project Spooky | Official Release | Full Optimization | Standalone Aimbot Soru | Enhanced UI & Keybinds."
+    logDesc.Text = (CurrentLang == "ES") and "Version 1.3 - Project NhoiiiX | Official Release | Full Optimization | Standalone Aimbot Soru | Enhanced UI & Keybinds." or "Version 1.3 - Project NhoiiiX | Official Release | Full Optimization | Standalone Aimbot Soru | Enhanced UI & Keybinds."
     logDesc.TextSize = 10.5
     logDesc.TextColor3 = Color3.fromRGB(160, 160, 175)
     logDesc.TextWrapped = true
@@ -19694,35 +19694,35 @@ end
 do
 
     local FunctionsPage = createScrollPage("Functions_Page", 800)
-    Spooky.CustomFunctions = Spooky.CustomFunctions or {}
+    NhoiiiX.CustomFunctions = NhoiiiX.CustomFunctions or {}
 
     local function saveFunctionsConfig(quiet)
         pcall(function()
             if writefile and HttpService then
                 local data = {
                     version = "1.7",
-                    functions = Spooky.CustomFunctions or {}
+                    functions = NhoiiiX.CustomFunctions or {}
                 }
-                writefile("ProjectSpooky_FunctionsConfig.json", HttpService:JSONEncode(data))
+                writefile("ProjectNhoiiiX_FunctionsConfig.json", HttpService:JSONEncode(data))
                 if not quiet then
                     notifyToggle("Function Config: Guardado", true)
                 end
             end
         end)
     end
-    _G.SpookySaveFunctionsConfig = saveFunctionsConfig
+    _G.NhoiiiXSaveFunctionsConfig = saveFunctionsConfig
 
     local rebuildFunctionButtonsList = nil
 
     local function loadFunctionsConfig(quiet)
         local loaded = false
         pcall(function()
-            if isfile and isfile("ProjectSpooky_FunctionsConfig.json") and readfile and HttpService then
-                local raw = readfile("ProjectSpooky_FunctionsConfig.json")
+            if isfile and isfile("ProjectNhoiiiX_FunctionsConfig.json") and readfile and HttpService then
+                local raw = readfile("ProjectNhoiiiX_FunctionsConfig.json")
                 if raw and #raw > 2 then
                     local data = HttpService:JSONDecode(raw)
                     if data and type(data) == "table" and data.functions and type(data.functions) == "table" then
-                        Spooky.CustomFunctions = data.functions
+                        NhoiiiX.CustomFunctions = data.functions
                         loaded = true
                         if not quiet then
                             notifyToggle("Function Config: Cargado", true)
@@ -19734,7 +19734,7 @@ do
         if rebuildFunctionButtonsList then rebuildFunctionButtonsList() end
         return loaded
     end
-    _G.SpookyLoadFunctionsConfig = loadFunctionsConfig
+    _G.NhoiiiXLoadFunctionsConfig = loadFunctionsConfig
 
     local fTopCard = makeCard(FunctionsPage, "Custom Functions", "Funciones Personalizadas", 88, 2)
 
@@ -19843,10 +19843,10 @@ do
             end
         end
 
-        local count = #Spooky.CustomFunctions
+        local count = #NhoiiiX.CustomFunctions
         emptyLbl.Visible = (count == 0)
 
-        for idx, item in ipairs(Spooky.CustomFunctions) do
+        for idx, item in ipairs(NhoiiiX.CustomFunctions) do
             local row = Instance.new("Frame", fListScroll)
             row.Name = "FuncRow_" .. tostring(idx)
             row.Size = UDim2.new(1, -4, 0, 36)
@@ -19896,11 +19896,11 @@ do
                     if fn then
                         local ok, runErr = pcall(fn)
                         if not ok then
-                            warn("[Spooky Functions Error] " .. tostring(runErr))
+                            warn("[NhoiiiX Functions Error] " .. tostring(runErr))
                             addLog("[ERR] " .. tostring(runErr))
                         end
                     else
-                        warn("[Spooky Functions Compile Error] " .. tostring(err))
+                        warn("[NhoiiiX Functions Compile Error] " .. tostring(err))
                         addLog("[ERR] " .. tostring(err))
                     end
                 end)
@@ -19921,7 +19921,7 @@ do
             dStk.Thickness = 1
 
             delBtn.Activated:Connect(function()
-                table.remove(Spooky.CustomFunctions, idx)
+                table.remove(NhoiiiX.CustomFunctions, idx)
                 saveFunctionsConfig(true)
                 rebuildFunctionButtonsList()
             end)
@@ -19929,7 +19929,7 @@ do
     end
 
     local funcModal = Instance.new("Frame", MAINUIframe or PagesFolder)
-    funcModal.Name = "Spooky_FunctionCreatorModal"
+    funcModal.Name = "NhoiiiX_FunctionCreatorModal"
     funcModal.Size = UDim2.new(0, 370, 0, 250)
     funcModal.Position = UDim2.new(0.5, -185, 0.5, -125)
     funcModal.BackgroundColor3 = Color3.fromRGB(12, 12, 17)
@@ -20033,9 +20033,9 @@ do
     saveNewBtn.Activated:Connect(function()
         local fName = tostring(nameBox.Text or "")
         fName = fName:gsub("^%s+", ""):gsub("%s+$", "")
-        if fName == "" then fName = "Custom Func " .. (#Spooky.CustomFunctions + 1) end
+        if fName == "" then fName = "Custom Func " .. (#NhoiiiX.CustomFunctions + 1) end
         local fCode = tostring(codeBox.Text or "")
-        table.insert(Spooky.CustomFunctions, {
+        table.insert(NhoiiiX.CustomFunctions, {
             name = fName,
             code = fCode
         })
@@ -20045,10 +20045,10 @@ do
     end)
 
     loadFunctionsConfig(true)
-    _G.SpookyGetCustomFunctions = function() return Spooky.CustomFunctions or {} end
-    _G.SpookySetCustomFunctions = function(funcs)
+    _G.NhoiiiXGetCustomFunctions = function() return NhoiiiX.CustomFunctions or {} end
+    _G.NhoiiiXSetCustomFunctions = function(funcs)
         if type(funcs) == "table" then
-            Spooky.CustomFunctions = funcs
+            NhoiiiX.CustomFunctions = funcs
             saveFunctionsConfig(true)
             if rebuildFunctionButtonsList then rebuildFunctionButtonsList() end
         end
@@ -20074,13 +20074,13 @@ do
     })
 end
 do
-    local SpookyAIPage = createScrollPage("SpookyAI_Page", 600)
+    local NhoiiiXAIPage = createScrollPage("NhoiiiXAI_Page", 600)
     local lastGeneratedCode = ""
     local lastGeneratedFullText = ""
     local terminalLogBox = nil
     local speechStatusLbl = nil
 
-    local headerCard = makeCard(SpookyAIPage, "Spooky AI", "Spooky IA", 130, 2)
+    local headerCard = makeCard(NhoiiiXAIPage, "NhoiiiX AI", "NhoiiiX IA", 130, 2)
     local avatarFrame = Instance.new("Frame", headerCard)
     avatarFrame.Name = "AvatarFrame"
     avatarFrame.Size = UDim2.new(0, 110, 0, 110)
@@ -20111,7 +20111,7 @@ do
     titleLbl.Position = UDim2.new(0, 0, 0, 15)
     titleLbl.BackgroundTransparency = 1
     titleLbl.Font = Enum.Font.GothamBold
-    titleLbl.Text = "Spooky AI"
+    titleLbl.Text = "NhoiiiX AI"
     titleLbl.TextSize = 16
     titleLbl.TextColor3 = Color3.fromRGB(245, 245, 255)
     titleLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -20131,7 +20131,7 @@ do
         es = "Estado: En linea"
     })
 
-    local chatCard = makeCard(SpookyAIPage, "Chat & Prompt", "Chat y Preguntas", 72, 138)
+    local chatCard = makeCard(NhoiiiXAIPage, "Chat & Prompt", "Chat y Preguntas", 72, 138)
     local promptInput = Instance.new("TextBox", chatCard)
     promptInput.Size = UDim2.new(1, -120, 0, 36)
     promptInput.Position = UDim2.new(0, 10, 0, 28)
@@ -20143,7 +20143,7 @@ do
     promptInput.TextSize = 11
     promptInput.TextColor3 = Color3.fromRGB(240, 240, 250)
     promptInput.ClearTextOnFocus = false
-    styleSpookyTextBox(promptInput)
+    styleNhoiiiXTextBox(promptInput)
     Instance.new("UICorner", promptInput).CornerRadius = UDim.new(0, 6)
     local piStk = Instance.new("UIStroke", promptInput)
     piStk.Color = Color3.fromRGB(50, 50, 68)
@@ -20153,13 +20153,13 @@ do
         es = "Pregunta lo que sea (scripts, combos, dudas)..."
     })
 
-    local respCard = makeCard(SpookyAIPage, "Response Terminal", "Terminal de Respuestas", 360, 216)
+    local respCard = makeCard(NhoiiiXAIPage, "Response Terminal", "Terminal de Respuestas", 360, 216)
     terminalLogBox = Instance.new("TextBox", respCard)
     terminalLogBox.Size = UDim2.new(1, -20, 0, 270)
     terminalLogBox.Position = UDim2.new(0, 10, 0, 26)
     terminalLogBox.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
     terminalLogBox.Font = Enum.Font.Code
-    terminalLogBox.Text = (CurrentLang == "ES") and ">> [Spooky AI]: Hola! Preguntame lo que quieras. Puedo programar scripts en Luau, combos de Blox Fruits o responder cualquier duda." or ">> [Spooky AI]: Hello! Ask me anything. I can write Luau scripts, Blox Fruits combos, or answer any question."
+    terminalLogBox.Text = (CurrentLang == "ES") and ">> [NhoiiiX AI]: Hola! Preguntame lo que quieras. Puedo programar scripts en Luau, combos de Blox Fruits o responder cualquier duda." or ">> [NhoiiiX AI]: Hello! Ask me anything. I can write Luau scripts, Blox Fruits combos, or answer any question."
     terminalLogBox.TextSize = 11
     terminalLogBox.TextColor3 = Color3.fromRGB(200, 200, 215)
     terminalLogBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -20291,7 +20291,7 @@ local lp = players.LocalPlayer
 for _, p in pairs(players:GetPlayers()) do
     if p ~= lp and p.Character then
         local highlight = Instance.new("Highlight")
-        highlight.Name = "SpookyESP"
+        highlight.Name = "NhoiiiXESP"
         highlight.FillColor = Color3.fromRGB(220, 50, 120)
         highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
         highlight.FillTransparency = 0.5
@@ -20514,16 +20514,16 @@ TIER A (Strong / Meta):
         end
 
         if string.find(q, "hola") or string.find(q, "hello") or string.find(q, "hi") or string.find(q, "hey") or string.find(q, "buenas") then
-            ans = (CurrentLang == "ES") and "Hola! Soy Spooky AI, tu copiloto inteligente en Spooky Hub. ¿En que puedo ayudarte hoy? Puedo programar scripts en Luau, darte los mejores combos de Blox Fruits, guias de razas o resolver cualquier consulta general." or "Hello! I am Spooky AI, your intelligent assistant inside Spooky Hub. How can I help you today? I can write Luau scripts, give you the best Blox Fruits combos and guides, or answer any question."
+            ans = (CurrentLang == "ES") and "Hola! Soy NhoiiiX AI, tu copiloto inteligente en NhoiiiX Hub. ¿En que puedo ayudarte hoy? Puedo programar scripts en Luau, darte los mejores combos de Blox Fruits, guias de razas o resolver cualquier consulta general." or "Hello! I am NhoiiiX AI, your intelligent assistant inside NhoiiiX Hub. How can I help you today? I can write Luau scripts, give you the best Blox Fruits combos and guides, or answer any question."
             return ans, code
         end
 
         if string.find(q, "quien eres") or string.find(q, "who are you") or string.find(q, "marin") then
-            ans = (CurrentLang == "ES") and "Soy Spooky AI, la inteligencia artificial oficial integrada en Spooky Hub. Diseñada con la esencia y estetica de Gothic Spooky intelligence, estoy optimizada para ayudarte en programacion Luau para Roblox, combate y bounty hunting en Blox Fruits y cualquier duda que tengas!" or "I am Spooky AI, the official artificial intelligence built into Spooky Hub. Inspired by Gothic Spooky intelligence, I am optimized to assist you with Roblox Luau scripting, Blox Fruits PvP & mechanics, and general inquiries!"
+            ans = (CurrentLang == "ES") and "Soy NhoiiiX AI, la inteligencia artificial oficial integrada en NhoiiiX Hub. Diseñada con la esencia y estetica de Gothic NhoiiiX intelligence, estoy optimizada para ayudarte en programacion Luau para Roblox, combate y bounty hunting en Blox Fruits y cualquier duda que tengas!" or "I am NhoiiiX AI, the official artificial intelligence built into NhoiiiX Hub. Inspired by Gothic NhoiiiX intelligence, I am optimized to assist you with Roblox Luau scripting, Blox Fruits PvP & mechanics, and general inquiries!"
             return ans, code
         end
 
-        ans = (CurrentLang == "ES") and ("Entendido! Sobre tu consulta ('" .. query .. "'): Spooky AI esta procesando la informacion mas actualizada para brindarte la mejor solucion y soporte en Blox Fruits y scripting en Luau.") or ("Understood! Regarding your query ('" .. query .. "'): Spooky AI is synthesizing the best assistance for you in Blox Fruits, Luau scripting, and general knowledge.")
+        ans = (CurrentLang == "ES") and ("Entendido! Sobre tu consulta ('" .. query .. "'): NhoiiiX AI esta procesando la informacion mas actualizada para brindarte la mejor solucion y soporte en Blox Fruits y scripting en Luau.") or ("Understood! Regarding your query ('" .. query .. "'): NhoiiiX AI is synthesizing the best assistance for you in Blox Fruits, Luau scripting, and general knowledge.")
         return ans, code
     end
 
@@ -20540,7 +20540,7 @@ TIER A (Strong / Meta):
             speechStatusLbl.Text = (CurrentLang == "ES") and "Estado: Listo" or "Status: Ready"
         end
         if terminalLogBox then
-            terminalLogBox.Text = string.format(">> [USER]: %s\n\n>> [SPOOKY AI]:\n%s\n\n========================================", query, rawResponse)
+            terminalLogBox.Text = string.format(">> [USER]: %s\n\n>> [NhoiiiX AI]:\n%s\n\n========================================", query, rawResponse)
         end
     end
 
@@ -20553,7 +20553,7 @@ TIER A (Strong / Meta):
             speechStatusLbl.Text = (CurrentLang == "ES") and "Estado: Pensando..." or "Status: Thinking..."
         end
         if terminalLogBox then
-            terminalLogBox.Text = (CurrentLang == "ES") and ">> [Spooky AI]: Procesando consulta..." or ">> [Spooky AI]: Processing query..."
+            terminalLogBox.Text = (CurrentLang == "ES") and ">> [NhoiiiX AI]: Procesando consulta..." or ">> [NhoiiiX AI]: Processing query..."
         end
         task.spawn(function()
             local reqFunc = (syn and syn.request) or (http and http.request) or http_request or request
@@ -20572,7 +20572,7 @@ TIER A (Strong / Meta):
                         },
                         systemInstruction = {
                             parts = {
-                                { text = "You are Spooky AI, the official hyper-intelligent AI assistant in Spooky Hub, inspired by Marin Kitagawa. You are an expert Roblox Luau developer and Blox Fruits master. Answer smartly, clearly, warmly, and directly in the user language. If the user asks for a script, provide clean, complete, working Roblox Luau code wrapped in ```lua ... ``` blocks without any comments." }
+                                { text = "You are NhoiiiX AI, the official hyper-intelligent AI assistant in NhoiiiX Hub, inspired by Marin Kitagawa. You are an expert Roblox Luau developer and Blox Fruits master. Answer smartly, clearly, warmly, and directly in the user language. If the user asks for a script, provide clean, complete, working Roblox Luau code wrapped in ```lua ... ``` blocks without any comments." }
                             }
                         }
                     })
@@ -20689,7 +20689,7 @@ TIER A (Strong / Meta):
         lastGeneratedCode = ""
         lastGeneratedFullText = ""
         if terminalLogBox then
-            terminalLogBox.Text = (CurrentLang == "ES") and ">> [Spooky AI]: Terminal limpia. Lista para una nueva consulta." or ">> [Spooky AI]: Terminal cleared. Ready for a new query."
+            terminalLogBox.Text = (CurrentLang == "ES") and ">> [NhoiiiX AI]: Terminal limpia. Lista para una nueva consulta." or ">> [NhoiiiX AI]: Terminal cleared. Ready for a new query."
         end
         notifyToggle((CurrentLang == "ES") and "Terminal limpia" or "Terminal cleared", true)
     end)
@@ -20701,7 +20701,7 @@ do
     local editControlsBtn = nil
     local hudOverlays = {}
     local originalControlsLayout = {}
-    _G.Spooky_ControlsLayout = _G.Spooky_ControlsLayout or {}
+    _G.NhoiiiX_ControlsLayout = _G.NhoiiiX_ControlsLayout or {}
     local activeDragConns = {}
 
     local ignoredHUDNames = {
@@ -20806,7 +20806,7 @@ do
         return btns
     end    local function cleanupHudOverlays()
     _G.cleanupHudOverlays = cleanupHudOverlays
-        _G.Spooky_CleanupHudOverlays = cleanupHudOverlays
+        _G.NhoiiiX_CleanupHudOverlays = cleanupHudOverlays
         for _, ov in ipairs(hudOverlays) do
             if ov and ov.Parent then pcall(function() ov:Destroy() end) end
         end
@@ -20820,8 +20820,8 @@ do
     local function saveControlsLayoutToFile()
         pcall(function()
             if writefile then
-                local json = HttpService:JSONEncode(_G.Spooky_ControlsLayout)
-                writefile("Spooky_ControlsLayout.json", json)
+                local json = HttpService:JSONEncode(_G.NhoiiiX_ControlsLayout)
+                writefile("NhoiiiX_ControlsLayout.json", json)
             end
         end)
     end
@@ -20829,15 +20829,15 @@ do
     local function loadControlsLayoutFromFile()
         pcall(function()
             local json = nil
-            if isfile and isfile("Spooky_ControlsLayout.json") and readfile then
-                json = readfile("Spooky_ControlsLayout.json")
+            if isfile and isfile("NhoiiiX_ControlsLayout.json") and readfile then
+                json = readfile("NhoiiiX_ControlsLayout.json")
             end
             if json and json ~= "" then
                 local ok, data = pcall(function() return HttpService:JSONDecode(json) end)
                 if ok and type(data) == "table" then
-                    _G.Spooky_ControlsLayout = data
+                    _G.NhoiiiX_ControlsLayout = data
                     for _, btn in ipairs(getBloxFruitsControlButtons()) do
-                        local saved = _G.Spooky_ControlsLayout[btn.Name]
+                        local saved = _G.NhoiiiX_ControlsLayout[btn.Name]
                         if saved then
                             if saved.scaleX and saved.scaleY then
                                 btn.Position = UDim2.new(saved.scaleX, saved.offsetX or 0, saved.scaleY, saved.offsetY or 0)
@@ -20889,7 +20889,7 @@ do
         if not editOverlayBar then
             local pGui = LocalPlayer:FindFirstChild("PlayerGui") or game:GetService("CoreGui")
             local sg = Instance.new("ScreenGui")
-            sg.Name = "Spooky_HUDOverlay"
+            sg.Name = "NhoiiiX_HUDOverlay"
             sg.ResetOnSpawn = false
             sg.IgnoreGuiInset = true
             safeParent(sg)
@@ -21038,11 +21038,11 @@ do
             local c3 = UserInputService.InputEnded:Connect(function(input)
                 if dragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
                     dragging = false
-                    _G.Spooky_ControlsLayout[btn.Name] = _G.Spooky_ControlsLayout[btn.Name] or {}
-                    _G.Spooky_ControlsLayout[btn.Name].scaleX = btn.Position.X.Scale
-                    _G.Spooky_ControlsLayout[btn.Name].offsetX = btn.Position.X.Offset
-                    _G.Spooky_ControlsLayout[btn.Name].scaleY = btn.Position.Y.Scale
-                    _G.Spooky_ControlsLayout[btn.Name].offsetY = btn.Position.Y.Offset
+                    _G.NhoiiiX_ControlsLayout[btn.Name] = _G.NhoiiiX_ControlsLayout[btn.Name] or {}
+                    _G.NhoiiiX_ControlsLayout[btn.Name].scaleX = btn.Position.X.Scale
+                    _G.NhoiiiX_ControlsLayout[btn.Name].offsetX = btn.Position.X.Offset
+                    _G.NhoiiiX_ControlsLayout[btn.Name].scaleY = btn.Position.Y.Scale
+                    _G.NhoiiiX_ControlsLayout[btn.Name].offsetY = btn.Position.Y.Offset
                 end
             end)
             table.insert(activeDragConns, c1)
@@ -21058,10 +21058,10 @@ do
     end)
 
     createActionButton(editCard, "Reset Layout", "Restablecer", UDim2.new(0.48, -4, 0, 32), UDim2.new(0.5, 4, 0, 28), function()
-        if isfile and isfile("Spooky_ControlsLayout.json") and delfile then
-            pcall(function() delfile("Spooky_ControlsLayout.json") end)
+        if isfile and isfile("NhoiiiX_ControlsLayout.json") and delfile then
+            pcall(function() delfile("NhoiiiX_ControlsLayout.json") end)
         end
-        _G.Spooky_ControlsLayout = {}
+        _G.NhoiiiX_ControlsLayout = {}
         for name, pos in pairs(originalControlsLayout) do
             for _, b in ipairs(getBloxFruitsControlButtons()) do
                 if b.Name == name then b.Position = pos end
@@ -21075,8 +21075,8 @@ do
     end)
 
     local scaleCard = makeCard(HUDPage, "HUD Scale", "Escala HUD", 116, 82)
-    createSlider(scaleCard, "Button Scale", "Escala de Botones", 0.50, 2.00, (_G.Spooky_ControlsLayout and _G.Spooky_ControlsLayout.globalScale) or 1.0, true, 0.05, "x", function(val)
-        _G.Spooky_ControlsLayout.globalScale = val
+    createSlider(scaleCard, "Button Scale", "Escala de Botones", 0.50, 2.00, (_G.NhoiiiX_ControlsLayout and _G.NhoiiiX_ControlsLayout.globalScale) or 1.0, true, 0.05, "x", function(val)
+        _G.NhoiiiX_ControlsLayout.globalScale = val
         for _, btn in ipairs(getBloxFruitsControlButtons()) do
             local s = btn:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", btn)
             s.Scale = val
@@ -21086,7 +21086,7 @@ do
 
     local bsW = UDim2.new(0.23, 0, 0, 26)
     createActionButton(scaleCard, "0.80x", "0.80x", bsW, UDim2.new(0, 8, 0, 74), function()
-        _G.Spooky_ControlsLayout.globalScale = 0.80
+        _G.NhoiiiX_ControlsLayout.globalScale = 0.80
         for _, btn in ipairs(getBloxFruitsControlButtons()) do
             local s = btn:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", btn)
             s.Scale = 0.80
@@ -21095,7 +21095,7 @@ do
         notifyToggle("Button Scale: 0.80x", true)
     end)
     createActionButton(scaleCard, "1.00x", "1.00x (Def)", bsW, UDim2.new(0.25, 6, 0, 74), function()
-        _G.Spooky_ControlsLayout.globalScale = 1.00
+        _G.NhoiiiX_ControlsLayout.globalScale = 1.00
         for _, btn in ipairs(getBloxFruitsControlButtons()) do
             local s = btn:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", btn)
             s.Scale = 1.00
@@ -21104,7 +21104,7 @@ do
         notifyToggle("Button Scale: 1.00x", true)
     end)
     createActionButton(scaleCard, "1.25x", "1.25x", bsW, UDim2.new(0.50, 4, 0, 74), function()
-        _G.Spooky_ControlsLayout.globalScale = 1.25
+        _G.NhoiiiX_ControlsLayout.globalScale = 1.25
         for _, btn in ipairs(getBloxFruitsControlButtons()) do
             local s = btn:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", btn)
             s.Scale = 1.25
@@ -21113,7 +21113,7 @@ do
         notifyToggle("Button Scale: 1.25x", true)
     end)
     createActionButton(scaleCard, "1.50x", "1.50x", bsW, UDim2.new(0.75, 2, 0, 74), function()
-        _G.Spooky_ControlsLayout.globalScale = 1.50
+        _G.NhoiiiX_ControlsLayout.globalScale = 1.50
         for _, btn in ipairs(getBloxFruitsControlButtons()) do
             local s = btn:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", btn)
             s.Scale = 1.50
@@ -21126,7 +21126,7 @@ end
 do
     local ControlPeoplePage = createScrollPage("ControlPeople_Page", 900)
     _G.PlayerBlacklist = _G.PlayerBlacklist or {}
-    Spooky.Blacklist = _G.PlayerBlacklist
+    NhoiiiX.Blacklist = _G.PlayerBlacklist
 
     local isSpectatingPlr = nil
     local function stopSpectating()
@@ -21182,7 +21182,7 @@ do
     searchBox.TextSize = 11
     searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     searchBox.ClearTextOnFocus = false
-    styleSpookyTextBox(searchBox)
+    styleNhoiiiXTextBox(searchBox)
     Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0, 6)
     local sStk = Instance.new("UIStroke", searchBox)
     sStk.Color = Color3.fromRGB(44, 44, 56)
@@ -21198,7 +21198,7 @@ do
     plLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
     local refreshPlayerList = nil
-    _G.SpookyRefreshPlayerList = function()
+    _G.NhoiiiXRefreshPlayerList = function()
         if refreshPlayerList then refreshPlayerList() end
     end
     refreshPlayerList = function()
@@ -21445,7 +21445,7 @@ do
         end)
     end
 
-    Spooky.RefreshPlayerList = refreshPlayerList
+    NhoiiiX.RefreshPlayerList = refreshPlayerList
     searchBox:GetPropertyChangedSignal("Text"):Connect(function()
         searchFilter = searchBox.Text
         refreshPlayerList()
@@ -21458,7 +21458,7 @@ do
 
     createActionButton(p_card1, "Clear BL", "Limpiar BL", UDim2.new(0.25, -12, 0, 26), UDim2.new(0.75, 2, 0, 56), function()
         _G.PlayerBlacklist = {}
-        Spooky.Blacklist = _G.PlayerBlacklist
+        NhoiiiX.Blacklist = _G.PlayerBlacklist
         refreshPlayerList()
         notifyToggle("All Players Cleared from Blacklist", false)
     end)
@@ -21478,7 +21478,7 @@ do
 end
 
 do
-    if _G.SpookyStartupStage then _G.SpookyStartupStage("combat") end
+    if _G.NhoiiiXStartupStage then _G.NhoiiiXStartupStage("combat") end
     _G.CombatCache = { lastScan = 0, player = nil, npc = nil, heldSkillKeys = {} }
     local CombatCache = _G.CombatCache
     local aimbot1TargetPos = nil
@@ -21628,7 +21628,7 @@ do
 
     _G.isPlayerBlacklisted = function(p)
         if not p then return false end
-        local bl = _G.PlayerBlacklist or (Spooky and Spooky.Blacklist)
+        local bl = _G.PlayerBlacklist or (NhoiiiX and NhoiiiX.Blacklist)
         if not bl then return false end
         if bl[p] == true then return true end
         if p.UserId and (bl[p.UserId] == true or bl[tostring(p.UserId)] == true or bl[tonumber(p.UserId)] == true) then return true end
@@ -21728,13 +21728,13 @@ do
         if dist > (maxDist or 800) then return false, "out of range" end
         return true, dist, pChar
     end
-    _G.SpookyIsEnemy = isEnemy
-    _G.SpookyInSafeZone = AX_InSafeZone
-    _G.SpookyPvPAllowed = AX_ReadPvPState
+    _G.NhoiiiXIsEnemy = isEnemy
+    _G.NhoiiiXInSafeZone = AX_InSafeZone
+    _G.NhoiiiXPvPAllowed = AX_ReadPvPState
 
     _G.StickyCombat = _G.StickyCombat or { player = nil, playerObj = nil, any = nil, npc = nil }
 
-    function Spooky.AimCenter()
+    function NhoiiiX.AimCenter()
         local cam = workspace.CurrentCamera
         if not cam then return Vector2.zero end
         if Settings.aimFovOrigin == "Mouse" and not UserInputService.TouchEnabled then
@@ -21743,7 +21743,7 @@ do
         end
         return cam.ViewportSize / 2
     end
-    function Spooky.AimScore(part, distance)
+    function NhoiiiX.AimScore(part, distance)
         local cam = workspace.CurrentCamera
         local mode = Settings.aimMode or "360"
         if mode == "360" then return distance end
@@ -21756,45 +21756,45 @@ do
         local point, visible = cam:WorldToViewportPoint(part.Position)
         if not visible or point.Z <= 0 then return nil end
         local radius = math.clamp(tonumber(Settings.aimFovRadius) or 150, 20, 800)
-        local pixels = (Vector2.new(point.X, point.Y) - Spooky.AimCenter()).Magnitude
+        local pixels = (Vector2.new(point.X, point.Y) - NhoiiiX.AimCenter()).Magnitude
         return pixels <= radius and pixels or nil
     end
-    function Spooky.SelectAimPlayer(maxDist, exclude)
+    function NhoiiiX.SelectAimPlayer(maxDist, exclude)
         local best, bestScore, bestModel = nil, math.huge, nil
         local reasons = {}
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p ~= exclude then
                 local ok, valid, distance, model = pcall(isTargetPlayerCombatValid, p, maxDist or 1200)
-                if not ok then Spooky.ReportIssue("Target filter", valid); valid = false; distance = "filter error" end
+                if not ok then NhoiiiX.ReportIssue("Target filter", valid); valid = false; distance = "filter error" end
                 if Settings.aimTargetPolicy == "Selected" and tostring(p.UserId) ~= tostring(Settings.aimTargetUserId) then
                     valid = false; distance = "not selected"
                 end
                 if valid then
                     local part = model:FindFirstChild(Settings.camLockTargetPart or "HumanoidRootPart") or model:FindFirstChild("HumanoidRootPart")
-                    local score = Spooky.AimScore(part, distance)
+                    local score = NhoiiiX.AimScore(part, distance)
                     if score and score < bestScore then best, bestScore, bestModel = p, score, model end
                     if not score then distance = "outside aim area"; valid = false end
                 end
                 if not valid then reasons[distance or "unknown"] = (reasons[distance or "unknown"] or 0) + 1 end
             end
         end
-        if best then Spooky.Diagnostics.statuses.Target = best.Name
+        if best then NhoiiiX.Diagnostics.statuses.Target = best.Name
         else
             local rows = {}
             for reason, count in pairs(reasons) do table.insert(rows, reason .. "=" .. count) end
             table.sort(rows)
-            Spooky.Diagnostics.statuses.Target = "No target: " .. table.concat(rows, ", ")
+            NhoiiiX.Diagnostics.statuses.Target = "No target: " .. table.concat(rows, ", ")
         end
         return best, bestModel
     end
     local function getClosestPlayer(maxDist)
-        local player, model = Spooky.SelectAimPlayer(maxDist)
+        local player, model = NhoiiiX.SelectAimPlayer(maxDist)
         _G.StickyCombat.playerObj, _G.StickyCombat.player = player, model
         return model
     end
     _G.GetClosestPlayerCombat = getClosestPlayer
-    Spooky.IsCombatPlayerValid = isTargetPlayerCombatValid
-    _G.SpookyCombatTargetValid = isTargetPlayerCombatValid
+    NhoiiiX.IsCombatPlayerValid = isTargetPlayerCombatValid
+    _G.NhoiiiXCombatTargetValid = isTargetPlayerCombatValid
 
     local function getClosestPlayerAny(maxDist)
         return getClosestPlayer(maxDist)
@@ -21895,7 +21895,7 @@ do
         end
         return false
     end
-    _G.SpookySkillBlocked = isKeyCurrentlyBlacklisted
+    _G.NhoiiiXSkillBlocked = isKeyCurrentlyBlacklisted
     local function faceTarget(targetPos)
         if not targetPos then return end
         if FeatureStates["BlacklistAimbot"] ~= false then
@@ -21932,7 +21932,7 @@ do
             end
         end)
     end
-    _G.SpookySetSkillKey=setCurrentSkillKey
+    _G.NhoiiiXSetSkillKey=setCurrentSkillKey
     FeatureCallbacks["AimbotPlayer1"] = function(v)
         if v then
             setFeatureState("AimbotPlayer2", false); setFeatureState("AimbotNpc2", false)
@@ -21970,8 +21970,8 @@ do
         end
     end
     local function hookMobileButton(btn)
-        if not btn or btn:GetAttribute("SpookySkillSession") == SCRIPT_SESSION then return end
-        btn:SetAttribute("SpookySkillSession", SCRIPT_SESSION)
+        if not btn or btn:GetAttribute("NhoiiiXSkillSession") == SCRIPT_SESSION then return end
+        btn:SetAttribute("NhoiiiXSkillSession", SCRIPT_SESSION)
         local k = btn.Name
         if table.find(SKILL_KEYS, k) then
             registerConnection(btn.Activated:Connect(function()
@@ -22031,7 +22031,7 @@ do
     end))
 
     local tracerGui = Instance.new("ScreenGui")
-    tracerGui.Name = "SpookyTracers"
+    tracerGui.Name = "NhoiiiXTracers"
     tracerGui.ResetOnSpawn, tracerGui.IgnoreGuiInset = false, true
     tracerGui.DisplayOrder = 100
     safeParent(tracerGui)
@@ -22043,7 +22043,7 @@ do
         Green=Color3.fromRGB(80,225,140), Blue=Color3.fromRGB(80,150,255),
         Yellow=Color3.fromRGB(255,225,90), Pink=Color3.fromRGB(255,130,190), White=Color3.new(1,1,1),
     }
-    function Spooky.GetMyTracerOrigin(camera)
+    function NhoiiiX.GetMyTracerOrigin(camera)
         local char = LocalPlayer.Character
         if not char or not camera then return nil end
         local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
@@ -22057,13 +22057,13 @@ do
         local vp = camera.ViewportSize
         return Vector2.new(vp.X * 0.5, vp.Y * 0.5)
     end
-    function Spooky.ProjectTracer(camera, position)
+    function NhoiiiX.ProjectTracer(camera, position)
         if not camera or not position then return nil end
         local p, visible = camera:WorldToViewportPoint(position)
         local vp = camera.ViewportSize
         if not visible or p.Z <= 0 or vp.X < 1 or vp.Y < 1 then return nil end
         if p.X ~= p.X or p.Y ~= p.Y or p.X < 0 or p.X > vp.X or p.Y < 0 or p.Y > vp.Y then return nil end
-        local from = Spooky.GetMyTracerOrigin(camera) or Vector2.new(vp.X * 0.5, vp.Y * 0.5)
+        local from = NhoiiiX.GetMyTracerOrigin(camera) or Vector2.new(vp.X * 0.5, vp.Y * 0.5)
         local to = Vector2.new(p.X, p.Y)
         local delta = to - from
         if delta.Magnitude < 1 then return nil end
@@ -22072,13 +22072,13 @@ do
     local function hideTracers()
         for _, line in pairs(tracerFrames) do line.Visible = false end
     end
-    Spooky.HideTracers = hideTracers
+    NhoiiiX.HideTracers = hideTracers
     local function drawTracer(model, camera, color)
         local root = model and (model:FindFirstChild("UpperTorso") or model:FindFirstChild("Torso") or model:FindFirstChild("HumanoidRootPart"))
         local hum = model and model:FindFirstChildOfClass("Humanoid")
         if not root or not hum or hum.Health <= 0 then return end
         local targetPos = root.Position + Vector3.new(0, 0.4, 0)
-        local midpoint, length, angle = Spooky.ProjectTracer(camera, targetPos)
+        local midpoint, length, angle = NhoiiiX.ProjectTracer(camera, targetPos)
         if not midpoint then return end
         local line = tracerFrames[model]
         if not line then
@@ -22104,7 +22104,7 @@ do
         local aimOn = FeatureStates["Tracers1"] or FeatureStates["Tracers2"] or FeatureStates["Tracers3"]
         local allOn = FeatureStates["TracersAll"] or _G.G_ESP_Tracers == true
         if not aimOn and not allOn then return end
-        local aim = aimOn and Spooky.TracerAimModel or nil
+        local aim = aimOn and NhoiiiX.TracerAimModel or nil
         local color = colors[Settings.tracerColorName] or colors.Red
         if aim then
             local p = Players:GetPlayerFromCharacter(aim)
@@ -22138,13 +22138,13 @@ do
         if not isCurrentSession() then return end
         fovCircle.Visible = FeatureStates["AimShowFOV"] == true
         if not fovCircle.Visible then return end
-        local center = Spooky.AimCenter()
+        local center = NhoiiiX.AimCenter()
         local radius = math.clamp(tonumber(Settings.aimFovRadius) or 150,20,800)
         fovCircle.Position, fovCircle.Size = UDim2.fromOffset(center.X,center.Y),UDim2.fromOffset(radius*2,radius*2)
         fovStroke.Color = _G.CurrentAccentColor or colors.Purple
     end))
-    Spooky.CleanupCombatVisuals = function()
-        Spooky.TracerAimModel = nil
+    NhoiiiX.CleanupCombatVisuals = function()
+        NhoiiiX.TracerAimModel = nil
         tracerGui:Destroy()
         table.clear(tracerFrames)
     end
@@ -22172,8 +22172,8 @@ do
             local skills = main and main:FindFirstChild("Skills")
             if skills then
                 for _, btn in ipairs(skills:GetChildren()) do
-                    if btn:IsA("GuiButton") and btn:GetAttribute("SpookySkillSession") ~= SCRIPT_SESSION then
-                        btn:SetAttribute("SpookySkillSession", SCRIPT_SESSION)
+                    if btn:IsA("GuiButton") and btn:GetAttribute("NhoiiiXSkillSession") ~= SCRIPT_SESSION then
+                        btn:SetAttribute("NhoiiiXSkillSession", SCRIPT_SESSION)
                         local key = btn.Name
                         if table.find(SKILL_KEYS, key) then
                             btn.Activated:Connect(function()
@@ -22211,7 +22211,7 @@ do
             if p and isTargetPlayerCombatValid(p,1000) then model = p.Character end
         else model = getClosestPlayer(1000) end
         local part = model and model:FindFirstChild("HumanoidRootPart")
-        if part and Spooky.AimScore(part,0) then return part,part.Position end
+        if part and NhoiiiX.AimScore(part,0) then return part,part.Position end
     end
     FeatureCallbacks["AimbotSoru"] = function() soruUntil = 0 end
     registerConnection(UserInputService.InputBegan:Connect(function(input,processed)
@@ -22243,7 +22243,7 @@ do
 
         if currentHeldCategory == "Gun" and (key == "TAP" or key == "M1") then return nil end
         local model, position
-        if getgenv().SpookyAutoBountyRunning and getgenv().targ then
+        if getgenv().NhoiiiXAutoBountyRunning and getgenv().targ then
             local valid, _, target = isTargetPlayerCombatValid(getgenv().targ, 1200)
             if valid then model = target end
         end
@@ -22259,13 +22259,13 @@ do
         if not part or not hum or hum.Health <= 0 then return nil end
         local player = Players:GetPlayerFromCharacter(model)
         if player and not isTargetPlayerCombatValid(player, 1200) then return nil end
-        if not getgenv().SpookyAutoBountyRunning and not Spooky.AimScore(part, 0) then return nil end
+        if not getgenv().NhoiiiXAutoBountyRunning and not NhoiiiX.AimScore(part, 0) then return nil end
         return part, position or part.Position
     end
     local function readAimProperty(key)
         if key ~= "Hit" and key ~= "Target" and key ~= "UnitRay" then return false end
         local ok, part, position = pcall(queryAimPart)
-        if not ok then Spooky.ReportIssue("Aim query", part); return false end
+        if not ok then NhoiiiX.ReportIssue("Aim query", part); return false end
         if not part then return false end
         if key == "Hit" then return true, CFrame.new(position) end
         if key == "Target" then return true, part end
@@ -22276,31 +22276,31 @@ do
         return true, Ray.new(cam.CFrame.Position, direction.Unit)
     end
 
-    getgenv()._SpookyActiveNamecallHandler = nil
+    getgenv()._NhoiiiXActiveNamecallHandler = nil
     task.spawn(function()
         local ok, err = pcall(function()
             local env = getgenv()
             local wrap = type(newcclosure) == "function" and newcclosure or function(fn) return fn end
-            env._SpookyActiveIndexHandler = nil
-            if not env._SpookyOldIndex then
+            env._NhoiiiXActiveIndexHandler = nil
+            if not env._NhoiiiXOldIndex then
                 local function dispatcher(object, key)
-                    local handler = env._SpookyActiveIndexHandler
+                    local handler = env._NhoiiiXActiveIndexHandler
                     if handler then return handler(object, key) end
-                    local native = env._SpookyOldIndex
+                    local native = env._NhoiiiXOldIndex
                     if type(native) == "function" then return native(object, key) end
                     if type(native) == "table" then return native[key] end
                 end
                 if type(hookmetamethod) == "function" then
-                    env._SpookyOldIndex = hookmetamethod(rawMouse, "__index", wrap(dispatcher))
+                    env._NhoiiiXOldIndex = hookmetamethod(rawMouse, "__index", wrap(dispatcher))
                 elseif type(getrawmetatable) == "function" and type(setreadonly) == "function" then
                     local mt = getrawmetatable(rawMouse)
-                    env._SpookyOldIndex = mt.__index
+                    env._NhoiiiXOldIndex = mt.__index
                     setreadonly(mt, false); mt.__index = wrap(dispatcher); setreadonly(mt, true)
                 else error("Mouse hook API unavailable; module adapter only") end
             end
-            local native = env._SpookyOldIndex
+            local native = env._NhoiiiXOldIndex
             if type(native) ~= "function" and type(native) ~= "table" then error("Native mouse index unavailable") end
-            env._SpookyActiveIndexHandler = function(object, key)
+            env._NhoiiiXActiveIndexHandler = function(object, key)
                 if object == rawMouse and isCurrentSession() and not (checkcaller and checkcaller()) then
                     local changed, value = readAimProperty(key)
                     if changed then return value end
@@ -22308,13 +22308,13 @@ do
                 if type(native) == "function" then return native(object, key) end
                 return native[key]
             end
-            Spooky.Diagnostics.statuses["Mouse hook"] = "Installed; Hit/Target/UnitRay only"
+            NhoiiiX.Diagnostics.statuses["Mouse hook"] = "Installed; Hit/Target/UnitRay only"
         end)
-        if not ok then Spooky.ReportIssue("Mouse hook", err) end
+        if not ok then NhoiiiX.ReportIssue("Mouse hook", err) end
     end)
     task.spawn(function()
         local ok, err = pcall(function()
-            if _G.SpookyRestoreMouseAim then _G.SpookyRestoreMouseAim() end
+            if _G.NhoiiiXRestoreMouseAim then _G.NhoiiiXRestoreMouseAim() end
             local instance = ReplicatedStorage:WaitForChild("Mouse", 10)
             if not instance or not isCurrentSession() then error("Mouse module unavailable") end
             local object = require(instance)
@@ -22349,7 +22349,7 @@ do
             end
             mt.__index, mt.__newindex = ownIndex, ownNewIndex
             rawset(object, "Hit", nil); rawset(object, "Target", nil)
-            _G.SpookyRestoreMouseAim = function()
+            _G.NhoiiiXRestoreMouseAim = function()
                 if mt.__index ~= ownIndex then return end
                 if type(setreadonly) == "function" then setreadonly(mt, false) end
                 mt.__index = oldIndex
@@ -22358,9 +22358,9 @@ do
                 if type(setreadonly) == "function" then setreadonly(mt, wasReadOnly) end
             end
             if type(setreadonly) == "function" then setreadonly(mt, wasReadOnly) end
-            Spooky.Diagnostics.statuses["Mouse module"] = "Installed; original properties preserved"
+            NhoiiiX.Diagnostics.statuses["Mouse module"] = "Installed; original properties preserved"
         end)
-        if not ok then Spooky.ReportIssue("Mouse module", err) end
+        if not ok then NhoiiiX.ReportIssue("Mouse module", err) end
     end)
 
     local LastTargetVelocities = setmetatable({}, { __mode = "k" })
@@ -22390,7 +22390,7 @@ do
         end
         return pred
     end
-    _G.SpookyGetDynamicPredictedPosition = getDynamicPredictedPosition
+    _G.NhoiiiXGetDynamicPredictedPosition = getDynamicPredictedPosition
 
     CombatCache.lastScan = 0
     local combatCleanedUp = false
@@ -22405,8 +22405,8 @@ do
         if not anyCombatActive then
             if combatCleanedUp then return end
             combatCleanedUp = true
-            Spooky.TracerAimModel = nil
-            if Spooky.HideTracers then Spooky.HideTracers() end
+            NhoiiiX.TracerAimModel = nil
+            if NhoiiiX.HideTracers then NhoiiiX.HideTracers() end
             if centuHighlight and centuHighlight.Enabled then centuHighlight.Enabled = false end
             aimbot1TargetPos = nil
             _G.aimbot1TargetPos = nil
@@ -22587,7 +22587,7 @@ do
         local anyAimbotActive = aimbot1Active or aimbot2Active or aimbot3Active or FeatureStates["Tracers1"] or FeatureStates["Tracers2"] or FeatureStates["Tracers3"]
 
         local preview = getSharedPlayer()
-        Spooky.TracerAimModel = (FeatureStates["Tracers2"] and lockedAim2Char)
+        NhoiiiX.TracerAimModel = (FeatureStates["Tracers2"] and lockedAim2Char)
             or (FeatureStates["Tracers1"] and lockedAim1Char)
             or (FeatureStates["Tracers3"] and centuTargetChar) or preview
     end
@@ -22595,7 +22595,7 @@ do
     registerConnection(RunService.RenderStepped:Connect(function()
         if os.clock()<nextCombatRetry then return end
         local ok,err=pcall(combatStep)
-        if not ok then nextCombatRetry=os.clock()+1;Spooky.ReportIssue("Combat update",err) end
+        if not ok then nextCombatRetry=os.clock()+1;NhoiiiX.ReportIssue("Combat update",err) end
     end))
 end
 
@@ -22744,7 +22744,7 @@ do
 
         if _G.G_AttackPlayers then
             for _, p in ipairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character and _G.SpookyCombatTargetValid and _G.SpookyCombatTargetValid(p,1000) then
+                if p ~= LocalPlayer and p.Character and _G.NhoiiiXCombatTargetValid and _G.NhoiiiXCombatTargetValid(p,1000) then
                     local hum = p.Character:FindFirstChildOfClass("Humanoid")
                     local r = p.Character:FindFirstChild("HumanoidRootPart")
                     if hum and hum.Health > 0 and r then
@@ -22777,7 +22777,7 @@ do
                         for burst = 1, 1 do
                             local code, count = GetNextValidator()
                             if code==0 or not Validator2 or not ShootGunEvent then
-                                Spooky.ReportIssue("Gun Aura","Native validator unavailable; disabled to preserve normal shooting")
+                                NhoiiiX.ReportIssue("Gun Aura","Native validator unavailable; disabled to preserve normal shooting")
                                 setFeatureState("GunAura",false)
                                 return
                             end
@@ -22823,15 +22823,15 @@ do
                         if d < distance then closest, distance = part, d end
                     end
                     for _, player in ipairs(Players:GetPlayers()) do
-                        if _G.SpookyCombatTargetValid and _G.SpookyCombatTargetValid(player,1000) then candidate(player.Character) end
+                        if _G.NhoiiiXCombatTargetValid and _G.NhoiiiXCombatTargetValid(player,1000) then candidate(player.Character) end
                     end
                     local enemies = workspace:FindFirstChild("Enemies")
                     if enemies then for _, model in ipairs(enemies:GetChildren()) do candidate(model) end end
-                    if closest and distance > 0.01 and Spooky.TakeAttackBudget("M1",0.15) then
+                    if closest and distance > 0.01 and NhoiiiX.TakeAttackBudget("M1",0.15) then
                         remote:FireServer((closest.Position-root.Position).Unit,1,true)
                     end
                 end)
-                if not ok then Spooky.ReportIssue("Fruit aura",err) end
+                if not ok then NhoiiiX.ReportIssue("Fruit aura",err) end
             end
         end)
     end
@@ -22847,7 +22847,7 @@ do
                 if hum and hum.WalkSpeed < 16 then hum.WalkSpeed = 16 end
                 if root then
                     for _, v in ipairs(root:GetChildren()) do
-                        if (v:IsA("BodyVelocity") or v:IsA("BodyPosition")) and not v.Name:match("^Spooky_") and v.Name ~= "Keep" and v.Name ~= "RootVelocity" then v:Destroy() end
+                        if (v:IsA("BodyVelocity") or v:IsA("BodyPosition")) and not v.Name:match("^NhoiiiX_") and v.Name ~= "Keep" and v.Name ~= "RootVelocity" then v:Destroy() end
                     end
                 end
             end)
@@ -22904,8 +22904,8 @@ do
             end
             if FeatureStates["RaceSave"] then
                 local now = tick()
-                if not _G.Spooky_LastRaceSaveTick or (now - _G.Spooky_LastRaceSaveTick >= 5) then
-                    _G.Spooky_LastRaceSaveTick = now
+                if not _G.NhoiiiX_LastRaceSaveTick or (now - _G.NhoiiiX_LastRaceSaveTick >= 5) then
+                    _G.NhoiiiX_LastRaceSaveTick = now
                     pcall(function()
                         local char = LocalPlayer.Character
                         local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -23124,13 +23124,13 @@ do
         for _, part in ipairs(char:GetDescendants()) do trackPart(part) end
         flight.partAdded = char.DescendantAdded:Connect(trackPart)
         local velocity = Instance.new("BodyVelocity")
-        velocity.Name = "Spooky_FlyVelocity"
+        velocity.Name = "NhoiiiX_FlyVelocity"
         velocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
         velocity.P = 50000
         velocity.Velocity = Vector3.new(0,12,0)
         velocity.Parent = root
         local gyro = Instance.new("BodyGyro")
-        gyro.Name = "Spooky_FlyGyro"
+        gyro.Name = "NhoiiiX_FlyGyro"
         gyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
         gyro.P = 1e5
         gyro.CFrame = root.CFrame
@@ -23174,7 +23174,7 @@ do
                 if UserInputService:IsKeyDown(Enum.KeyCode.Space) or hum.Jump or os.clock() < flight.riseUntil then direction += Vector3.yAxis end
                 if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then direction -= Vector3.yAxis end
             end
-            local speed = Spooky.Runtime.number(Settings.flySpeed, 350, 10, 1000)
+            local speed = NhoiiiX.Runtime.number(Settings.flySpeed, 350, 10, 1000)
             if (flight.dashUntil or 0) > os.clock() then direction = flight.dashDirection; speed *= 1.8 end
             local desired = direction.Magnitude > 0.01 and direction.Unit * speed or Vector3.zero
             if os.clock() < flight.takeoffUntil then desired = Vector3.new(desired.X,math.max(desired.Y,12),desired.Z) end
@@ -23391,7 +23391,7 @@ do
             end
         end)
     end
-    _G.SpookyExecuteSkillSoru = executeSkillSoru
+    _G.NhoiiiXExecuteSkillSoru = executeSkillSoru
 
     local function setupAnimListener(char)
         if not char then return end
@@ -23736,7 +23736,7 @@ do
     end
     local fflag1OriginalShadows = Lighting.GlobalShadows
     local fflag1OriginalFog = Lighting.FogEnd
-    local SPOOKY_FFLAGS = {
+    local NhoiiiX_FFLAGS = {
         { "DFIntTaskSchedulerTargetFps", "240" },
         { "FFlagDisablePostFx", "True" },
         { "FIntFRMMaxGrassDistance", "0" },
@@ -23759,9 +23759,9 @@ do
         end
         return accepted, failed
     end
-    _G.SpookyApplyFastFlagsList = applyFastFlagsList
-    _G.SpookyFFlags = SPOOKY_FFLAGS
-    _G.SpookyFullFlags = SPOOKY_FFLAGS
+    _G.NhoiiiXApplyFastFlagsList = applyFastFlagsList
+    _G.NhoiiiXFFlags = NhoiiiX_FFLAGS
+    _G.NhoiiiXFullFlags = NhoiiiX_FFLAGS
 
     local flagPreset = {generation=0, originals={}}
     FeatureCallbacks["FFlag1"] = function(enabled)
@@ -23779,7 +23779,7 @@ do
             local getter = getfflag or get_fflag
             flagPreset.unrestorable = type(getter) ~= "function"
             flagPreset.originals = {}
-            for _, pair in ipairs(SPOOKY_FFLAGS) do
+            for _, pair in ipairs(NhoiiiX_FFLAGS) do
                 if type(getter) == "function" then
                     local ok, value = pcall(getter, pair[1])
                     if ok and value ~= nil then flagPreset.originals[pair[1]] = value
@@ -23790,7 +23790,7 @@ do
             pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
             if type(setfpscap) == "function" then pcall(setfpscap, 240) end
             task.spawn(function()
-                local accepted, failed = applyFastFlagsList(SPOOKY_FFLAGS, nil, function()
+                local accepted, failed = applyFastFlagsList(NhoiiiX_FFLAGS, nil, function()
                     return isCurrentSession() and flagPreset.active and flagPreset.generation == generation
                 end)
                 if flagPreset.generation == generation and flagPreset.active then
@@ -23883,7 +23883,7 @@ do
                 noGfxModifiedObjects[inst] = { Enabled = inst.Enabled }
             end
             inst.Enabled = false
-        elseif cName == "Highlight" and inst.Name ~= "CentuDox_TargetHighlight" and not string.find(inst.Name, "ESP") and not string.find(inst.Name, "Spooky") then
+        elseif cName == "Highlight" and inst.Name ~= "CentuDox_TargetHighlight" and not string.find(inst.Name, "ESP") and not string.find(inst.Name, "NhoiiiX") then
             if not noGfxModifiedObjects[inst] then
                 noGfxModifiedObjects[inst] = { Enabled = inst.Enabled }
             end
@@ -24145,7 +24145,7 @@ do
     end
     local function cleanAllESPs()
     _G.cleanAllESPs = cleanAllESPs
-        _G.Spooky_CleanAllESPs = cleanAllESPs
+        _G.NhoiiiX_CleanAllESPs = cleanAllESPs
         for p, _ in pairs(bespokeESPStore) do cleanPlayerBespokeESP(p) end
         bespokeESPStore = {}
         for p, _ in pairs(matchaESPStore) do cleanMatchaESP(p) end
@@ -24712,7 +24712,7 @@ do
             fruitESPStore = {}
         end
     end
-    _G.RebuildSpookyESPs = rebuildESPs
+    _G.RebuildNhoiiiXESPs = rebuildESPs
     local lastEspTextUpdate = 0
     local rainbowHue = 0
     RunService.RenderStepped:Connect(function(dt)
@@ -25313,7 +25313,7 @@ do
             if not activeSky or activeSky.Parent ~= Lighting then
                 if activeSky then activeSky:Destroy() end
                 activeSky = Instance.new("Sky", Lighting)
-                activeSky.Name = "Spooky_Skybox"
+                activeSky.Name = "NhoiiiX_Skybox"
                 activeSky.SkyboxBk = sb.bk
                 activeSky.SkyboxDn = sb.dn
                 activeSky.SkyboxFt = sb.ft
@@ -25381,7 +25381,7 @@ do
         end
 
         activeRainbowSky = Instance.new("Sky")
-        activeRainbowSky.Name = "Spooky_RainbowSky"
+        activeRainbowSky.Name = "NhoiiiX_RainbowSky"
         activeRainbowSky.CelestialBodiesShown = true
         activeRainbowSky.SkyboxBk = "rbxassetid://16876541778"
         activeRainbowSky.SkyboxDn = "rbxassetid://16876543880"
@@ -25394,7 +25394,7 @@ do
         local atmo = existingAtmo
         if not atmo then
             atmo = Instance.new("Atmosphere", Lighting)
-            atmo.Name = "Spooky_RainbowAtmosphere"
+            atmo.Name = "NhoiiiX_RainbowAtmosphere"
             activeRainbowAtmosphere = atmo
         end
 
@@ -25456,9 +25456,9 @@ do
     local function ensureShaders()
         if not fxCC then
             fxCC = Instance.new("ColorCorrectionEffect", Lighting)
-            fxCC.Name = "Spooky_CC"
+            fxCC.Name = "NhoiiiX_CC"
             fxBloom = Instance.new("BloomEffect", Lighting)
-            fxBloom.Name = "Spooky_Bloom"
+            fxBloom.Name = "NhoiiiX_Bloom"
         end
     end
     local SHADER_PRESETS = {
@@ -25573,10 +25573,10 @@ do
         if not fruit or not fruit.Parent then return end
         pcall(function()
             if fruit:IsA("Model") then
-                if not fruit:GetAttribute("SpookyOrigScale") then
-                    fruit:SetAttribute("SpookyOrigScale", fruit:GetScale() or 1)
+                if not fruit:GetAttribute("NhoiiiXOrigScale") then
+                    fruit:SetAttribute("NhoiiiXOrigScale", fruit:GetScale() or 1)
                 end
-                local orig = fruit:GetAttribute("SpookyOrigScale") or 1
+                local orig = fruit:GetAttribute("NhoiiiXOrigScale") or 1
                 fruit:ScaleTo(orig * targetScale)
             end
             for _, part in ipairs(fruit:GetDescendants()) do
@@ -25600,25 +25600,25 @@ do
     end
     local function restoreAllFruitScales()
     _G.restoreAllFruitScales = restoreAllFruitScales
-        _G.Spooky_RestoreFruitScales = restoreAllFruitScales
+        _G.NhoiiiX_RestoreFruitScales = restoreAllFruitScales
         pcall(function()
             for _, item in ipairs(workspace:GetChildren()) do
-                if isFruitObject(item) and item:IsA("Model") and item:GetAttribute("SpookyOrigScale") then
-                    pcall(function() item:ScaleTo(item:GetAttribute("SpookyOrigScale")) end)
+                if isFruitObject(item) and item:IsA("Model") and item:GetAttribute("NhoiiiXOrigScale") then
+                    pcall(function() item:ScaleTo(item:GetAttribute("NhoiiiXOrigScale")) end)
                 end
             end
             local fruitFolder = workspace:FindFirstChild("Fruit") or workspace:FindFirstChild("Fruits") or workspace:FindFirstChild("Items")
             if fruitFolder then
                 for _, item in ipairs(fruitFolder:GetChildren()) do
-                    if isFruitObject(item) and item:IsA("Model") and item:GetAttribute("SpookyOrigScale") then
-                        pcall(function() item:ScaleTo(item:GetAttribute("SpookyOrigScale")) end)
+                    if isFruitObject(item) and item:IsA("Model") and item:GetAttribute("NhoiiiXOrigScale") then
+                        pcall(function() item:ScaleTo(item:GetAttribute("NhoiiiXOrigScale")) end)
                     end
                 end
             end
             local function restoreTool(tool)
                 if not tool or not isFruitObject(tool) then return end
-                if tool:IsA("Model") and tool:GetAttribute("SpookyOrigScale") then
-                    pcall(function() tool:ScaleTo(tool:GetAttribute("SpookyOrigScale")) end)
+                if tool:IsA("Model") and tool:GetAttribute("NhoiiiXOrigScale") then
+                    pcall(function() tool:ScaleTo(tool:GetAttribute("NhoiiiXOrigScale")) end)
                 else
                     for _, part in ipairs(tool:GetDescendants()) do
                         if part:IsA("BasePart") and part:GetAttribute("OrigPartSize") then
@@ -25732,7 +25732,7 @@ registerConnection(UserInputService.InputBegan:Connect(function(input, gpe)
             if entry.key and entry.key ~= "None" and (input.KeyCode == entry.key or input.KeyCode.Name == entry.key or (typeof(entry.key) == "EnumItem" and input.KeyCode == entry.key)) then
                 if entry.id == "ToggleUI" then
                     if MAINUIframe then
-                        if _G.SpookyToggleUI then _G.SpookyToggleUI(input) end
+                        if _G.NhoiiiXToggleUI then _G.NhoiiiXToggleUI(input) end
                     end
                 elseif entry.mode == "Toggle" then
                     if toggleFeature then
@@ -25742,10 +25742,10 @@ registerConnection(UserInputService.InputBegan:Connect(function(input, gpe)
                     end
                 else
                     if entry.id == "MacroCombo" or entry.id == "PvPMacro" then
-                        if (Spooky.IsMacroRunning and Spooky.IsMacroRunning()) and (isSimulatingKeys or (_G.IsSyntheticKey and (_G.IsSyntheticKey(input.KeyCode) or _G.IsSyntheticKey(entry.key)))) then
+                        if (NhoiiiX.IsMacroRunning and NhoiiiX.IsMacroRunning()) and (isSimulatingKeys or (_G.IsSyntheticKey and (_G.IsSyntheticKey(input.KeyCode) or _G.IsSyntheticKey(entry.key)))) then
 
                         else
-                            if Spooky.TryMacroInput then Spooky.TryMacroInput(input) end
+                            if NhoiiiX.TryMacroInput then NhoiiiX.TryMacroInput(input) end
                         end
                     elseif entry.id == "SwitchCamLock" then
                         if FeatureCallbacks["SwitchCamLock"] then
@@ -25763,20 +25763,20 @@ registerConnection(UserInputService.InputBegan:Connect(function(input, gpe)
     end
 end))
 pcall(function()
-    if isfile and isfile("Spooky_AutoLoad_FullConfig.txt") and _G.Spooky_LoadFullConfig then
-        _G.Spooky_LoadFullConfig()
+    if isfile and isfile("NhoiiiX_AutoLoad_FullConfig.txt") and _G.NhoiiiX_LoadFullConfig then
+        _G.NhoiiiX_LoadFullConfig()
     else
-        if isfile and isfile("Spooky_AutoLoad_Macro.txt") and _G.Spooky_LoadMacroConfig then
-            _G.Spooky_LoadMacroConfig()
+        if isfile and isfile("NhoiiiX_AutoLoad_Macro.txt") and _G.NhoiiiX_LoadMacroConfig then
+            _G.NhoiiiX_LoadMacroConfig()
         end
-        if isfile and isfile("Spooky_AutoLoad_UI.txt") and _G.Spooky_LoadUIConfig then
-            _G.Spooky_LoadUIConfig()
+        if isfile and isfile("NhoiiiX_AutoLoad_UI.txt") and _G.NhoiiiX_LoadUIConfig then
+            _G.NhoiiiX_LoadUIConfig()
         end
     end
 end)
 pcall(function()
-    if isfile and isfile("ProjectSpooky_ESPConfig.json") and readfile and HttpService then
-        local raw = readfile("ProjectSpooky_ESPConfig.json")
+    if isfile and isfile("ProjectNhoiiiX_ESPConfig.json") and readfile and HttpService then
+        local raw = readfile("ProjectNhoiiiX_ESPConfig.json")
         local cfg = HttpService:JSONDecode(raw)
         if type(cfg) == "table" then
             if cfg.name ~= nil then _G.G_ESP_Name = cfg.name end
@@ -25814,18 +25814,18 @@ do
     local floatingConfigs = {}
     local savedFloatingPositions = {}
     pcall(function()
-        if isfile and readfile and isfile("ProjectSpooky_FloatingPositions.json") then
-            local data=HttpService:JSONDecode(readfile("ProjectSpooky_FloatingPositions.json"))
+        if isfile and readfile and isfile("ProjectNhoiiiX_FloatingPositions.json") then
+            local data=HttpService:JSONDecode(readfile("ProjectNhoiiiX_FloatingPositions.json"))
             if type(data)=="table" then savedFloatingPositions=data end
         end
     end)
-    if Spooky.PendingFloatingPositions then
-        for id,p in pairs(Spooky.PendingFloatingPositions) do savedFloatingPositions[id]=p end
-        Spooky.PendingFloatingPositions=nil
+    if NhoiiiX.PendingFloatingPositions then
+        for id,p in pairs(NhoiiiX.PendingFloatingPositions) do savedFloatingPositions[id]=p end
+        NhoiiiX.PendingFloatingPositions=nil
     end
 
-    local function getSpookyAccent()
-        return (_G.CurrentAccentColor or (_G.SpookyThemeAccents and CurrentTheme and _G.SpookyThemeAccents[CurrentTheme] and _G.SpookyThemeAccents[CurrentTheme].accent)) or Color3.fromRGB(140, 115, 235)
+    local function getNhoiiiXAccent()
+        return (_G.CurrentAccentColor or (_G.NhoiiiXThemeAccents and CurrentTheme and _G.NhoiiiXThemeAccents[CurrentTheme] and _G.NhoiiiXThemeAccents[CurrentTheme].accent)) or Color3.fromRGB(140, 115, 235)
     end
 
     local function createFloatingWidget(cfg)
@@ -25843,7 +25843,7 @@ do
         end
 
         local sg = Instance.new("ScreenGui")
-        sg.Name = "Spooky_Float_" .. cfg.id
+        sg.Name = "NhoiiiX_Float_" .. cfg.id
         sg.ResetOnSpawn = false
         sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         sg.DisplayOrder = 9996
@@ -25894,7 +25894,7 @@ do
 
         local function updateVisual(isActive)
             if cfg.getTitle then titleLbl.Text = cfg.getTitle() end
-            local accent = getSpookyAccent()
+            local accent = getNhoiiiXAccent()
             if cfg.isToggle then
                 cStroke.Color = isActive and accent or Color3.fromRGB(36, 36, 42)
                 cStroke.Thickness = isActive and 1.6 or 1.2
@@ -25932,13 +25932,13 @@ do
                 hasMoved = false
                 dragStart = input.Position
                 startPos = card.Position
-                local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+                local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
                 dragging = not isLocked
             end
         end)
 
         listen(UserInputService.InputChanged, function(input)
-            local isLocked = _G.SpookyLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
+            local isLocked = _G.NhoiiiXLockFloatingButtons or (FeatureStates and FeatureStates["LockFloatingButtons"])
             if isLocked then
                 dragging = false
                 return
@@ -25963,7 +25963,7 @@ do
                         end
                     else
                         pcall(function()
-                            if _G.SpookySaveFloatingPositions then _G.SpookySaveFloatingPositions() end
+                            if _G.NhoiiiXSaveFloatingPositions then _G.NhoiiiXSaveFloatingPositions() end
                         end)
                     end
                 end
@@ -25971,7 +25971,7 @@ do
         end)
     end
 
-    _G.SpookyRefreshFloatingWidgets = function()
+    _G.NhoiiiXRefreshFloatingWidgets = function()
         for id, cfg in pairs(floatingConfigs) do
             local handler = floatingSyncHandlers[id]
             if handler then handler(cfg.getActive and cfg.getActive() or false) end
@@ -25989,13 +25989,13 @@ do
         floatingCards[id] = nil
     end
 
-    _G.SpookyUpdateFloatingWidget = function(id, state)
+    _G.NhoiiiXUpdateFloatingWidget = function(id, state)
         if floatingSyncHandlers[id] then
             pcall(floatingSyncHandlers[id], state)
         end
     end
 
-    _G.SpookySaveFloatingPositions = function()
+    _G.NhoiiiXSaveFloatingPositions = function()
         pcall(function()
             local posData = table.clone(savedFloatingPositions)
             for id, card in pairs(floatingCards) do
@@ -26006,12 +26006,12 @@ do
             end
             savedFloatingPositions = posData
             if writefile then
-                writefile("ProjectSpooky_FloatingPositions.json", HttpService:JSONEncode(posData))
+                writefile("ProjectNhoiiiX_FloatingPositions.json", HttpService:JSONEncode(posData))
             end
         end)
     end
 
-    _G.SpookyGetFloatingPositions = function()
+    _G.NhoiiiXGetFloatingPositions = function()
         local posData = table.clone(savedFloatingPositions)
         for id, card in pairs(floatingCards) do
             if card and card.Parent then
@@ -26022,7 +26022,7 @@ do
         return posData
     end
 
-    _G.SpookySetFloatingPositions = function(posData)
+    _G.NhoiiiXSetFloatingPositions = function(posData)
         if type(posData) ~= "table" then return end
         for id, p in pairs(posData) do
             if type(p) ~= "table" or not tonumber(p.xs) or not tonumber(p.xo) or not tonumber(p.ys) or not tonumber(p.yo) then continue end
@@ -26032,27 +26032,27 @@ do
                 card.Position = UDim2.new(p.xs, p.xo, p.ys, p.yo)
             end
         end
-        pcall(_G.SpookySaveFloatingPositions)
+        pcall(_G.NhoiiiXSaveFloatingPositions)
     end
 
-    _G.SpookyResetFloatingPositions = function()
+    _G.NhoiiiXResetFloatingPositions = function()
         for id, card in pairs(floatingCards) do
             local def = floatingDefaultPositions[id]
             if card and card.Parent and def then
                 card.Position = def
             end
         end
-        pcall(_G.SpookySaveFloatingPositions)
+        pcall(_G.NhoiiiXSaveFloatingPositions)
     end
 
     local customControls = {}
-    local customFile = "ProjectSpooky_CustomControls.json"
+    local customFile = "ProjectNhoiiiX_CustomControls.json"
     for _, def in ipairs(_G.ALL_KEYBIND_DEFS or {}) do
         if def.mode == "Action" and (def.run or FeatureCallbacks[def.id] or def.id == "ToggleUI") then
-            Spooky.ControlCatalog["Action:" .. def.id] = {
+            NhoiiiX.ControlCatalog["Action:" .. def.id] = {
                 en=def.name,es=def.name,page="Keybinds",isToggle=false,
                 run=function()
-                    if def.id == "ToggleUI" and _G.SpookyToggleUI then _G.SpookyToggleUI()
+                    if def.id == "ToggleUI" and _G.NhoiiiXToggleUI then _G.NhoiiiXToggleUI()
                     elseif def.run then def.run()
                     elseif FeatureCallbacks[def.id] then FeatureCallbacks[def.id](true) end
                 end,
@@ -26068,12 +26068,12 @@ do
         table.sort(ids)
         if writefile then
             local ok, err = pcall(writefile, customFile, HttpService:JSONEncode(ids))
-            if not ok then warn("[Spooky] Cannot save custom controls: " .. tostring(err)) end
+            if not ok then warn("[NhoiiiX] Cannot save custom controls: " .. tostring(err)) end
         end
         return ids
     end
     local function setCustomControl(id, enabled, quiet)
-        local entry = Spooky.ControlCatalog[id]
+        local entry = NhoiiiX.ControlCatalog[id]
         if not entry then return end
         local widgetId = "Custom_" .. id
         if enabled then
@@ -26089,7 +26089,7 @@ do
                 onTrigger=function(refresh)
                     if not isCurrentSession() then return end
                     local ok, err = pcall(entry.run)
-                    if not ok then warn("[Spooky] " .. entry.en .. ": " .. tostring(err)) end
+                    if not ok then warn("[NhoiiiX] " .. entry.en .. ": " .. tostring(err)) end
                     refresh(entry.isToggle and FeatureStates[entry.feature] == true)
                 end,
             })
@@ -26099,15 +26099,15 @@ do
         end
         if not quiet then persistCustomControls() end
     end
-    _G.SpookyGetCustomControls = function()
+    _G.NhoiiiXGetCustomControls = function()
         local ids = {}
         for id in pairs(customControls) do table.insert(ids,id) end
         table.sort(ids)
         return ids
     end
-    _G.SpookySetCustomControls = function(ids)
+    _G.NhoiiiXSetCustomControls = function(ids)
         if type(ids) ~= "table" then return end
-        local previous = _G.SpookyGetCustomControls()
+        local previous = _G.NhoiiiXGetCustomControls()
         for _, id in ipairs(previous) do setCustomControl(id,false,true) end
         local seen = {}
         for _, id in ipairs(ids) do
@@ -26115,16 +26115,16 @@ do
         end
         persistCustomControls()
     end
-    _G.SpookySyncCustomControl = function(feature)
+    _G.NhoiiiXSyncCustomControl = function(feature)
         for id in pairs(customControls) do
-            local entry = Spooky.ControlCatalog[id]
+            local entry = NhoiiiX.ControlCatalog[id]
             if entry and entry.feature == feature then
-                _G.SpookyUpdateFloatingWidget("Custom_" .. id, FeatureStates[feature] == true)
+                _G.NhoiiiXUpdateFloatingWidget("Custom_" .. id, FeatureStates[feature] == true)
             end
         end
     end
     local picker, rebuildPicker
-    _G.SpookyOpenControlPicker = function()
+    _G.NhoiiiXOpenControlPicker = function()
         if picker and picker.Parent then picker:Destroy(); picker=nil; return end
         picker = Instance.new("Frame", MAINUIframe)
         picker.Name = "CustomControlPicker"
@@ -26137,7 +26137,7 @@ do
         picker.Active = true
         Instance.new("UICorner",picker).CornerRadius=UDim.new(0,12)
         local border=Instance.new("UIStroke",picker)
-        border.Color=getSpookyAccent()
+        border.Color=getNhoiiiXAccent()
         local search=Instance.new("TextBox",picker)
         search.Position=UDim2.fromOffset(12,12)
         search.Size=UDim2.new(1,-64,0,32)
@@ -26167,11 +26167,11 @@ do
             if not picker or not picker.Parent then return end
             local placeholders={EN="Search a function…",ES="Buscar una función…",PT="Buscar função…",FR="Rechercher une fonction…",TL="Maghanap ng function…"}
             search.PlaceholderText=placeholders[CurrentLang] or placeholders.EN
-            border.Color=getSpookyAccent()
+            border.Color=getNhoiiiXAccent()
             list:ClearAllChildren()
             local entries={}
             local query=search.Text:lower()
-            for id, entry in pairs(Spooky.ControlCatalog) do
+            for id, entry in pairs(NhoiiiX.ControlCatalog) do
                 local title=controlTitle(entry)
                 if id ~= "Action:CustomControlPicker" and (query=="" or (title .. " " .. entry.en .. " " .. entry.page):lower():find(query,1,true)) then
                     table.insert(entries,{id=id,entry=entry,title=title})
@@ -26183,7 +26183,7 @@ do
                 row.Size=UDim2.new(1,-8,0,34)
                 row.Position=UDim2.fromOffset(0,(i-1)*38)
                 row.BackgroundColor3=Color3.fromRGB(28,28,39)
-                row.TextColor3=customControls[item.id] and getSpookyAccent() or Color3.fromRGB(230,230,240)
+                row.TextColor3=customControls[item.id] and getNhoiiiXAccent() or Color3.fromRGB(230,230,240)
                 row.TextSize=12
                 row.Font=Enum.Font.Gotham
                 row.TextXAlignment=Enum.TextXAlignment.Left
@@ -26200,17 +26200,17 @@ do
         search:GetPropertyChangedSignal("Text"):Connect(rebuildPicker)
         rebuildPicker()
     end
-    _G.SpookyRefreshControlPicker = function() if rebuildPicker then rebuildPicker() end end
-    if Spooky.PendingCustomControls then
-        _G.SpookySetCustomControls(Spooky.PendingCustomControls)
-        Spooky.PendingCustomControls=nil
+    _G.NhoiiiXRefreshControlPicker = function() if rebuildPicker then rebuildPicker() end end
+    if NhoiiiX.PendingCustomControls then
+        _G.NhoiiiXSetCustomControls(NhoiiiX.PendingCustomControls)
+        NhoiiiX.PendingCustomControls=nil
     elseif isfile and readfile and isfile(customFile) then
         local ok,ids=pcall(function() return HttpService:JSONDecode(readfile(customFile)) end)
-        if ok and type(ids)=="table" then _G.SpookySetCustomControls(ids) end
+        if ok and type(ids)=="table" then _G.NhoiiiXSetCustomControls(ids) end
     end
 
     FeatureCallbacks["LockFloatingButtons"] = function(v)
-        _G.SpookyLockFloatingButtons = v
+        _G.NhoiiiXLockFloatingButtons = v
         notifyToggle((CurrentLang == "ES") and ("Bloquear Botones: " .. (v and "ACTIVADO" or "DESACTIVADO")) or ("Lock Floating Buttons: " .. (v and "LOCKED" or "UNLOCKED")), v)
     end
 
@@ -26279,8 +26279,8 @@ do
                 onTrigger = function(updateVisual)
                     local nextState = not (FeatureStates["AutoV4"] == true)
                     setFeatureState("AutoV4", nextState)
-                    if _G.SpookyTriggerAwakeningV4 then
-                        _G.SpookyTriggerAwakeningV4(true)
+                    if _G.NhoiiiXTriggerAwakeningV4 then
+                        _G.NhoiiiXTriggerAwakeningV4(true)
                     end
                     updateVisual(nextState)
                 end
@@ -26309,7 +26309,7 @@ do
         Color = Color3.fromRGB(255, 30, 30),
         NPCs = false
     }
-    _G.SpookyHitbox = HitboxSettings
+    _G.NhoiiiXHitbox = HitboxSettings
 
     local OriginalHeadProps = {}
     local SelectionBoxes = {}
@@ -26351,7 +26351,7 @@ do
         local sb = SelectionBoxes[model]
         if not sb or not sb.Parent then
             sb = Instance.new("SelectionBox")
-            sb.Name = "SpookyHitboxSelection"
+            sb.Name = "NhoiiiXHitboxSelection"
             sb.Color3 = HitboxSettings.Color
             sb.SurfaceColor3 = HitboxSettings.Color
             sb.SurfaceTransparency = 0.72
@@ -26466,7 +26466,7 @@ do
     FeatureCallbacks["HitboxExpander"] = function(v)
         Settings.hitboxExpander = (v == true)
         HitboxSettings.Enabled = (v == true)
-        if _G.SpookySetHitboxExpander then _G.SpookySetHitboxExpander(v) end
+        if _G.NhoiiiXSetHitboxExpander then _G.NhoiiiXSetHitboxExpander(v) end
         if v then
             scanAndExpandAll()
         else
@@ -26487,15 +26487,15 @@ do
 end
 
 for name, enabled in pairs(FeatureStates) do
-    if enabled and FeatureCallbacks[name] and Spooky.AppliedFeatures[name] ~= FeatureCallbacks[name] then
+    if enabled and FeatureCallbacks[name] and NhoiiiX.AppliedFeatures[name] ~= FeatureCallbacks[name] then
         setFeatureState(name,true)
     end
 end
 if applyLanguage then
     pcall(function()
         local savedLang = "EN"
-        if isfile and isfile("spooky_lang.txt") and readfile then
-            local sl = string.upper(string.gsub(readfile("spooky_lang.txt") or "", "%s+", ""))
+        if isfile and isfile("NhoiiiX_lang.txt") and readfile then
+            local sl = string.upper(string.gsub(readfile("NhoiiiX_lang.txt") or "", "%s+", ""))
             if sl == "EN" or sl == "ES" or sl == "PT" or sl == "TL" or sl == "FR" then
                 savedLang = sl
             end
@@ -26521,5 +26521,5 @@ task.spawn(function()
     end)
 end)
 
-if _G.SpookyFinishStartup then _G.SpookyFinishStartup() end
+if _G.NhoiiiXFinishStartup then _G.NhoiiiXFinishStartup() end
 return ScreenGui
