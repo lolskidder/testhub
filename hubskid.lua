@@ -4914,7 +4914,7 @@ MainButton.Size = UDim2.new(0, 55, 0, 55)
 
 MainButton.Position = UDim2.new(0, 10, 1, -58)
 
-MainButton.Image = "rbxassetid://81213277023664"
+MainButton.Image = "rbxassetid://70895505430795"
 
 MainButton.AutoButtonColor = false
 
