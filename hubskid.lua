@@ -5166,7 +5166,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlred
 
 local Window = Library:MakeWindow({
 
-    Title = "Redz Hub [ BETA ACCESS ] : Blox Fruits ",
+    Title = "NhoiiiX Hub | Blox Fruits ",
 
     SubTitle = "",
 
@@ -5336,7 +5336,7 @@ Player = Window:MakeTab({
 
 Discord:AddDiscordInvite({
 
-	Title = "SkiringX Hub",
+	Title = "NhoiiiX Hub",
 
 	Description = "A Best New Script",
 
