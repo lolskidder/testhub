@@ -259,7 +259,7 @@ do
     aura.Size = UDim2.new(0, 68, 0, 68)
     aura.Position = UDim2.new(0, 26, 0, 22)
     aura.BackgroundTransparency = 1
-    aura.Image = "rbxassetid://70895505430795"
+    aura.Image = ""
     aura.ImageColor3 = Color3.fromRGB(165, 120, 255)
     aura.ImageTransparency = 0.55
     Instance.new("UICorner", aura).CornerRadius = UDim.new(1, 0)
@@ -269,7 +269,7 @@ do
     logo.Size = UDim2.new(0, 56, 0, 56)
     logo.Position = UDim2.new(0, 32, 0, 28)
     logo.BackgroundTransparency = 1
-    logo.Image = "rbxassetid://70895505430795"
+    logo.Image = ""
     logo.ImageColor3 = Color3.fromRGB(245, 240, 255)
     Instance.new("UICorner", logo).CornerRadius = UDim.new(1, 0)
 
@@ -448,7 +448,7 @@ do
         if finished then return end
         finished = true
         pulsing = false
-        setProgress(100, 0.22, es and "Tu espacio esta listo!" or "Your workspace is ready!", "NHOIIIX / READY")
+        setProgress(100, 0.22, es and "Tu espacio esta listo!" or "Your workspace is ready!", "NhoiiiX / READY")
         pctLbl.TextColor3 = Color3.fromRGB(120, 255, 180)
         TweenService:Create(spark, TweenInfo.new(0.2), { BackgroundColor3 = Color3.fromRGB(120, 255, 180) }):Play()
 
@@ -860,8 +860,8 @@ local function updateToggleVisual(name, active)
                 TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 200, 215)
             }):Play()
         end
-        if data.nhoiiiXIcon then
-            TweenService:Create(data.nhoiiiXIcon, TweenInfo.new(0.18), {
+        if data.NhoiiiXIcon then
+            TweenService:Create(data.NhoiiiXIcon, TweenInfo.new(0.18), {
                 ImageColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(140, 140, 160)
             }):Play()
         end
@@ -1198,47 +1198,47 @@ NhoiiiX.UI.screen=ScreenGui
 
     local initNhoiiiXColor = _G.CurrentAccentColor or Color3.fromRGB(165, 80, 255)
 
-    local nhoiiiXFireAura = Instance.new("ImageLabel", MAINUIframe)
-    nhoiiiXFireAura.Name = "nhoiiiXFireAura"
-    nhoiiiXFireAura.Size = UDim2.new(0, 88, 0, 88)
-    nhoiiiXFireAura.Position = UDim2.new(0, 20, 0, 6)
-    nhoiiiXFireAura.BackgroundTransparency = 1
-    nhoiiiXFireAura.BorderSizePixel = 0
-    nhoiiiXFireAura.ZIndex = 7
-    nhoiiiXFireAura.Image = "rbxassetid://124747708335361"
-    nhoiiiXFireAura.ImageColor3 = initNhoiiiXColor
-    nhoiiiXFireAura.ImageTransparency = 0.65
-    nhoiiiXFireAura.ScaleType = Enum.ScaleType.Stretch
-    Instance.new("UICorner", nhoiiiXFireAura).CornerRadius = UDim.new(0.5, 0)
-    _G.NhoiiiXThemedElements.nhoiiiXFireAura = nhoiiiXFireAura
+    local NhoiiiXFireAura = Instance.new("ImageLabel", MAINUIframe)
+    NhoiiiXFireAura.Name = "NhoiiiXFireAura"
+    NhoiiiXFireAura.Size = UDim2.new(0, 88, 0, 88)
+    NhoiiiXFireAura.Position = UDim2.new(0, 20, 0, 6)
+    NhoiiiXFireAura.BackgroundTransparency = 1
+    NhoiiiXFireAura.BorderSizePixel = 0
+    NhoiiiXFireAura.ZIndex = 7
+    NhoiiiXFireAura.Image = "rbxassetid://124747708335361"
+    NhoiiiXFireAura.ImageColor3 = initNhoiiiXColor
+    NhoiiiXFireAura.ImageTransparency = 0.65
+    NhoiiiXFireAura.ScaleType = Enum.ScaleType.Stretch
+    Instance.new("UICorner", NhoiiiXFireAura).CornerRadius = UDim.new(0.5, 0)
+    _G.NhoiiiXThemedElements.NhoiiiXFireAura = NhoiiiXFireAura
 
-    local nhoiiiXAuraStroke = Instance.new("UIStroke", nhoiiiXFireAura)
-    nhoiiiXAuraStroke.Thickness = 3.0
-    nhoiiiXAuraStroke.Transparency = 0.6
-    nhoiiiXAuraStroke.Color = initNhoiiiXColor
-    _G.NhoiiiXThemedElements.nhoiiiXAuraStroke = nhoiiiXAuraStroke
+    local NhoiiiXAuraStroke = Instance.new("UIStroke", NhoiiiXFireAura)
+    NhoiiiXAuraStroke.Thickness = 3.0
+    NhoiiiXAuraStroke.Transparency = 0.6
+    NhoiiiXAuraStroke.Color = initNhoiiiXColor
+    _G.NhoiiiXThemedElements.NhoiiiXAuraStroke = NhoiiiXAuraStroke
 
-    local nhoiiiXIcon = Instance.new("ImageLabel", MAINUIframe)
-    nhoiiiXIcon.Name = "nhoiiiX icon (do not change this icon)"
-    nhoiiiXIcon.Size = UDim2.new(0, 80, 0, 80)
-    nhoiiiXIcon.Position = UDim2.new(0, 24, 0, 10)
-    nhoiiiXIcon.BackgroundTransparency = 1
-    nhoiiiXIcon.BorderSizePixel = 0
-    nhoiiiXIcon.ZIndex = 8
-    nhoiiiXIcon.Visible = true
-    nhoiiiXIcon.Active = false
-    nhoiiiXIcon.Image = "rbxassetid://124747708335361"
-    nhoiiiXIcon.ImageColor3 = initNhoiiiXColor
-    nhoiiiXIcon.ScaleType = Enum.ScaleType.Stretch
-    Instance.new("UICorner", nhoiiiXIcon).CornerRadius = UDim.new(0.5, 0)
-    _G.NhoiiiXThemedElements.nhoiiiXIcon = nhoiiiXIcon
+    local NhoiiiXIcon = Instance.new("ImageLabel", MAINUIframe)
+    NhoiiiXIcon.Name = "NhoiiiX icon (do not change this icon)"
+    NhoiiiXIcon.Size = UDim2.new(0, 80, 0, 80)
+    NhoiiiXIcon.Position = UDim2.new(0, 24, 0, 10)
+    NhoiiiXIcon.BackgroundTransparency = 1
+    NhoiiiXIcon.BorderSizePixel = 0
+    NhoiiiXIcon.ZIndex = 8
+    NhoiiiXIcon.Visible = true
+    NhoiiiXIcon.Active = false
+    NhoiiiXIcon.Image = "rbxassetid://124747708335361"
+    NhoiiiXIcon.ImageColor3 = initNhoiiiXColor
+    NhoiiiXIcon.ScaleType = Enum.ScaleType.Stretch
+    Instance.new("UICorner", NhoiiiXIcon).CornerRadius = UDim.new(0.5, 0)
+    _G.NhoiiiXThemedElements.NhoiiiXIcon = NhoiiiXIcon
 
-    local nhoiiiXIconStroke = Instance.new("UIStroke", nhoiiiXIcon)
-    nhoiiiXIconStroke.Name = "nhoiiiXIconGlow"
-    nhoiiiXIconStroke.Thickness = 2.0
-    nhoiiiXIconStroke.Transparency = 0.35
-    nhoiiiXIconStroke.Color = initNhoiiiXColor
-    _G.NhoiiiXThemedElements.nhoiiiXIconStroke = nhoiiiXIconStroke
+    local NhoiiiXIconStroke = Instance.new("UIStroke", NhoiiiXIcon)
+    NhoiiiXIconStroke.Name = "NhoiiiXIconGlow"
+    NhoiiiXIconStroke.Thickness = 2.0
+    NhoiiiXIconStroke.Transparency = 0.35
+    NhoiiiXIconStroke.Color = initNhoiiiXColor
+    _G.NhoiiiXThemedElements.NhoiiiXIconStroke = NhoiiiXIconStroke
 
     local function playNhoiiiXFloat()
         pcall(function()
@@ -1246,27 +1246,27 @@ NhoiiiX.UI.screen=ScreenGui
             if _G.NhoiiiXTiltTween then pcall(function() _G.NhoiiiXTiltTween:Cancel() end) end
             if _G.NhoiiiXAuraTween then pcall(function() _G.NhoiiiXAuraTween:Cancel() end) end
 
-            nhoiiiXIcon.Position = UDim2.new(0, 24, 0, 10)
-            nhoiiiXIcon.Rotation = 0
-            nhoiiiXFireAura.Position = UDim2.new(0, 20, 0, 6)
-            nhoiiiXFireAura.Size = UDim2.new(0, 88, 0, 88)
-            nhoiiiXFireAura.ImageTransparency = 0.55
+            NhoiiiXIcon.Position = UDim2.new(0, 24, 0, 10)
+            NhoiiiXIcon.Rotation = 0
+            NhoiiiXFireAura.Position = UDim2.new(0, 20, 0, 6)
+            NhoiiiXFireAura.Size = UDim2.new(0, 88, 0, 88)
+            NhoiiiXFireAura.ImageTransparency = 0.55
         end)
     end
     playNhoiiiXFloat()
     _G.NhoiiiXPlayFloatAnimation = playNhoiiiXFloat
 
-    local nhoiiiXLbl = Instance.new("TextLabel", MAINUIframe)
-    _G.NhoiiiXThemedElements.nhoiiiXLbl = nhoiiiXLbl
-    nhoiiiXLbl.Name = "nhoiiiX (do not change this name)"
-    nhoiiiXLbl.Size = UDim2.new(0, 128, 0, 24)
-    nhoiiiXLbl.Position = UDim2.new(0, 0, 0, 96)
-    nhoiiiXLbl.BackgroundTransparency = 1
-    nhoiiiXLbl.Font = Enum.Font.GothamBold
-    nhoiiiXLbl.Text = "NHOIIIX"
-    nhoiiiXLbl.TextSize = 15
-    nhoiiiXLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    nhoiiiXLbl.TextXAlignment = Enum.TextXAlignment.Center
+    local NhoiiiXLbl = Instance.new("TextLabel", MAINUIframe)
+    _G.NhoiiiXThemedElements.NhoiiiXLbl = NhoiiiXLbl
+    NhoiiiXLbl.Name = "NhoiiiX (do not change this name)"
+    NhoiiiXLbl.Size = UDim2.new(0, 128, 0, 24)
+    NhoiiiXLbl.Position = UDim2.new(0, 0, 0, 96)
+    NhoiiiXLbl.BackgroundTransparency = 1
+    NhoiiiXLbl.Font = Enum.Font.GothamBold
+    NhoiiiXLbl.Text = "NhoiiiX"
+    NhoiiiXLbl.TextSize = 15
+    NhoiiiXLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NhoiiiXLbl.TextXAlignment = Enum.TextXAlignment.Center
 
     local rightSideImg = Instance.new("Frame", MAINUIframe)
     _G.NhoiiiXThemedElements.rightSideImg = rightSideImg
@@ -1434,7 +1434,7 @@ NhoiiiX.UI.screen=ScreenGui
     titleBanner.Position = UDim2.new(0, 135, 0, 6)
     titleBanner.BackgroundTransparency = 1
     titleBanner.BorderSizePixel = 0
-    titleBanner.Image = ""
+    titleBanner.Image = "rbxassetid://"
     titleBanner.ScaleType = Enum.ScaleType.Fit
     titleBanner.ImageColor3 = Color3.fromRGB(255, 255, 255)
     titleBanner.ZIndex = 5
@@ -1695,7 +1695,7 @@ NhoiiiX.UI.screen=ScreenGui
             return "Home"
         elseif norm == "combat" or norm == "combate" or norm == "pvp" then
             return "Combat"
-        elseif norm == "nhoiiiXbounty" or norm == "autobounty" or norm == "bounty" or norm == "nhoiiiX_bounty" or norm == "auto_bounty" then
+        elseif norm == "NhoiiiXbounty" or norm == "autobounty" or norm == "bounty" or norm == "NhoiiiX_bounty" or norm == "auto_bounty" then
             return "NhoiiiXBounty"
         elseif norm == "kitsunebounty" or norm == "kitautobounty" or norm == "kitbounty" or norm == "kitsune" then
             return "NhoiiiXBounty"
@@ -2298,17 +2298,17 @@ local function makeCard(parent, titleEN, titleES, h, y)
     cardTop.BackgroundTransparency = 1
     cardTop.BorderSizePixel = 0
 
-    local nhoiiiXHeaderIcon = Instance.new("ImageLabel", cardTop)
-    nhoiiiXHeaderIcon.Name = "HeaderEmblem"
-    nhoiiiXHeaderIcon.Size = UDim2.new(0, 13, 0, 13)
-    nhoiiiXHeaderIcon.Position = UDim2.new(0, 8, 0.5, -6.5)
-    nhoiiiXHeaderIcon.BackgroundTransparency = 1
-    nhoiiiXHeaderIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or "rbxassetid://124747708335361"
-    nhoiiiXHeaderIcon.ImageColor3 = Color3.fromRGB(200, 210, 235)
-    nhoiiiXHeaderIcon.ZIndex = 3
-    Instance.new("UICorner", nhoiiiXHeaderIcon).CornerRadius = UDim.new(1, 0)
+    local NhoiiiXHeaderIcon = Instance.new("ImageLabel", cardTop)
+    NhoiiiXHeaderIcon.Name = "HeaderEmblem"
+    NhoiiiXHeaderIcon.Size = UDim2.new(0, 13, 0, 13)
+    NhoiiiXHeaderIcon.Position = UDim2.new(0, 8, 0.5, -6.5)
+    NhoiiiXHeaderIcon.BackgroundTransparency = 1
+    NhoiiiXHeaderIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or "rbxassetid://124747708335361"
+    NhoiiiXHeaderIcon.ImageColor3 = Color3.fromRGB(200, 210, 235)
+    NhoiiiXHeaderIcon.ZIndex = 3
+    Instance.new("UICorner", NhoiiiXHeaderIcon).CornerRadius = UDim.new(1, 0)
     if _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.AllHeaderEmblems then
-        table.insert(_G.NhoiiiXThemedElements.AllHeaderEmblems, nhoiiiXHeaderIcon)
+        table.insert(_G.NhoiiiXThemedElements.AllHeaderEmblems, NhoiiiXHeaderIcon)
     end
 
     local hdr = Instance.new("TextLabel", cardTop)
@@ -2396,7 +2396,7 @@ local function createToggleButton(parent, name, textEN, textES, size, pos, isSub
     ToggleButtons[name] = {
         btn = btn,
         txtLbl = txtLbl,
-        nhoiiiXIcon = nil,
+        NhoiiiXIcon = nil,
         iconStk = nil,
         btnStk = btnStk,
         switchPill = switchPill,
@@ -2760,7 +2760,7 @@ local TAB_TRANSLATIONS = {
 local UI_DICTIONARY = {
     ["+ ADD KEYBIND"] = { PT = "+ ADICIONAR TECLA", TL = "+ MAGDAGDAG NG KEYBIND", FR = "+ AJOUTER RACCOURCI", ES = "+ AGREGAR KEYBIND", EN = "+ ADD KEYBIND" },
     ["+ AGREGAR KEYBIND"] = { PT = "+ ADICIONAR TECLA", TL = "+ MAGDAGDAG NG KEYBIND", FR = "+ AJOUTER RACCOURCI", ES = "+ AGREGAR KEYBIND", EN = "+ ADD KEYBIND" },
-    [":nhoiiiX vfx:"] = { PT = ":nhoiiiX vfx:", TL = ":nhoiiiX vfx:", FR = ":nhoiiiX vfx:", ES = ":nhoiiiX vfx:", EN = ":nhoiiiX vfx:" },
+    [":NhoiiiX vfx:"] = { PT = ":NhoiiiX vfx:", TL = ":NhoiiiX vfx:", FR = ":NhoiiiX vfx:", ES = ":NhoiiiX vfx:", EN = ":NhoiiiX vfx:" },
     ["ABRIR PESTANA KEYBINDS"] = { PT = "ABRIR ABA DE TECLAS E ATALHOS ->", TL = "BUKSAN ANG TAB NG KEYBINDS ->", FR = "OUVRIR ONGLET RACCOURCIS ->", ES = "ABRIR PESTANA KEYBINDS", EN = "OPEN KEYBINDS & SHORTCUTS TAB ->" },
     ["APLICAR POR ID"] = { PT = "APLICAR POR ID", TL = "ILAPAT GAMIT ANG ID", FR = "APPLIQUER PAR ID", ES = "APLICAR POR ID", EN = "APPLY BY ID" },
     ["APPLY BY ID"] = { PT = "APLICAR POR ID", TL = "ILAPAT GAMIT ANG ID", FR = "APPLIQUER PAR ID", ES = "APLICAR POR ID", EN = "APPLY BY ID" },
@@ -3336,7 +3336,7 @@ applyLanguage = function(lang, silent)
     if _G.NhoiiiXRefreshFloatingWidgets then _G.NhoiiiXRefreshFloatingWidgets() end
     if _G.NhoiiiXRefreshControlPicker then _G.NhoiiiXRefreshControlPicker() end
     pcall(function()
-        if writefile then writefile("nhoiiiX_lang.txt", CurrentLang) end
+        if writefile then writefile("NhoiiiX_lang.txt", CurrentLang) end
     end)
 
     if NavButtons then
@@ -7212,12 +7212,12 @@ do
             if el then
                 if el.titleBanner then el.titleBanner.ImageColor3 = th.accent end
 
-                if el.nhoiiiXIcon and el.nhoiiiXIcon.Parent then el.nhoiiiXIcon.ImageColor3 = th.accent end
-                if el.nhoiiiXIconStroke and el.nhoiiiXIconStroke.Parent then el.nhoiiiXIconStroke.Color = th.accent end
-                if el.nhoiiiXFireAura and el.nhoiiiXFireAura.Parent then el.nhoiiiXFireAura.ImageColor3 = th.accent end
-                if el.nhoiiiXAuraStroke and el.nhoiiiXAuraStroke.Parent then el.nhoiiiXAuraStroke.Color = th.accent end
+                if el.NhoiiiXIcon and el.NhoiiiXIcon.Parent then el.NhoiiiXIcon.ImageColor3 = th.accent end
+                if el.NhoiiiXIconStroke and el.NhoiiiXIconStroke.Parent then el.NhoiiiXIconStroke.Color = th.accent end
+                if el.NhoiiiXFireAura and el.NhoiiiXFireAura.Parent then el.NhoiiiXFireAura.ImageColor3 = th.accent end
+                if el.NhoiiiXAuraStroke and el.NhoiiiXAuraStroke.Parent then el.NhoiiiXAuraStroke.Color = th.accent end
 
-                if el.nhoiiiXLbl then el.nhoiiiXLbl.TextColor3 = th.accent end
+                if el.NhoiiiXLbl then el.NhoiiiXLbl.TextColor3 = th.accent end
 
                 if el.CloseBtn then el.CloseBtn.TextColor3 = th.accent end
                 if el.MinimizeBtn then el.MinimizeBtn.TextColor3 = th.accent end
@@ -7463,9 +7463,9 @@ do
                     if isfile("ProjectNhoiiiX_QuickToggles.json") then delfile("ProjectNhoiiiX_QuickToggles.json") end
                     if isfile("ProjectNhoiiiX_PCKeybinds.json") then delfile("ProjectNhoiiiX_PCKeybinds.json") end
                     if isfile("ProjectNhoiiiX_ESPConfig.json") then delfile("ProjectNhoiiiX_ESPConfig.json") end
-                    if isfile("nhoiiiX_ui_config.txt") then delfile("nhoiiiX_ui_config.txt") end
-                    if isfile("nhoiiiX_theme.txt") then delfile("nhoiiiX_theme.txt") end
-                    if isfile("nhoiiiX_config.txt") then delfile("nhoiiiX_config.txt") end
+                    if isfile("NhoiiiX_ui_config.txt") then delfile("NhoiiiX_ui_config.txt") end
+                    if isfile("NhoiiiX_theme.txt") then delfile("NhoiiiX_theme.txt") end
+                    if isfile("NhoiiiX_config.txt") then delfile("NhoiiiX_config.txt") end
                 end
             end)
             notifyToggle("ALL SETTINGS & UI RESET TO FACTORY DEFAULTS!", true)
@@ -7514,8 +7514,8 @@ do
                     end
                 end
             end
-            if not applied and isfile and isfile("nhoiiiX_ui_config.txt") and readfile then
-                local raw = readfile("nhoiiiX_ui_config.txt")
+            if not applied and isfile and isfile("NhoiiiX_ui_config.txt") and readfile then
+                local raw = readfile("NhoiiiX_ui_config.txt")
                 if raw and #raw > 2 then
                     local parts = string.split(raw, "|")
                     local savedTheme = parts[1]
@@ -7567,11 +7567,11 @@ do
             local el = _G.NhoiiiXThemedElements
             if el then
                 if el.titleBanner then el.titleBanner.ImageColor3 = col end
-                if el.nhoiiiXIcon then el.nhoiiiXIcon.ImageColor3 = col end
-                if el.nhoiiiXIconStroke then el.nhoiiiXIconStroke.Color = col end
-                if el.nhoiiiXFireAura and el.nhoiiiXFireAura.Parent then el.nhoiiiXFireAura.ImageColor3 = col end
-                if el.nhoiiiXAuraStroke and el.nhoiiiXAuraStroke.Parent then el.nhoiiiXAuraStroke.Color = col end
-                if el.nhoiiiXLbl then el.nhoiiiXLbl.TextColor3 = col end
+                if el.NhoiiiXIcon then el.NhoiiiXIcon.ImageColor3 = col end
+                if el.NhoiiiXIconStroke then el.NhoiiiXIconStroke.Color = col end
+                if el.NhoiiiXFireAura and el.NhoiiiXFireAura.Parent then el.NhoiiiXFireAura.ImageColor3 = col end
+                if el.NhoiiiXAuraStroke and el.NhoiiiXAuraStroke.Parent then el.NhoiiiXAuraStroke.Color = col end
+                if el.NhoiiiXLbl then el.NhoiiiXLbl.TextColor3 = col end
                 if el.CloseBtn then el.CloseBtn.TextColor3 = col end
                 if el.MinimizeBtn then el.MinimizeBtn.TextColor3 = col end
                 if el.changeHudBtn then
@@ -7817,7 +7817,7 @@ do
 
     local cWallpaper = makeCard(UIPage, "UI Wallpaper", "Fondo de Pantalla", 280, 488)
 
-    local NHOIIIX_WALLPAPERS = {
+    local NhoiiiX_WALLPAPERS = {
         ["Pikachu Starry Night"]      = "rbxassetid://121128577777470",
         ["Knight in Cherry Blossoms"] = "rbxassetid://71827928567053",
         ["Crimson Angel"]             = "rbxassetid://108707236134250",
@@ -7902,7 +7902,7 @@ do
     local applyAssetBtn = createActionButton(cWallpaper, "APPLY BY ID", "APLICAR POR ID", UDim2.new(0, 96, 0, 26), UDim2.new(1, -102, 0, 42), onApplyCustomAsset)
 
     createCycleButton(cWallpaper, "Preset Wallpaper", "Fondo Predeterminado", cbWallpaperNames, 1, UDim2.new(1, -12, 0, 26), UDim2.new(0, 6, 0, 74), function(choice)
-        local assetId = NHOIIIX_WALLPAPERS[choice]
+        local assetId = NhoiiiX_WALLPAPERS[choice]
         if assetId then
             assetBox.Text = assetId:gsub("rbxassetid://", "")
             applyWallpaper(assetId)
@@ -9228,8 +9228,8 @@ end
                 end
             end
 
-            if isfile and isfile("nhoiiiX_ui_config.txt") and readfile then
-                local raw = readfile("nhoiiiX_ui_config.txt")
+            if isfile and isfile("NhoiiiX_ui_config.txt") and readfile then
+                local raw = readfile("NhoiiiX_ui_config.txt")
                 if raw and #raw > 2 then
                     local parts = string.split(raw, "|")
                     local savedTheme = parts[1]
@@ -10846,7 +10846,7 @@ end
         titleLbl.Position = UDim2.new(0, 24, 0, 5)
         titleLbl.BackgroundTransparency = 1
         titleLbl.Font = Enum.Font.GothamBold
-        titleLbl.Text = "NHOIIIX"
+        titleLbl.Text = "NhoiiiX"
         titleLbl.TextColor3 = Color3.fromRGB(240, 240, 255)
         titleLbl.TextSize = 10
         titleLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -14525,7 +14525,7 @@ do
 
     local sc1 = makeCard(SacredVFXPage, "NhoiiiX VFX Engine", "Motor NhoiiiX VFX", 108, 2)
 
-    createToggleButton(sc1, "MasterVFX", ":nhoiiiX vfx:", ":nhoiiiX vfx:", UDim2.new(0.48, -4, 0, 36), UDim2.new(0, 8, 0, 38))
+    createToggleButton(sc1, "MasterVFX", ":NhoiiiX vfx:", ":NhoiiiX vfx:", UDim2.new(0.48, -4, 0, 36), UDim2.new(0, 8, 0, 38))
     createActionButton(sc1, "Reset Original", "Restablecer Original", UDim2.new(0.48, -4, 0, 36), UDim2.new(0.5, 4, 0, 38), function()
         VFXSettings.Enabled = false
         setFeatureState("MasterVFX", false)
@@ -14543,11 +14543,11 @@ do
         if v then
             startVFXWatchers()
             refreshAllVFX()
-            notifyToggle(":nhoiiiX vfx: ACTIVADO", true)
+            notifyToggle(":NhoiiiX vfx: ACTIVADO", true)
         else
             resetOriginalVFX()
             stopVFXWatchers()
-            notifyToggle(":nhoiiiX vfx: DESACTIVADO", false)
+            notifyToggle(":NhoiiiX vfx: DESACTIVADO", false)
         end
     end
     end
@@ -19568,7 +19568,7 @@ do
         notifyToggle("Discord link copied: " .. link, true)
     end)
     createActionButton(m2, "TikTok Official", "TikTok Oficial", UDim2.new(0.48, -4, 0, 30), UDim2.new(0.5, 4, 0, 28), function()
-        local user = "projectnhoiiiXoficial"
+        local user = "projectNhoiiiXoficial"
         universalCopy(user)
         notifyToggle("TikTok copied: @" .. user, true)
     end)
@@ -20540,7 +20540,7 @@ TIER A (Strong / Meta):
             speechStatusLbl.Text = (CurrentLang == "ES") and "Estado: Listo" or "Status: Ready"
         end
         if terminalLogBox then
-            terminalLogBox.Text = string.format(">> [USER]: %s\n\n>> [NHOIIIX AI]:\n%s\n\n========================================", query, rawResponse)
+            terminalLogBox.Text = string.format(">> [USER]: %s\n\n>> [NhoiiiX AI]:\n%s\n\n========================================", query, rawResponse)
         end
     end
 
@@ -23736,7 +23736,7 @@ do
     end
     local fflag1OriginalShadows = Lighting.GlobalShadows
     local fflag1OriginalFog = Lighting.FogEnd
-    local NHOIIIX_FFLAGS = {
+    local NhoiiiX_FFLAGS = {
         { "DFIntTaskSchedulerTargetFps", "240" },
         { "FFlagDisablePostFx", "True" },
         { "FIntFRMMaxGrassDistance", "0" },
@@ -23760,8 +23760,8 @@ do
         return accepted, failed
     end
     _G.NhoiiiXApplyFastFlagsList = applyFastFlagsList
-    _G.NhoiiiXFFlags = NHOIIIX_FFLAGS
-    _G.NhoiiiXFullFlags = NHOIIIX_FFLAGS
+    _G.NhoiiiXFFlags = NhoiiiX_FFLAGS
+    _G.NhoiiiXFullFlags = NhoiiiX_FFLAGS
 
     local flagPreset = {generation=0, originals={}}
     FeatureCallbacks["FFlag1"] = function(enabled)
@@ -23779,7 +23779,7 @@ do
             local getter = getfflag or get_fflag
             flagPreset.unrestorable = type(getter) ~= "function"
             flagPreset.originals = {}
-            for _, pair in ipairs(NHOIIIX_FFLAGS) do
+            for _, pair in ipairs(NhoiiiX_FFLAGS) do
                 if type(getter) == "function" then
                     local ok, value = pcall(getter, pair[1])
                     if ok and value ~= nil then flagPreset.originals[pair[1]] = value
@@ -23790,7 +23790,7 @@ do
             pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
             if type(setfpscap) == "function" then pcall(setfpscap, 240) end
             task.spawn(function()
-                local accepted, failed = applyFastFlagsList(NHOIIIX_FFLAGS, nil, function()
+                local accepted, failed = applyFastFlagsList(NhoiiiX_FFLAGS, nil, function()
                     return isCurrentSession() and flagPreset.active and flagPreset.generation == generation
                 end)
                 if flagPreset.generation == generation and flagPreset.active then
@@ -26494,8 +26494,8 @@ end
 if applyLanguage then
     pcall(function()
         local savedLang = "EN"
-        if isfile and isfile("nhoiiiX_lang.txt") and readfile then
-            local sl = string.upper(string.gsub(readfile("nhoiiiX_lang.txt") or "", "%s+", ""))
+        if isfile and isfile("NhoiiiX_lang.txt") and readfile then
+            local sl = string.upper(string.gsub(readfile("NhoiiiX_lang.txt") or "", "%s+", ""))
             if sl == "EN" or sl == "ES" or sl == "PT" or sl == "TL" or sl == "FR" then
                 savedLang = sl
             end
