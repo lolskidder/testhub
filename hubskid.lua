@@ -4914,7 +4914,7 @@ MainButton.Size = UDim2.new(0, 55, 0, 55)
 
 MainButton.Position = UDim2.new(0, 10, 1, -58)
 
-MainButton.Image = "rbxassetid://81213277023664"
+MainButton.Image = "rbxassetid://70895505430795"
 
 MainButton.AutoButtonColor = false
 
@@ -4928,15 +4928,17 @@ ImageLabel.Parent = MainButton
 
 ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 
-ImageLabel.Position = UDim2.new(0, 16, 0, 254)
+ImageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 
-ImageLabel.Size = UDim2.new(0, 40, 0, 40)
+ImageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)
 
 ImageLabel.BackgroundTransparency = 1
 
 ImageLabel.BorderSizePixel = 0
 
-ImageLabel.ImageColor3 = Color3.fromRGB(36, 36, 36)
+ImageLabel.Image = "rbxassetid://70895505430795"
+ImageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
+ImageLabel.ScaleType = Enum.ScaleType.Fit
 
 
 
