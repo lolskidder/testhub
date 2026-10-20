@@ -4914,7 +4914,7 @@ MainButton.Size = UDim2.new(0, 55, 0, 55)
 
 MainButton.Position = UDim2.new(0, 10, 1, -58)
 
-MainButton.Image = "rbxassetid://70895505430795"
+MainButton.Image = "rbxassetid://81213277023664"
 
 MainButton.AutoButtonColor = false
 
@@ -24618,7 +24618,7 @@ RunService.RenderStepped:Connect(function()
         end)
         
         -- Định dạng hiển thị giống hệt ảnh: TIME : H:M:S | FPS: XX | PING: XXX
-        textLabel.Text = string.format("TIME : %s | FPS: %d | PING: %d", timeStr, fps, ping)
+        textLabel.Text = "NhoiiiX-Hub"
     else
         container.Visible = false
         -- Reset lại thời gian nếu tắt đi bật lại từ đầu nếu muốn (hoặc bỏ dòng này nếu muốn giữ nguyên thời gian cũ)
