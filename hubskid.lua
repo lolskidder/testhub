@@ -1,3 +1,11 @@
+
+
+
+-- Open Source Project by Darling
+
+
+-- discord: https://discord.gg/WdEuJP5u72
+
 local F = {
     UDim2 = UDim2.new,
     Color3 = Color3.fromRGB,
@@ -251,7 +259,7 @@ do
     aura.Size = UDim2.new(0, 68, 0, 68)
     aura.Position = UDim2.new(0, 26, 0, 22)
     aura.BackgroundTransparency = 1
-    aura.Image = "rbxassetid://124747708335361"
+    aura.Image = "rbxassetid://70895505430795"
     aura.ImageColor3 = Color3.fromRGB(165, 120, 255)
     aura.ImageTransparency = 0.55
     Instance.new("UICorner", aura).CornerRadius = UDim.new(1, 0)
@@ -261,7 +269,7 @@ do
     logo.Size = UDim2.new(0, 56, 0, 56)
     logo.Position = UDim2.new(0, 32, 0, 28)
     logo.BackgroundTransparency = 1
-    logo.Image = "rbxassetid://124747708335361"
+    logo.Image = "rbxassetid://70895505430795"
     logo.ImageColor3 = Color3.fromRGB(245, 240, 255)
     Instance.new("UICorner", logo).CornerRadius = UDim.new(1, 0)
 
@@ -285,7 +293,7 @@ do
     title.Size = UDim2.new(1, -120, 0, 28)
     title.BackgroundTransparency = 1
     title.Font = Enum.Font.GothamBold
-    title.Text = "PROJECT SPOOKY"
+    title.Text = "NhoiiiX Pvp"
     title.TextSize = 21
     title.TextColor3 = Color3.fromRGB(250, 250, 255)
     title.TextXAlignment = Enum.TextXAlignment.Left
@@ -510,7 +518,7 @@ pcall(function()
     end
 end)
 local function performFullScriptShutdown()
-    print("[Project Spooky] Full Shutdown: Deactivating ALL features and cleaning up...")
+    print("[NhoiiiX ] Full Shutdown: Deactivating ALL features and cleaning up...")
 
     local fCallbacks = _G.FeatureCallbacks
     local fStates = _G.FeatureStates
@@ -1426,7 +1434,7 @@ Spooky.UI.screen=ScreenGui
     titleBanner.Position = UDim2.new(0, 135, 0, 6)
     titleBanner.BackgroundTransparency = 1
     titleBanner.BorderSizePixel = 0
-    titleBanner.Image = "rbxassetid://139775297797213"
+    titleBanner.Image = "rbxassetid://70895505430795"
     titleBanner.ScaleType = Enum.ScaleType.Fit
     titleBanner.ImageColor3 = Color3.fromRGB(255, 255, 255)
     titleBanner.ZIndex = 5
@@ -1639,7 +1647,7 @@ Spooky.UI.screen=ScreenGui
         sf.Parent = PagesFolder
         return sf
     end
-	
+
     local SidebarScroll = Instance.new("ScrollingFrame", MAINUIframe)
     SidebarScroll.Name = "ScrollingFrame(ventanas \"combat,home,etc..)"
     SidebarScroll.Size = UDim2.new(0, 112, 0, 235)
@@ -5083,7 +5091,8 @@ do
             end
         end
     end
-local function setNoclipState(enable)
+
+    local function setNoclipState(enable)
         FeatureStates["NoClip"] = enable
         FeatureStates["Noclip"] = enable
         if enable then
@@ -7696,7 +7705,8 @@ do
             _G.saveUIConfig()
         end
     end, UDim2.new(0, 8, 0, 28))
-	local qW = UDim2.new(0.23, 0, 0, 26)
+
+    local qW = UDim2.new(0.23, 0, 0, 26)
     createActionButton(cScale, "0.80x", "0.80x", qW, UDim2.new(0, 8, 0, 74), function()
         if UIScale then
             UIScale.Scale = 0.80; currentBaseScale = 0.80; userCustomScale = 0.80; _G.InitialUIScaleVal = 0.80; _G.saveUIConfig()
@@ -10594,7 +10604,8 @@ do
             hideInstanceFX(obj)
         end
     end
-	function _G.SpookySetHideV4Effects(enabled)
+
+    function _G.SpookySetHideV4Effects(enabled)
         HideV4Active = (enabled == true)
         if HideV4Active then
             pcall(function()
@@ -12941,7 +12952,7 @@ do
         titleLbl.Size = UDim2.new(1, -70, 1, 0)
         titleLbl.Position = UDim2.new(0, 32, 0, 0)
         titleLbl.BackgroundTransparency = 1
-        titleLbl.Text = "SPOOKY ESP LIVE CUSTOMIZER"
+        titleLbl.Text = "NhoiiiX ESP LIVE CUSTOMIZER"
         titleLbl.Font = Enum.Font.GothamBold
         titleLbl.TextSize = 11
         titleLbl.TextColor3 = Color3.fromRGB(240, 240, 255)
@@ -13170,7 +13181,8 @@ do
                 end
             end)
         end)
-   if _G.G_ESP_SimpleMode == nil then _G.G_ESP_SimpleMode = (FeatureStates and FeatureStates["SimpleEsp"] == true) end
+
+        if _G.G_ESP_SimpleMode == nil then _G.G_ESP_SimpleMode = (FeatureStates and FeatureStates["SimpleEsp"] == true) end
         if _G.G_ESP_Name == nil then _G.G_ESP_Name = true end
         if _G.G_ESP_HP == nil then _G.G_ESP_HP = true end
         if _G.G_ESP_HP_Format == nil then _G.G_ESP_HP_Format = "Numbers" end
@@ -15588,7 +15600,8 @@ do
             end
             return tbl14
         end
- local function fn11(arg, arg2, arg3)
+
+        local function fn11(arg, arg2, arg3)
             local v2 = fn10(arg, arg2, arg3)
             local tbl14 = {}
             for i = 1, 16 do
@@ -16843,7 +16856,7 @@ local UI = (function()
             end
         end)
     end
-			function UI.ShowNotification(text, nType)
+    function UI.ShowNotification(text, nType)
         pcall(function()
             if abStatusLblRef then
                 abStatusLblRef.Text = tostring(text or "")
@@ -17577,7 +17590,7 @@ do
     local function Notify(msg)
         pcall(function()
             StarterGui:SetCore("SendNotification", {
-                Title = "Spooky Bounty",
+                Title = "NhoiiiX Bounty",
                 Text = msg or "Activated",
                 Duration = 5
             })
@@ -18909,7 +18922,7 @@ do
                 ["content"] = "",
                 ["embeds"] = {
                     {
-                        ["title"] = "SPOOKY BOUNTY",
+                        ["title"] = "NhoiiiX BOUNTY",
                         ["color"] = 3447003,
                         ["fields"] = {
                             {
@@ -19665,7 +19678,8 @@ do
         fbInput.Text = ""
         notifyToggle((CurrentLang == "ES") and "Gracias! Feedback enviado." or "Thank you! Feedback sent.", true)
     end)
-	local m4 = makeCard(ReportPage, "Update Log", "Registro de Actualizaciones", 75, 262)
+
+    local m4 = makeCard(ReportPage, "Update Log", "Registro de Actualizaciones", 75, 262)
     local logDesc = Instance.new("TextLabel", m4)
     logDesc.Size = UDim2.new(1, -20, 0, 42)
     logDesc.Position = UDim2.new(0, 10, 0, 26)
@@ -25332,7 +25346,7 @@ do
             end)
             origLightingProps = nil
         end
-local atmo = Lighting:FindFirstChildOfClass("Atmosphere")
+        local atmo = Lighting:FindFirstChildOfClass("Atmosphere")
         if atmo and origAtmosphereProps then
             pcall(function()
                 atmo.Color = origAtmosphereProps.Color
