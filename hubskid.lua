@@ -259,7 +259,7 @@ do
     aura.Size = UDim2.new(0, 68, 0, 68)
     aura.Position = UDim2.new(0, 26, 0, 22)
     aura.BackgroundTransparency = 1
-    aura.Image = "rbxassetid://70895505430795"
+    aura.Image = ""
     aura.ImageColor3 = Color3.fromRGB(165, 120, 255)
     aura.ImageTransparency = 0.55
     Instance.new("UICorner", aura).CornerRadius = UDim.new(1, 0)
@@ -269,7 +269,7 @@ do
     logo.Size = UDim2.new(0, 56, 0, 56)
     logo.Position = UDim2.new(0, 32, 0, 28)
     logo.BackgroundTransparency = 1
-    logo.Image = "rbxassetid://70895505430795"
+    logo.Image = ""
     logo.ImageColor3 = Color3.fromRGB(245, 240, 255)
     Instance.new("UICorner", logo).CornerRadius = UDim.new(1, 0)
 
@@ -1206,7 +1206,7 @@ NhoiiiX.UI.screen=ScreenGui
     NhoiiiXFireAura.BorderSizePixel = 0
     NhoiiiXFireAura.ZIndex = 7
     NhoiiiXFireAura.Visible = false -- Hide logo aura on main tab
-    NhoiiiXFireAura.Image = "rbxassetid://70895505430795"
+    NhoiiiXFireAura.Image = ""
     NhoiiiXFireAura.ImageColor3 = initNhoiiiXColor
     NhoiiiXFireAura.ImageTransparency = 0.65
     NhoiiiXFireAura.ScaleType = Enum.ScaleType.Stretch
@@ -1228,7 +1228,7 @@ NhoiiiX.UI.screen=ScreenGui
     NhoiiiXIcon.ZIndex = 8
     NhoiiiXIcon.Visible = false -- Hide logo on main tab
     NhoiiiXIcon.Active = false
-    NhoiiiXIcon.Image = "rbxassetid://70895505430795"
+    NhoiiiXIcon.Image = ""
     NhoiiiXIcon.ImageColor3 = initNhoiiiXColor
     NhoiiiXIcon.ScaleType = Enum.ScaleType.Stretch
     Instance.new("UICorner", NhoiiiXIcon).CornerRadius = UDim.new(0.5, 0)
@@ -1435,7 +1435,7 @@ NhoiiiX.UI.screen=ScreenGui
     titleBanner.Position = UDim2.new(0, 135, 0, 6)
     titleBanner.BackgroundTransparency = 1
     titleBanner.BorderSizePixel = 0
-    titleBanner.Image = "rbxassetid://70895505430795"
+    titleBanner.Image = ""
     titleBanner.ScaleType = Enum.ScaleType.Fit
     titleBanner.ImageColor3 = Color3.fromRGB(255, 255, 255)
     titleBanner.ZIndex = 5
@@ -1952,7 +1952,7 @@ NhoiiiX.UI.screen=ScreenGui
     MobileToggle.Position = UDim2.new(0, 20, 0, 80)
     MobileToggle.BackgroundColor3 = Color3.fromRGB(10, 10, 14)
     MobileToggle.BorderSizePixel = 0
-    MobileToggle.Image = "rbxassetid://70895505430795"
+    MobileToggle.Image = ""
     MobileToggle.ScaleType = Enum.ScaleType.Stretch
     MobileToggle.ClipsDescendants = true
     MobileToggle.Visible = false
@@ -2304,7 +2304,7 @@ local function makeCard(parent, titleEN, titleES, h, y)
     NhoiiiXHeaderIcon.Size = UDim2.new(0, 13, 0, 13)
     NhoiiiXHeaderIcon.Position = UDim2.new(0, 8, 0.5, -6.5)
     NhoiiiXHeaderIcon.BackgroundTransparency = 1
-    NhoiiiXHeaderIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or "rbxassetid://70895505430795"
+    NhoiiiXHeaderIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or ""
     NhoiiiXHeaderIcon.ImageColor3 = Color3.fromRGB(200, 210, 235)
     NhoiiiXHeaderIcon.ZIndex = 3
     Instance.new("UICorner", NhoiiiXHeaderIcon).CornerRadius = UDim.new(1, 0)
@@ -2549,7 +2549,7 @@ local function createSlider(parent, textEN, textES, minV, maxV, defV, isFloat, s
     knob.Size = UDim2.new(0, 18, 0, 18)
     knob.Position = UDim2.new(curPct, -9, 0.5, -9)
     knob.BackgroundColor3 = Color3.fromRGB(16, 16, 22)
-    knob.Image = "rbxassetid://70895505430795"
+    knob.Image = ""
     knob.BorderSizePixel = 0
     knob.ZIndex = 5
     Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
@@ -2714,7 +2714,7 @@ local function styleNhoiiiXTextBox(box)
         emblem.Size = UDim2.new(0, 16, 0, 16)
         emblem.Position = UDim2.new(1, -22, 0.5, -8)
         emblem.BackgroundTransparency = 1
-        emblem.Image = "rbxassetid://70895505430795"
+        emblem.Image = ""
         emblem.ImageColor3 = Color3.fromRGB(130, 135, 155)
         emblem.ZIndex = box.ZIndex + 1
         Instance.new("UICorner", emblem).CornerRadius = UDim.new(1, 0)
@@ -10836,7 +10836,7 @@ end
         spkIcon.Size = UDim2.new(0, 15, 0, 15)
         spkIcon.Position = UDim2.new(0, 6, 0, 5)
         spkIcon.BackgroundTransparency = 1
-        spkIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or "rbxassetid://70895505430795"
+        spkIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or ""
         spkIcon.ImageColor3 = accent
         if _G.NhoiiiXThemedElements and _G.NhoiiiXThemedElements.AllHeaderEmblems then
             table.insert(_G.NhoiiiXThemedElements.AllHeaderEmblems, spkIcon)
@@ -12941,7 +12941,7 @@ do
         spkIcon.Size = UDim2.new(0, 16, 0, 16)
         spkIcon.Position = UDim2.new(0, 10, 0.5, -8)
         spkIcon.BackgroundTransparency = 1
-        spkIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or "rbxassetid://70895505430795"
+        spkIcon.Image = (CurrentTheme == "Red NhoiiiX") and "rbxassetid://88089153116193" or ""
         spkIcon.ImageColor3 = _G.CurrentAccentColor or Color3.fromRGB(140, 115, 235)
         spkIcon.ZIndex = 5002
         _G.NhoiiiXESPCustomizerIcon = spkIcon
