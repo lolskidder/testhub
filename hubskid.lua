@@ -56,7 +56,7 @@ end
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
 
-        Title = "Redz Hub ",
+        Title = "NhoiiiX Hub ",
 
         Text = "Loading...",
 
@@ -4928,17 +4928,15 @@ ImageLabel.Parent = MainButton
 
 ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 
-ImageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+ImageLabel.Position = UDim2.new(0, 16, 0, 254)
 
-ImageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)
+ImageLabel.Size = UDim2.new(0, 40, 0, 40)
 
 ImageLabel.BackgroundTransparency = 1
 
 ImageLabel.BorderSizePixel = 0
 
-ImageLabel.Image = "rbxassetid://70895505430795"
-ImageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
-ImageLabel.ScaleType = Enum.ScaleType.Fit
+ImageLabel.ImageColor3 = Color3.fromRGB(36, 36, 36)
 
 
 
@@ -24620,7 +24618,7 @@ RunService.RenderStepped:Connect(function()
         end)
         
         -- Định dạng hiển thị giống hệt ảnh: TIME : H:M:S | FPS: XX | PING: XXX
-        textLabel.Text = "NhoiiiX-Hub"
+        textLabel.Text = string.format("TIME : %s | FPS: %d | PING: %d", timeStr, fps, ping)
     else
         container.Visible = false
         -- Reset lại thời gian nếu tắt đi bật lại từ đầu nếu muốn (hoặc bỏ dòng này nếu muốn giữ nguyên thời gian cũ)
