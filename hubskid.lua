@@ -5336,15 +5336,15 @@ Player = Window:MakeTab({
 
 Discord:AddDiscordInvite({
 
-	Title = "NhoiiiX Hub",
+	Title = "Nhoiii Community",
 
 	Description = "A Best New Script",
 
   Banner = Color3.fromRGB(36, 36, 36),
 
-	Logo = "rbxassetid://72550888769297",
+	Logo = "rbxassetid://70895505430795",
 
-	Invite = "https://discord.gg/zCchBkZxZx",
+	Invite = "https://discord.gg/aXWW8hytgX",
 
 })
 
@@ -5390,7 +5390,7 @@ Discord:AddButton({
 
     Name = "Send Review",
 
-    Description = "67",
+    Description = "367",
 
     Callback = function()
 
