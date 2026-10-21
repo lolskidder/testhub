@@ -1,4 +1,494 @@
--- BlyxoHub | Steal An Egg
+-- NhoiiiX Anti-Die UI (isolated so errors here do not stop the main script)
+task.spawn(function()
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+if not player then
+    warn("[NhoiiiX] Run this as a client LocalScript.")
+    return
+end
+
+local playerGui = player:WaitForChild("PlayerGui")
+local previous = playerGui:FindFirstChild("NhoiiiXAntiDie")
+if previous then previous:Destroy() end
+
+-- â”€â”€ UTILITIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+local function addCorner(parent, radius)
+    local o = Instance.new("UICorner")
+    o.CornerRadius = UDim.new(0, radius)
+    o.Parent = parent
+    return o
+end
+
+local function borderSequence()
+    return ColorSequence.new({
+        ColorSequenceKeypoint.new(0,    Color3.fromRGB(0,   18,  60)),
+        ColorSequenceKeypoint.new(0.30, Color3.fromRGB(20,  80, 180)),
+        ColorSequenceKeypoint.new(0.62, Color3.fromRGB(60, 140, 255)),
+        ColorSequenceKeypoint.new(1,    Color3.fromRGB(10,  40, 120)),
+    })
+end
+
+local function addGradientStroke(parent, thickness, initialRotation)
+    local stroke = Instance.new("UIStroke")
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Thickness = thickness
+    stroke.Color = Color3.new(1, 1, 1)
+    stroke.Parent = parent
+
+    local grad = Instance.new("UIGradient")
+    grad.Color = borderSequence()
+    grad.Rotation = initialRotation or 0
+    grad.Parent = stroke
+
+    return stroke, grad
+end
+
+local function makeDraggable(target)
+    local dragging = false
+    local dragStart = Vector2.zero
+    local startPos = target.Position
+
+    target.Active = true
+
+    target.InputBegan:Connect(function(input)
+        if input.UserInputType ~= Enum.UserInputType.MouseButton1
+        and input.UserInputType ~= Enum.UserInputType.Touch then return end
+        dragging  = true
+        dragStart = input.Position
+        startPos  = target.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if not dragging then return end
+        if input.UserInputType ~= Enum.UserInputType.MouseMovement
+        and input.UserInputType ~= Enum.UserInputType.Touch then return end
+        local delta = input.Position - dragStart
+        target.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end)
+end
+
+-- â”€â”€ PALETTE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- Every colour is drawn from a midnight storm / deep navy range.
+local COL = {
+    PANEL_BG      = Color3.fromRGB(7,   12,  30),   -- near-black navy
+    PANEL_BG2     = Color3.fromRGB(10,  18,  45),   -- slightly lighter well
+    HEADER_GLOW   = Color3.fromRGB(20,  70, 180),
+    ACCENT        = Color3.fromRGB(40, 110, 255),
+    TITLE_0       = Color3.fromRGB(15,  40, 120),
+    TITLE_MID     = Color3.fromRGB(80, 160, 255),
+    TITLE_1       = Color3.fromRGB(180, 220, 255),
+    SUBTITLE      = Color3.fromRGB(90, 140, 220),
+    MINI_BG       = Color3.fromRGB(12,  30,  80),
+    CARD_BG       = Color3.fromRGB(12,  22,  55),
+    DOT_OFF       = Color3.fromRGB(30,  60, 140),
+    DOT_ON        = Color3.fromRGB(60, 140, 255),
+    LABEL         = Color3.fromRGB(200, 225, 255),
+    KNOB_OFF_BG   = Color3.fromRGB(30,  55, 130),
+    KNOB_ON_BG    = Color3.fromRGB(180, 220, 255),
+    TRACK_OFF     = Color3.fromRGB(18,  40, 100),
+    TRACK_ON      = Color3.fromRGB(30,  90, 200),
+    TRACK_G0      = Color3.fromRGB(60, 130, 255),
+    TRACK_G1      = Color3.fromRGB(30,  80, 200),
+}
+
+-- â”€â”€ SCREEN GUI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name           = "NhoiiiXAntiDie"
+screenGui.ResetOnSpawn   = false
+screenGui.DisplayOrder   = 999999
+screenGui.IgnoreGuiInset = true
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent         = playerGui
+
+-- â”€â”€ OUTER BORDER WRAP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- Reshaped: wider and slightly taller, more breathing room for side-by-side cards
+local borderWrap = Instance.new("Frame")
+borderWrap.Name                 = "BorderWrap"
+borderWrap.Size                 = UDim2.new(0, 310, 0, 175)
+borderWrap.Position             = UDim2.new(0.5, -155, 0.5, -88)
+borderWrap.BackgroundColor3     = COL.PANEL_BG
+borderWrap.BackgroundTransparency = 0.08
+borderWrap.BorderSizePixel      = 0
+borderWrap.Active               = true
+borderWrap.ZIndex               = 10
+borderWrap.Parent               = screenGui
+addCorner(borderWrap, 22)
+
+local _, outerBorderGradient = addGradientStroke(borderWrap, 2, 0)
+makeDraggable(borderWrap)
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Name               = "MainFrame"
+mainFrame.Size               = UDim2.new(1, -4, 1, -4)
+mainFrame.Position           = UDim2.new(0, 2, 0, 2)
+mainFrame.BackgroundTransparency = 1
+mainFrame.BorderSizePixel    = 0
+mainFrame.ClipsDescendants   = true
+mainFrame.ZIndex             = 11
+mainFrame.Parent             = borderWrap
+addCorner(mainFrame, 20)
+
+-- â”€â”€ HEADER GLOW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+local headerGlow = Instance.new("Frame")
+headerGlow.Size               = UDim2.new(1, 0, 0, 65)
+headerGlow.Position           = UDim2.fromOffset(0, 0)
+headerGlow.BackgroundColor3   = COL.HEADER_GLOW
+headerGlow.BackgroundTransparency = 0.88
+headerGlow.BorderSizePixel    = 0
+headerGlow.ZIndex             = 12
+headerGlow.Parent             = mainFrame
+addCorner(headerGlow, 20)
+
+local headerGlowGrad = Instance.new("UIGradient")
+headerGlowGrad.Rotation    = 90
+headerGlowGrad.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.10),
+    NumberSequenceKeypoint.new(1, 1),
+})
+headerGlowGrad.Parent = headerGlow
+
+-- â”€â”€ HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+local header = Instance.new("Frame")
+header.Name               = "Header"
+header.Size               = UDim2.new(1, 0, 0, 48)
+header.BackgroundTransparency = 1
+header.BorderSizePixel    = 0
+header.ZIndex             = 13
+header.Parent             = mainFrame
+
+-- Left accent bar
+local accent = Instance.new("Frame")
+accent.Size             = UDim2.new(0, 3, 0, 28)
+accent.Position         = UDim2.new(0, 10, 0, 10)
+accent.BackgroundColor3 = COL.ACCENT
+accent.BorderSizePixel  = 0
+accent.ZIndex           = 14
+accent.Parent           = header
+addCorner(accent, 2)
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Name              = "Title"
+title.Size              = UDim2.new(1, -70, 0, 19)
+title.Position          = UDim2.new(0, 18, 0, 7)
+title.BackgroundTransparency = 1
+title.Text              = "NhoiiiX-Hub Anti-Die"
+title.TextColor3        = Color3.new(1, 1, 1)
+title.Font              = Enum.Font.GothamBlack
+title.TextSize          = 15
+title.TextXAlignment    = Enum.TextXAlignment.Left
+title.ZIndex            = 14
+title.Parent            = header
+
+local titleGradient = Instance.new("UIGradient")
+titleGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0,   COL.TITLE_0),
+    ColorSequenceKeypoint.new(0.5, COL.TITLE_MID),
+    ColorSequenceKeypoint.new(1,   COL.TITLE_1),
+})
+titleGradient.Rotation = 0
+titleGradient.Parent   = title
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Name               = "Subtitle"
+subtitle.Size               = UDim2.new(1, -70, 0, 13)
+subtitle.Position           = UDim2.new(0, 18, 0, 27)
+subtitle.BackgroundTransparency = 1
+subtitle.Text               = "discord.gg/aXWW8hytgX"
+subtitle.TextColor3         = COL.SUBTITLE
+subtitle.TextTransparency   = 0.25
+subtitle.Font               = Enum.Font.GothamMedium
+subtitle.TextSize           = 9
+subtitle.TextXAlignment     = Enum.TextXAlignment.Left
+subtitle.ZIndex             = 14
+subtitle.Parent             = header
+
+-- Minimise button (top-right)
+local minimise = Instance.new("TextButton")
+minimise.Name                = "Minimize"
+minimise.Size                = UDim2.new(0, 26, 0, 26)
+minimise.Position            = UDim2.new(1, -38, 0.5, -13)
+minimise.BackgroundColor3    = COL.MINI_BG
+minimise.BackgroundTransparency = 0.15
+minimise.AutoButtonColor     = false
+minimise.BorderSizePixel     = 0
+minimise.Font                = Enum.Font.GothamBlack
+minimise.Text                = "-"
+minimise.TextSize            = 16
+minimise.TextColor3          = Color3.new(1, 1, 1)
+minimise.ZIndex              = 14
+minimise.Parent              = header
+addCorner(minimise, 9)
+
+local _, minimiseGradient = addGradientStroke(minimise, 1.5, 0)
+
+minimise.MouseEnter:Connect(function()
+    TweenService:Create(minimise, TweenInfo.new(0.12, Enum.EasingStyle.Quad), {
+        BackgroundColor3 = COL.ACCENT,
+        BackgroundTransparency = 0.05,
+    }):Play()
+end)
+minimise.MouseLeave:Connect(function()
+    TweenService:Create(minimise, TweenInfo.new(0.12, Enum.EasingStyle.Quad), {
+        BackgroundColor3 = COL.MINI_BG,
+        BackgroundTransparency = 0.15,
+    }):Play()
+end)
+
+-- Thin divider beneath header
+local divider = Instance.new("Frame")
+divider.Size            = UDim2.new(1, -24, 0, 1)
+divider.Position        = UDim2.new(0, 12, 0, 50)
+divider.BackgroundColor3 = COL.ACCENT
+divider.BackgroundTransparency = 0.7
+divider.BorderSizePixel = 0
+divider.ZIndex          = 13
+divider.Parent          = mainFrame
+
+-- â”€â”€ CONTENT (side-by-side cards) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- Reshaped: two cards sit next to each other in a horizontal row
+-- instead of the original vertical stack.
+local content = Instance.new("Frame")
+content.Name               = "Content"
+content.Size               = UDim2.new(1, -20, 1, -62)
+content.Position           = UDim2.new(0, 10, 0, 56)
+content.BackgroundTransparency = 1
+content.BorderSizePixel    = 0
+content.ZIndex             = 13
+content.Parent             = mainFrame
+
+local animatedCardShines   = {}
+local animatedCardStrokes  = {}
+local animatedToggleStrokes = {}
+local toggleStates         = { antiDie = false, antiFling = false }
+
+-- Cards are placed at X offsets â€” left and right â€” filling the row
+local function makeFeatureCard(cardName, text, xOffset, stateKey)
+    local CARD_W = 133
+
+    local card = Instance.new("Frame")
+    card.Name               = cardName
+    card.Size               = UDim2.new(0, CARD_W, 1, 0)
+    card.Position           = UDim2.new(0, xOffset, 0, 0)
+    card.BackgroundColor3   = COL.CARD_BG
+    card.BackgroundTransparency = 0.08
+    card.BorderSizePixel    = 0
+    card.ZIndex             = 14
+    card.Parent             = content
+    addCorner(card, 16)
+
+    local _, cardStrokeGrad = addGradientStroke(card, 1.2, 0)
+    table.insert(animatedCardStrokes, cardStrokeGrad)
+
+    -- Shine overlay
+    local shine = Instance.new("Frame")
+    shine.Size                  = UDim2.new(1, 0, 1, 0)
+    shine.BackgroundColor3      = Color3.new(1, 1, 1)
+    shine.BackgroundTransparency = 0.94
+    shine.BorderSizePixel       = 0
+    shine.ZIndex                = 14
+    shine.Parent                = card
+    addCorner(shine, 16)
+
+    local shineGrad = Instance.new("UIGradient")
+    shineGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+        ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
+    })
+    shineGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0),
+        NumberSequenceKeypoint.new(1, 1),
+    })
+    shineGrad.Rotation = 90
+    shineGrad.Parent   = shine
+    table.insert(animatedCardShines, shineGrad)
+
+    -- Feature label, centred in upper portion
+    local featureLabel = Instance.new("TextLabel")
+    featureLabel.Size               = UDim2.new(1, -12, 0, 22)
+    featureLabel.Position           = UDim2.new(0, 6, 0, 14)
+    featureLabel.BackgroundTransparency = 1
+    featureLabel.Text               = text
+    featureLabel.TextColor3         = COL.LABEL
+    featureLabel.Font               = Enum.Font.GothamBold
+    featureLabel.TextSize           = 13
+    featureLabel.TextXAlignment     = Enum.TextXAlignment.Center
+    featureLabel.ZIndex             = 15
+    featureLabel.Parent             = card
+
+    -- Status dot below label
+    local dot = Instance.new("Frame")
+    dot.Size            = UDim2.new(0, 6, 0, 6)
+    dot.Position        = UDim2.new(0.5, -3, 0, 40)
+    dot.BackgroundColor3 = COL.DOT_OFF
+    dot.BorderSizePixel = 0
+    dot.ZIndex          = 16
+    dot.Parent          = card
+    addCorner(dot, 3)
+
+    -- Toggle track, centred at bottom of card
+    local track = Instance.new("TextButton")
+    track.Name              = "Toggle"
+    track.Size              = UDim2.new(0, 44, 0, 24)
+    track.Position          = UDim2.new(0.5, -22, 1, -34)
+    track.BackgroundColor3  = COL.TRACK_OFF
+    track.BorderSizePixel   = 0
+    track.AutoButtonColor   = false
+    track.Text              = ""
+    track.ZIndex            = 15
+    track.Parent            = card
+    addCorner(track, 12)
+
+    local trackGrad = Instance.new("UIGradient")
+    trackGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, COL.TRACK_G0),
+        ColorSequenceKeypoint.new(1, COL.TRACK_G1),
+    })
+    trackGrad.Rotation = 0
+    trackGrad.Parent   = track
+
+    local _, toggleStrokeGrad = addGradientStroke(track, 1, 0)
+    table.insert(animatedToggleStrokes, toggleStrokeGrad)
+
+    local knob = Instance.new("TextButton")
+    knob.Name                  = "Knob"
+    knob.Size                  = UDim2.new(0, 20, 0, 20)
+    knob.Position              = UDim2.new(0, 2, 0, 2)
+    knob.BackgroundColor3      = COL.KNOB_OFF_BG
+    knob.BackgroundTransparency = 0.55
+    knob.BorderSizePixel       = 0
+    knob.AutoButtonColor       = false
+    knob.Text                  = ""
+    knob.ZIndex                = 16
+    knob.Parent                = track
+    addCorner(knob, 10)
+
+    local function render(animated)
+        local on = toggleStates[stateKey]
+        local ti = TweenInfo.new(animated and 0.18 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+        TweenService:Create(track, ti, {
+            BackgroundColor3 = on and COL.TRACK_ON or COL.TRACK_OFF,
+        }):Play()
+
+        TweenService:Create(knob, ti, {
+            Position            = on and UDim2.new(0, 22, 0, 2) or UDim2.new(0, 2, 0, 2),
+            BackgroundColor3    = on and COL.KNOB_ON_BG or COL.KNOB_OFF_BG,
+            BackgroundTransparency = on and 0 or 0.55,
+        }):Play()
+
+        TweenService:Create(dot, ti, {
+            BackgroundColor3 = on and COL.DOT_ON or COL.DOT_OFF,
+        }):Play()
+    end
+
+    local function toggle()
+        toggleStates[stateKey] = not toggleStates[stateKey]
+        render(true)
+        if stateKey == "antiDie" and toggleStates.antiDie then
+            -- Client-side health restoration attempt; server-authoritative damage may override it.
+            task.spawn(function()
+                while toggleStates.antiDie and player.Parent do
+                    local character = player.Character
+                    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.Health > 0 and humanoid.Health < humanoid.MaxHealth then
+                        humanoid.Health = humanoid.MaxHealth
+                    end
+                    task.wait(0.08)
+                end
+            end)
+        end
+    end
+
+    track.Activated:Connect(toggle)
+    knob.Activated:Connect(toggle)
+    render(false)
+
+    return card
+end
+
+-- Left card at x=0, right card at x=143 (133 wide + 10 gap)
+makeFeatureCard("AntiDieCard",   "Anti Die",   0,   "antiDie")
+makeFeatureCard("AntiFlingCard", "Anti Fling", 143, "antiFling")
+
+-- â”€â”€ MINIMISE / RESTORE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+local EXPANDED_SIZE     = UDim2.new(0, 310, 0, 175)
+local COLLAPSED_SIZE    = UDim2.new(0, 310, 0, 52)
+local CONTENT_POS_OPEN  = UDim2.new(0, 10, 0, 56)
+local CONTENT_POS_SHUT  = UDim2.new(0, 10, 0, -85)
+local isCollapsed       = false
+local minimiseBusy      = false
+
+minimise.MouseButton1Click:Connect(function()
+    if minimiseBusy then return end
+    minimiseBusy  = true
+    isCollapsed   = not isCollapsed
+    minimise.Text = isCollapsed and "+" or "-"
+
+    local ti = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.InOut)
+
+    if isCollapsed then
+        content.Visible = true
+        TweenService:Create(content,    ti, { Position = CONTENT_POS_SHUT }):Play()
+        local wt = TweenService:Create(borderWrap, ti, { Size = COLLAPSED_SIZE })
+        wt:Play()
+        wt.Completed:Once(function()
+            content.Visible = false
+            divider.Visible = false
+            minimiseBusy    = false
+        end)
+    else
+        divider.Visible  = true
+        content.Visible  = true
+        content.Position = CONTENT_POS_SHUT
+        TweenService:Create(content,    ti, { Position = CONTENT_POS_OPEN }):Play()
+        local wt = TweenService:Create(borderWrap, ti, { Size = EXPANDED_SIZE })
+        wt:Play()
+        wt.Completed:Once(function()
+            content.Position = CONTENT_POS_OPEN
+            minimiseBusy     = false
+        end)
+    end
+end)
+
+-- â”€â”€ ANIMATED GRADIENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+RunService.RenderStepped:Connect(function(dt)
+    local s = dt * 60
+
+    outerBorderGradient.Rotation = (outerBorderGradient.Rotation + 0.9 * s) % 360
+    headerGlowGrad.Rotation      = (headerGlowGrad.Rotation      + 1.4 * s) % 360
+    titleGradient.Rotation       = (titleGradient.Rotation       + 1.2 * s) % 360
+    minimiseGradient.Rotation    = (minimiseGradient.Rotation    + 1.6 * s) % 360
+
+    for _, g in animatedCardShines do
+        g.Rotation = (g.Rotation + 1.4 * s) % 360
+    end
+    for _, g in animatedCardStrokes do
+        g.Rotation = (g.Rotation + 1.8 * s) % 360
+    end
+    for _, g in animatedToggleStrokes do
+        g.Rotation = (g.Rotation + 1.8 * s) % 360
+    end
+end)
+
+print("[NhoiiiX] UI loaded â€” midnight storm build")
+end)
+
+-- NhoiiiX-Hub | Steal An Egg
 -- Version 6.3.0  |  build a284e87f  |  9e892c9  |  2026-09-23 15:45 UTC
 --
 -- GENERATED FILE - DO NOT EDIT.
@@ -94,9 +584,9 @@ local BLYXO_GAME    = "Steal An Egg"
 local BLYXO_EDITION = "premium"
 
 local env = (type(getgenv) == "function" and getgenv()) or _G
-env.BlyxoGeneration = (env.BlyxoGeneration or 0) + 1
+env.NhoiiiXGeneration = (env.NhoiiiXGeneration or 0) + 1
 local BX = {
-generation  = env.BlyxoGeneration,
+generation  = env.NhoiiiXGeneration,
 version     = BLYXO_VERSION,
 build       = BLYXO_BUILD,
 game        = BLYXO_GAME,
@@ -108,7 +598,7 @@ _conns      = {},
 }
 env.BX = BX
 function BX.alive()
-return env.BlyxoGeneration == BX.generation
+return env.NhoiiiXGeneration == BX.generation
 end
 function BX.module(name, factory)
 if BX._factories[name] then
@@ -202,21 +692,21 @@ end
 BX._conns = {}
 BX._loaded = {}
 end
-if type(env.BlyxoTeardown) == "function" then
-pcall(env.BlyxoTeardown)
+if type(env.NhoiiiXTeardown) == "function" then
+pcall(env.NhoiiiXTeardown)
 end
-env.BlyxoTeardown = BX.teardown
+env.NhoiiiXTeardown = BX.teardown
 BX.module("boot.log", function(BX)
 local M = {}
-local TRACE_FILE  = "BlyxoHub_trace.txt"
+local TRACE_FILE  = "NhoiiiX-Hub_trace.txt"
 local FLUSH_GAP   = 3.0
 local RING        = 500   
 local canWrite  = (type(writefile) == "function")
 local debugOn   = function()
 local env = (type(getgenv) == "function" and getgenv()) or _G
-return env.BlyxoDebug == true
+return env.NhoiiiXDebug == true
 end
-local PREV_FILE = "BlyxoHub_trace_prev.txt"
+local PREV_FILE = "NhoiiiX-Hub_trace_prev.txt"
 if canWrite and type(readfile) == "function" and type(isfile) == "function" then
 pcall(function()
 local env = (type(getgenv) == "function" and getgenv()) or _G
@@ -226,7 +716,7 @@ if isfile(TRACE_FILE) then writefile(PREV_FILE, readfile(TRACE_FILE)) end
 end)
 end
 if canWrite then
-pcall(writefile, TRACE_FILE, "[boot] BlyxoHub logger initialized\n")
+pcall(writefile, TRACE_FILE, "[boot] NhoiiiX-Hub logger initialized\n")
 end
 local ring, ringN, ringHead = {}, 0, 0
 local flushAt     = 0
@@ -799,7 +1289,7 @@ end,
 assetEarnings = function(t) return type(rawget(t, "LiveRatePerSecond")) == "function" end,
 eggState = function(t) return type(rawget(t, "ReadFieldEggs")) == "function" end,
 }
-local SWEEP_FLAG = "BlyxoHub/heap_sweep.flag"
+local SWEEP_FLAG = "NhoiiiX-Hub/heap_sweep.flag"
 local function harvestHeap()
 if heapTried then return end
 heapTried = true
@@ -812,7 +1302,7 @@ log.warn("skipping the heap sweep: the client died in one last run")
 return
 end
 if exec.can.files then
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.writeFile(SWEEP_FLAG, "sweeping")
 end
 local objs = exec.gcScan(true)
@@ -1305,8 +1795,8 @@ local GAME_SUFFIX = ""
 if BX.game and BX.game ~= "Steal An Egg" then
 GAME_SUFFIX = "_" .. tostring(BX.game):gsub("%W+", "")
 end
-local DIR = "BlyxoHub/profiles" .. GAME_SUFFIX
-local SETTINGS = "BlyxoHub/settings" .. GAME_SUFFIX .. ".json"
+local DIR = "NhoiiiX-Hub/profiles" .. GAME_SUFFIX
+local SETTINGS = "NhoiiiX-Hub/settings" .. GAME_SUFFIX .. ".json"
 M.FORMAT = FORMAT
 local SKIP_KEYS = { "url", "token", "secret", "key", "password" }
 local ORDER = {
@@ -1398,7 +1888,7 @@ if not pcall(function() body = svc.HttpService:JSONEncode({ version = FORMAT, na
 return false
 end
 return BX.try("profiles.index", function()
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.ensureFolder(DIR)
 if not exec.writeFile(INDEX, body) then error("writefile refused", 0) end
 end) and true or false
@@ -1418,7 +1908,7 @@ function M.refresh()
 listing, listingOk = {}, false
 if not M.available() then return listing end
 BX.try("profiles.refresh", function()
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.ensureFolder(DIR)
 local seen = {}
 for _, name in ipairs(readIndex()) do
@@ -1573,7 +2063,7 @@ local okEnc = pcall(function() body = svc.HttpService:JSONEncode(payload) end)
 if not okEnc or not body then return false, "Could not encode the profile" end
 local path = pathFor(name)
 local ok = BX.try("profiles.save", function()
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.ensureFolder(DIR)
 if not exec.writeFile(path, body) then error("writefile refused", 0) end
 end)
@@ -1702,7 +2192,7 @@ if not pcall(function() body = svc.HttpService:JSONEncode(s) end) then
 return false, "Could not save the setting"
 end
 local wrote = BX.try("profiles.settings", function()
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 if not exec.writeFile(SETTINGS, body) then error("writefile refused", 0) end
 end)
 if not wrote then return false, "Could not write the auto-load setting" end
@@ -1723,7 +2213,7 @@ s.version = FORMAT
 local body
 if not pcall(function() body = svc.HttpService:JSONEncode(s) end) then return false end
 return BX.try("profiles.windowSettings", function()
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 if not exec.writeFile(SETTINGS, body) then error("writefile refused", 0) end
 end) and true or false
 end
@@ -2464,7 +2954,7 @@ local exec = BX.require("core.exec")
 local log = BX.require("boot.log").for_module("logo")
 local M = {}
 local FALLBACK_ASSET = "rbxassetid://95108798243406"
-local FOLDER = "BlyxoHub/assets"
+local FOLDER = "NhoiiiX-Hub/assets"
 local OVERRIDE = FOLDER .. "/logo.png"
 local ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 local function decode(text)
@@ -2640,7 +3130,7 @@ local WARN = Color3.fromRGB(255, 140, 128)
 local ok, errorMessage = pcall(function()
 local createdAt = os.clock()
 local parent = exec.hiddenParent()
-local old = parent:FindFirstChild("BlyxoSplash")
+local old = parent:FindFirstChild("NhoiiiXSplash")
 if old then old:Destroy() end
 local EXPO = Enum.EasingStyle.Exponential
 local tweenCount = 0
@@ -2697,16 +3187,16 @@ if okShadow and instance then fade(instance, { Transparency = transparency }) en
 return okShadow and instance or nil
 end
 local gui = new("ScreenGui", {
-Name = "BlyxoSplash", DisplayOrder = 999997, IgnoreGuiInset = true,
+Name = "NhoiiiXSplash", DisplayOrder = 999997, IgnoreGuiInset = true,
 ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 }, parent)
 local loadingSound = new("Sound", {
-Name = "BlyxoLoadingNotification",
+Name = "NhoiiiXLoadingNotification",
 SoundId = "rbxassetid://139746569667955",
 Volume = 3,
 }, game:GetService("SoundService"))
 local errorSound = new("Sound", {
-Name = "BlyxoErrorNotification",
+Name = "NhoiiiXErrorNotification",
 SoundId = "rbxassetid://71028126634386",
 Volume = 3,
 }, game:GetService("SoundService"))
@@ -2882,7 +3372,7 @@ NumberSequenceKeypoint.new(1, 1),
 }, arcStroke)
 local title = text("Title", {
 Position = UDim2.fromOffset(PAD, 160), Size = UDim2.new(1, -PAD * 2, 0, 36),
-FontFace = font(Enum.FontWeight.Bold), Text = "BlyxoHub", TextColor3 = WHITE, TextSize = SIZE_TITLE,
+FontFace = font(Enum.FontWeight.Bold), Text = "NhoiiiX Hub", TextColor3 = WHITE, TextSize = SIZE_TITLE,
 })
 local titleSheen = new("UIGradient", {
 Offset = Vector2.new(-1, 0), Rotation = 20,
@@ -3033,7 +3523,7 @@ if fps < 45 then blurReason = ("fps %.0f"):format(fps) return end
 if closing or closed then return end
 local camera = workspace.CurrentCamera
 if not camera then return end
-blur = new("BlurEffect", { Name = "BlyxoSplashBlur", Size = 0 }, camera)
+blur = new("BlurEffect", { Name = "NhoiiiXSplashBlur", Size = 0 }, camera)
 tween(blur, ease(0.6, Enum.EasingStyle.Quad), { Size = BLUR_SIZE })
 blurReason = ("on (fps %.0f)"):format(fps)
 end
@@ -3278,7 +3768,7 @@ local function ensure()
 if sound and sound.Parent then return sound end
 local ok, result = pcall(function()
 local s = Instance.new("Sound")
-s.Name = "BlyxoHover"
+s.Name = "NhoiiiXHover"
 s.SoundId = "rbxassetid://139800881181209"
 s.Volume = 2
 s.Parent = game:GetService("SoundService")
@@ -3346,7 +3836,7 @@ local ok, f = pcall(Font.new, FAMILY, weight)
 return ok and f or Font.fromEnum(FONT)
 end
 local STROKE_T = 0.35
-local POS_FILE = "BlyxoHub_stats_pos.json"   
+local POS_FILE = "NhoiiiX-Hub_stats_pos.json"   
 local NUM_EASE_K = 12     
 local TONE_FADE  = 0.45   
 local FPS_ALPHA  = 0.28   
@@ -3364,7 +3854,7 @@ local SPIKE_FLOOR   = 120
 local SPIKE_CONFIRM = 2     
 local STALE_AFTER = 6       
 local BLANK = "--"
-local ICON_ROOT = "BlyxoHub/icons"
+local ICON_ROOT = "NhoiiiX-Hub/icons"
 local ICON_DIR  = ICON_ROOT .. "/v1"
 local ICON_BASE = "https://raw.githubusercontent.com/google/material-design-icons/3.0.1/"
 local ICON_SRC  = {
@@ -4301,14 +4791,14 @@ end
 local function build()
 sc = BX.scope("ui.stats")
 local parent = exec.hiddenParent()
-local old = parent:FindFirstChild("BlyxoStats")
+local old = parent:FindFirstChild("NhoiiiXStats")
 if old then old:Destroy() end
 gui = mk("ScreenGui", {
-Name = "BlyxoStats", DisplayOrder = 100000, IgnoreGuiInset = true,
+Name = "NhoiiiXStats", DisplayOrder = 100000, IgnoreGuiInset = true,
 ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 }, parent)
 notificationSound = mk("Sound", {
-Name = "BlyxoNotification",
+Name = "NhoiiiXNotification",
 SoundId = "rbxassetid://87437544236708",
 Volume = 3,
 PlaybackSpeed = 1,
@@ -4362,7 +4852,7 @@ VerticalAlignment = Enum.VerticalAlignment.Center,
 Padding = UDim.new(0, 0), SortOrder = Enum.SortOrder.LayoutOrder,
 }, pill)
 launcher = mk("TextButton", {
-Name = "BlyxoHubLauncher", AnchorPoint = Vector2.new(0.5, 0),
+Name = "NhoiiiX-HubLauncher", AnchorPoint = Vector2.new(0.5, 0),
 Position = UDim2.fromScale(0.5, 0.08), Size = UDim2.fromOffset(250, 58),
 BackgroundColor3 = Color3.fromRGB(12, 12, 16), BackgroundTransparency = 0.04,
 BorderSizePixel = 0, AutoButtonColor = false, Text = "", Visible = false,
@@ -4383,7 +4873,7 @@ Name = "Title", Position = UDim2.fromOffset(62, 11),
 Size = UDim2.fromOffset(170, 22), BackgroundTransparency = 1,
 FontFace = face(Enum.FontWeight.SemiBold), TextSize = 16,
 TextColor3 = TEXT, TextXAlignment = Enum.TextXAlignment.Left,
-Text = "BlyxoHub", ZIndex = 21,
+Text = "NhoiiiX-Hub", ZIndex = 21,
 }, launcher)
 launcherSub = mk("TextLabel", {
 Name = "Subtitle", Position = UDim2.fromOffset(62, 32),
@@ -4399,7 +4889,7 @@ end))
 baseScale = pickScale()
 scaler = mk("UIScale", { Scale = baseScale }, pill)
 brandFrame = mk("Frame", {
-Name = "BlyxoBrand", LayoutOrder = 0, Size = UDim2.fromOffset(108, 30),
+Name = "NhoiiiXBrand", LayoutOrder = 0, Size = UDim2.fromOffset(108, 30),
 BackgroundTransparency = 1, BorderSizePixel = 0,
 }, pill)
 mk("ImageLabel", {
@@ -4413,7 +4903,7 @@ Name = "Title", Position = UDim2.fromOffset(32, 1),
 Size = UDim2.fromOffset(76, 18), BackgroundTransparency = 1,
 FontFace = face(Enum.FontWeight.SemiBold), TextSize = 13,
 TextColor3 = TEXT, TextXAlignment = Enum.TextXAlignment.Left,
-Text = "BlyxoHub",
+Text = "NhoiiiX-Hub",
 }, brandFrame)
 brandSubtitle = mk("TextLabel", {
 Name = "Subtitle", Position = UDim2.fromOffset(32, 17),
@@ -5062,9 +5552,9 @@ log.info("recap: %d eggs, +%s/s, %s, %s", s.eggs, eggs.formatRate(s.income), bes
 return
 end
 local parent = exec.hiddenParent()
-local gui = parent:FindFirstChild("BlyxoIsland") or parent:FindFirstChild("BlyxoStats")
+local gui = parent:FindFirstChild("NhoiiiXIsland") or parent:FindFirstChild("NhoiiiXStats")
 if not gui then
-gui = sc:own(mk("ScreenGui", { Name = "BlyxoRecap", DisplayOrder = 999998, IgnoreGuiInset = true,
+gui = sc:own(mk("ScreenGui", { Name = "NhoiiiXRecap", DisplayOrder = 999998, IgnoreGuiInset = true,
 ResetOnSpawn = false }, parent))
 end
 local stats = BX._loaded["ui.stats"]
@@ -7621,7 +8111,7 @@ island = ok and mod or nil
 end
 if not island or type(island.show) ~= "function" then return false end
 island.show(o.key or "notify", {
-title = tostring(title or "BlyxoHub"),
+title = tostring(title or "NhoiiiX-Hub"),
 sub = body and tostring(body) or nil,
 tone = o.tone or "normal",
 hold = o.hold or 4,
@@ -7659,7 +8149,7 @@ wantW, wantH = T.fitTouchSize(wantW, wantH)
 fitMargin = T.TOUCH_MARGIN
 end
 local gui = mk("ScreenGui", {
-Name = opts.guiName or ("Blyxo_" .. tostring(math.random(1e6, 9e6))),
+Name = opts.guiName or ("NhoiiiX_" .. tostring(math.random(1e6, 9e6))),
 ResetOnSpawn = false,
 ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 DisplayOrder = 1000,
@@ -7782,7 +8272,7 @@ VerticalAlignment = Enum.VerticalAlignment.Center,
 local title = mk("TextLabel", {
 Name = "Title",
 BackgroundTransparency = 1,
-Text = tostring(opts.title or "BlyxoHub"),
+Text = tostring(opts.title or "NhoiiiX-Hub"),
 FontFace = T.FONT_TITLE or T.FONT_BOLD,
 TextSize = T.SIZE_TITLE,
 TextColor3 = T.WHITE,
@@ -9624,7 +10114,7 @@ log.info("motion: %d library tween durations unified to %.2f-%.2fs", changed, MO
 return patched
 end
 local Rayfield, lastErr
-local INIT_FLAG = "BlyxoHub/rayfield_init.flag"
+local INIT_FLAG = "NhoiiiX-Hub/rayfield_init.flag"
 local diedLastRun = false
 if exec.can.files then
 diedLastRun = exec.isFile(INIT_FLAG)
@@ -9634,7 +10124,7 @@ tostring(exec.readFile(INIT_FLAG)))
 exec.deleteFile(INIT_FLAG)
 end
 end
-local CACHE = "BlyxoHub/rayfield_gen2.lua"
+local CACHE = "NhoiiiX-Hub/rayfield_gen2.lua"
 local canCache = exec.can.files and not diedLastRun
 if diedLastRun and exec.can.files and exec.isFile(CACHE) then
 log.warn("deleting the cached library: the last run died loading one")
@@ -9651,7 +10141,7 @@ okMem and tostring(live) or "?", #source)
 end
 if exec.can.files then
 BX.try("window.initFlag", function()
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.writeFile(INIT_FLAG, tostring(label) .. " | " .. tostring(#source) .. " bytes")
 end)
 end
@@ -9672,7 +10162,7 @@ task.spawn(function()
 BX.try("window.cacheRefresh", function()
 local fresh = game:HttpGet(URLS[1])
 if type(fresh) == "string" and #fresh > 1000 then
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.writeFile(CACHE, fresh)
 log.info("rayfield cache refreshed (%d bytes)", #fresh)
 end
@@ -9706,7 +10196,7 @@ if lib then
 Rayfield = lib
 if canCache and url == URLS[1] then
 BX.try("window.cacheWrite", function()
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.writeFile(CACHE, res)
 end)
 end
@@ -9743,10 +10233,10 @@ local windowIcon = BX.require("ui.logo").icon()
 local w0 = os.clock()
 local okWin, window = bounded("CreateWindow", function()
 return Rayfield:CreateWindow({
-name = "BlyxoHub",
+name = "NhoiiiX-Hub",
 subtitle = BX.game or "Steal An Egg",
 icon = windowIcon,
-showName = "BlyxoHub",
+showName = "NhoiiiX-Hub",
 sidebarLayout = true,
 profile = "Welcome back",
 theme = {
@@ -9779,7 +10269,7 @@ ShadowColor     = Color3.fromRGB(0, 0, 0),
 configuration = {
 autoSave = false,
 autoLoad = false,
-fileName = "BlyxoHub_" .. tostring(BX.game or "Steal An Egg"):gsub("%s+", ""),
+fileName = "NhoiiiX-Hub_" .. tostring(BX.game or "Steal An Egg"):gsub("%s+", ""),
 },
 })
 end, INIT_TIMEOUT)
@@ -9817,8 +10307,8 @@ BX.try("window.findGui", function()
 local root = exec.hiddenParent()
 for _ = 1, 20 do
 for _, g in ipairs(root:GetChildren()) do
-if g:IsA("ScreenGui") and g.Name ~= "BlyxoSplash"
-and g.Name ~= "BlyxoStats" and g:FindFirstChild("Main") then
+if g:IsA("ScreenGui") and g.Name ~= "NhoiiiXSplash"
+and g.Name ~= "NhoiiiXStats" and g:FindFirstChild("Main") then
 screen = g
 break
 end
@@ -9847,8 +10337,8 @@ end
 local function suppressRayfieldLauncher()
 local root = exec.hiddenParent()
 for _, candidate in ipairs(root:GetChildren()) do
-if candidate:IsA("ScreenGui") and candidate.Name ~= "BlyxoStats"
-and candidate.Name ~= "BlyxoSplash" then
+if candidate:IsA("ScreenGui") and candidate.Name ~= "NhoiiiXStats"
+and candidate.Name ~= "NhoiiiXSplash" then
 local candidateName = tostring(candidate.Name):lower()
 if candidate ~= screen and candidateName:find("rayfield", 1, true) then
 candidate.Enabled = false
@@ -9958,7 +10448,7 @@ if not isHide and not inTopRight then return end
 boundChrome[obj] = true
 BX.try("window.chromeOverlay", function()
 local overlay = Instance.new("TextButton")
-overlay.Name = "BlyxoChromeOverlay"
+overlay.Name = "NhoiiiXChromeOverlay"
 overlay.BackgroundTransparency = 1
 overlay.BorderSizePixel = 0
 overlay.Text = ""
@@ -10065,7 +10555,7 @@ end)
 if ok and t then tabsByName[name] = t end
 return ok and t or nil
 end
-local UI_FILE = "BlyxoHub_ui.json"
+local UI_FILE = "NhoiiiX-Hub_ui.json"
 local function readUi()
 local raw = exec.readFile(UI_FILE)
 if not raw then return {} end
@@ -10095,13 +10585,13 @@ end
 local hasNotify = type(Rayfield.Notify) == "function"
 local hasToast = type(window.Toast) == "function"
 function M.notify(title, content, duration)
-log.info("[notify] %s: %s", tostring(title or "BlyxoHub"), tostring(content or ""))
+log.info("[notify] %s: %s", tostring(title or "NhoiiiX-Hub"), tostring(content or ""))
 local island = BX._loaded["ui.island"]
 local text = tostring(content or "")
 if island and island.show then
 local ok = BX.try("window.island", function()
 island.show("notify", {
-title = tostring(title or "BlyxoHub"), sub = text,
+title = tostring(title or "NhoiiiX-Hub"), sub = text,
 hold = math.clamp(tonumber(duration) or 3, 2, 6),
 })
 end)
@@ -10427,7 +10917,7 @@ local players = game:GetService("Players")
 local localPlayer = players.LocalPlayer
 local raw
 raw = native.window({
-title = "BlyxoHub",
+title = "NhoiiiX-Hub",
 subtitle = BX.game or "Steal An Egg",
 user = localPlayer and (localPlayer.DisplayName or localPlayer.Name) or "Player",
 userTag = localPlayer and ("@" .. localPlayer.Name) or "@Player",
@@ -10581,7 +11071,7 @@ raw:destroy()
 return true
 end
 M.win = raw
-log.info("menu built on native BlyxoHub UI")
+log.info("menu built on native NhoiiiX-Hub UI")
 return M
 end)
 BX.module("ui.tabs.home", function(BX)
@@ -10602,17 +11092,17 @@ game:GetService("GuiService"):OpenBrowserWindow(INVITE)
 end)
 local copied = exec.clipboard(INVITE)
 log.info("discord: opened (copied=%s)", tostring(copied))
-win.notify("BlyxoHub", copied and "Discord opened and invite copied"
+win.notify("NhoiiiX-Hub", copied and "Discord opened and invite copied"
 or ("Join at " .. INVITE))
 end
 function M.build(tab)
 if not tab then return M end
 if type(tab.SetHeading) == "function" then
-tab:SetHeading("BlyxoHub Community")
+tab:SetHeading("NhoiiiX-Hub Community")
 end
 tab:CreateRichCard({
 name = "Community",
-text = "Release notes, support, and early access for BlyxoHub users.",
+text = "Release notes, support, and early access for NhoiiiX-Hub users.",
 titleSize = 16,
 textSize = 13,
 action = { label = "Join Discord", textSize = 14, callback = openDiscord },
@@ -10923,14 +11413,14 @@ name = "Stop Everything",
 description = "Turns every switch off. Resume puts them back.",
 callback = function()
 local n = prof.stopAll()
-win.notify("BlyxoHub", ("Everything off (%d switches)"):format(n), 4)
+win.notify("NhoiiiX-Hub", ("Everything off (%d switches)"):format(n), 4)
 end,
 })
 tab:CreateButton({
 name = "Resume",
 callback = function()
 local n = prof.resumeAll()
-win.notify("BlyxoHub", n > 0 and ("%d switches back on"):format(n)
+win.notify("NhoiiiX-Hub", n > 0 and ("%d switches back on"):format(n)
 or "Nothing to resume", 4)
 end,
 })
@@ -12121,7 +12611,7 @@ say(ok, msg)
 end,
 })
 tab:CreateButton({
-name = "Unload BlyxoHub",
+name = "Unload NhoiiiX-Hub",
 description = "Close the hub and stop its workers.",
 callback = function() win.unload() end,
 })
@@ -12737,9 +13227,9 @@ local function attach(root)
 detach()
 if not (root and root:IsA("BasePart")) then return false end
 att = Instance.new("Attachment")
-att.Name = "BlyxoSpeedAtt"
+att.Name = "NhoiiiXSpeedAtt"
 lv = Instance.new("LinearVelocity")
-lv.Name = "BlyxoSpeed"
+lv.Name = "NhoiiiXSpeed"
 lv.Attachment0 = att
 lv.MaxForce = K.FORCE
 lv.RelativeTo = Enum.ActuatorRelativeTo.World
@@ -12926,13 +13416,13 @@ if not hum then return false end
 if hum:GetAttribute(SWAP_ATTR) == true then
 stats.alreadySwapped = stats.alreadySwapped + 1
 if not swapPrior then
-local d = hum:GetAttribute("BlyxoPriorDead")
+local d = hum:GetAttribute("NhoiiiXPriorDead")
 if d ~= nil then
 swapPrior = {
 dead        = d,
-fallingDown = hum:GetAttribute("BlyxoPriorFallingDown") ~= false,
-ragdoll     = hum:GetAttribute("BlyxoPriorRagdoll") ~= false,
-breakJoints = hum:GetAttribute("BlyxoPriorBreakJoints") == true,
+fallingDown = hum:GetAttribute("NhoiiiXPriorFallingDown") ~= false,
+ragdoll     = hum:GetAttribute("NhoiiiXPriorRagdoll") ~= false,
+breakJoints = hum:GetAttribute("NhoiiiXPriorBreakJoints") == true,
 }
 rememberStates(swapPrior)
 end
@@ -12960,10 +13450,10 @@ local clone = hum:Clone()
 if not clone then error("clone failed") end
 clone.Name = "Humanoid"
 clone:SetAttribute(SWAP_ATTR, true)
-clone:SetAttribute("BlyxoPriorDead", prior.dead)
-clone:SetAttribute("BlyxoPriorFallingDown", prior.fallingDown)
-clone:SetAttribute("BlyxoPriorRagdoll", prior.ragdoll)
-clone:SetAttribute("BlyxoPriorBreakJoints", prior.breakJoints)
+clone:SetAttribute("NhoiiiXPriorDead", prior.dead)
+clone:SetAttribute("NhoiiiXPriorFallingDown", prior.fallingDown)
+clone:SetAttribute("NhoiiiXPriorRagdoll", prior.ragdoll)
+clone:SetAttribute("NhoiiiXPriorBreakJoints", prior.breakJoints)
 clone:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
 clone:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
 clone:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
@@ -13015,12 +13505,12 @@ function M.disarm()
 if not swapPrior then
 local hum = ch.humanoid()
 if hum and hum:GetAttribute(SWAP_ATTR) == true then
-local d = hum:GetAttribute("BlyxoPriorDead")
+local d = hum:GetAttribute("NhoiiiXPriorDead")
 swapPrior = {
 dead        = (d == nil) and true or d,
-fallingDown = hum:GetAttribute("BlyxoPriorFallingDown") ~= false,
-ragdoll     = hum:GetAttribute("BlyxoPriorRagdoll") ~= false,
-breakJoints = hum:GetAttribute("BlyxoPriorBreakJoints") == true,
+fallingDown = hum:GetAttribute("NhoiiiXPriorFallingDown") ~= false,
+ragdoll     = hum:GetAttribute("NhoiiiXPriorRagdoll") ~= false,
+breakJoints = hum:GetAttribute("NhoiiiXPriorBreakJoints") == true,
 }
 end
 end
@@ -15498,7 +15988,7 @@ local function ensure()
 if sc then return end
 sc = BX.scope("features.esp.cards")
 folder = Instance.new("Folder")
-folder.Name = "BlyxoESP"
+folder.Name = "NhoiiiXESP"
 sc:own(folder)
 folder.Parent = workspace
 local acc, step = 0, 1 / K.VIS_HZ
@@ -16351,11 +16841,11 @@ if not M.hasUrl() then return "not set" end
 local host = tostring(url):match("^https?://([^/]+)") or "?"
 return ("%s/...(%d chars)"):format(host, #url)
 end
-local ENABLE_FILE = "BlyxoHub/webhook-state.txt"
+local ENABLE_FILE = "NhoiiiX-Hub/webhook-state.txt"
 local function rememberEnabled(v)
 if not exec.can.files then return end
 BX.try("webhook.rememberEnabled", function()
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.writeFile(ENABLE_FILE, v and "1" or "0")
 end)
 end
@@ -16372,7 +16862,7 @@ function M.applyProfileEnabled(on)
 if enabledPersisted then return enabled end
 return M.setEnabled(on, true)
 end
-local URL_FILE = "BlyxoHub/webhook.txt"
+local URL_FILE = "NhoiiiX-Hub/webhook.txt"
 local function remember(v)
 if not exec.can.files then return end
 BX.try("webhook.remember", function()
@@ -16380,7 +16870,7 @@ if v == nil or v == "" then
 if exec.isFile(URL_FILE) then exec.deleteFile(URL_FILE) end
 return
 end
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.writeFile(URL_FILE, v)
 end)
 end
@@ -16451,13 +16941,13 @@ add("Rarity", e.rarity ~= "?" and e.rarity or nil)
 add("Mutation", mutation)
 add("Area", e.areaId)
 return {
-username = "BlyxoHub",
+username = "NhoiiiX-Hub",
 embeds = { {
 title = e.event == "stolen" and "Egg stolen" or "Egg delivered",
 description = "**" .. tostring(e.name or "Egg") .. "**",
 color = 5814783,
 fields = fields,
-footer = { text = ("BlyxoHub %s %s"):format(tostring(BX.game or ""), tostring(BX.version or "")) },
+footer = { text = ("NhoiiiX-Hub %s %s"):format(tostring(BX.game or ""), tostring(BX.version or "")) },
 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
 } },
 }
@@ -16522,12 +17012,12 @@ if not enabled then M.setEnabled(true) end
 task.spawn(function()
 BX.try("webhook.test", function()
 post({
-username = "BlyxoHub",
+username = "NhoiiiX-Hub",
 embeds = { {
 title = "Test",
 description = "Webhook is working.",
 color = 5814783,
-footer = { text = ("BlyxoHub %s %s"):format(tostring(BX.game or ""), tostring(BX.version or "")) },
+footer = { text = ("NhoiiiX-Hub %s %s"):format(tostring(BX.game or ""), tostring(BX.version or "")) },
 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
 } },
 }, "test")
@@ -16724,7 +17214,7 @@ log.info("restored %d properties (%s)", put, tostring(why))
 return put
 end
 local function fences()
-local esp = workspace:FindFirstChild("BlyxoESP")
+local esp = workspace:FindFirstChild("NhoiiiXESP")
 local plr = svc.Players.LocalPlayer
 return esp, plr and plr.Character
 end
@@ -18375,7 +18865,7 @@ local exec = BX.require("core.exec")
 local svc  = BX.require("core.services")
 local log  = BX.require("boot.log").for_module("catalog")
 local M = {}
-local EXPORT_PATH = "BlyxoHub/catalog_export.json"
+local EXPORT_PATH = "NhoiiiX-Hub/catalog_export.json"
 local baked = nil
 BX.try("catalog.baked", function()
 if BX._factories and BX._factories["features.catalogdata"] then
@@ -18482,7 +18972,7 @@ if not okJson or not encoded then
 log.error("could not encode the harvest")
 return false
 end
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.writeFile(EXPORT_PATH, encoded)
 log.info("harvested %d pets, scale exponent %.3f, %d mutations -> %s",
 counted, out.scaleExponent, (function()
@@ -20222,7 +20712,7 @@ SOFT_STRIKES = 2,
 M.K = K
 local stats = { runs = 0, delivered = 0, failed = 0, cancelled = 0, lost = 0 }
 function M.stats() return table.clone(stats) end
-local SPEED_FILE = "BlyxoHub/carry_speed.json"
+local SPEED_FILE = "NhoiiiX-Hub/carry_speed.json"
 local SPEED_FILE_V = 2
 local speed = { current = K.SPEED, ceiling = nil }
 BX.try("carry.loadSpeed", function()
@@ -20245,7 +20735,7 @@ log.info("carry speed restored: %d studs/s (ceiling %s)", speed.current, tostrin
 end)
 local function saveSpeed()
 BX.try("carry.saveSpeed", function()
-exec.ensureFolder("BlyxoHub")
+exec.ensureFolder("NhoiiiX-Hub")
 exec.writeFile(SPEED_FILE, svc.HttpService:JSONEncode({
 v = SPEED_FILE_V, current = speed.current, ceiling = speed.ceiling,
 }))
@@ -22811,11 +23301,11 @@ do
 local logmod = BX.require("boot.log")
 logmod.level = BX.require("core.config").LOG_LEVEL
 local log = logmod.for_module("startup")
-logmod.session(("BlyxoHub %s build %s | generation %d")
+logmod.session(("NhoiiiX-Hub %s build %s | generation %d")
 :format(BX.version, BX.build, BX.generation))
 local startup = { state = "BOOTING", stages = {}, t0 = os.clock(), current = nil }
 local env = (type(getgenv) == "function" and getgenv()) or _G
-env.BlyxoStartup = startup
+env.NhoiiiXStartup = startup
 local function setState(s)
 startup.state = s
 log.info("state -> %s", s)
@@ -22856,7 +23346,7 @@ startup.error = tostring(why)
 setState("FAILED")
 splash.fail(("Failed to initialize  |  Stage: %s  |  %s"):format(stageName, tostring(why)))
 warn(("[BLYXO] startup failed - stage %s: %s"):format(stageName, tostring(why)))
-warn("[BLYXO] see BlyxoHub_trace.txt")
+warn("[BLYXO] see NhoiiiX-Hub_trace.txt")
 end
 local function stage(name, required, fn)
 if not BX.alive() or startup.state == "FAILED" then
@@ -22976,7 +23466,7 @@ end)
 lazyBuilding[name] = nil
 if not ok then
 log.error("lazy tab %s failed: %s", name, tostring(err))
-win.notify("BlyxoHub", name .. " could not load", 5)
+win.notify("NhoiiiX-Hub", name .. " could not load", 5)
 end
 end
 local function lazyTab(name, moduleName)
@@ -23172,7 +23662,7 @@ failHub("premium key", gateWhy)
 BX.try("startup.premiumUnload", win.unload)
 BX.try("startup.premiumNotice", function()
 game:GetService("StarterGui"):SetCore("SendNotification", {
-Title = "BlyxoHub Premium", Text = tostring(gateWhy), Duration = 10,
+Title = "NhoiiiX-Hub Premium", Text = tostring(gateWhy), Duration = 10,
 })
 end)
 return
@@ -23196,7 +23686,7 @@ log.error("client teleport %s (place %s)", tostring(state), tostring(placeId))
 end)
 end
 end)
-env.BlyxoAudit = function()
+env.NhoiiiXAudit = function()
 local h = BX.profile.health()
 print(("[BLYXO] up %.0fs | mem %.0fMB (%+.0f since start) | %d modules")
 :format(h.uptime, h.mem, h.memGrow, h.loaded))
@@ -23213,10 +23703,10 @@ for _, r in ipairs(rep) do print("[BLYXO]   " .. r) end
 end
 return h
 end
-env.BlyxoProfile = function()
+env.NhoiiiXProfile = function()
 for _, line in ipairs(BX.profile.report()) do print("[BLYXO] " .. line) end
 end
-env.BlyxoStages = function()
+env.NhoiiiXStages = function()
 print(("[BLYXO] startup: %s in %.2fs"):format(
 startup.state, startup.readyAt or (os.clock() - startup.t0)))
 print("[BLYXO]   stage          result      cost      at")
@@ -23237,7 +23727,7 @@ logmod.session(("startup complete - all work done in %.2fs"):format(startup.init
 local function diag()
 local rep = BX.require("core.exec").report()
 local lines = {
-("executor = %s  (BlyxoHub %s build %s, generation %d)")
+("executor = %s  (NhoiiiX-Hub %s build %s, generation %d)")
 :format(tostring(rep.executor), tostring(BX.version),
 tostring(BX.build), BX.generation),
 ("capabilities = %s"):format(#rep.have > 0 and table.concat(rep.have, ",") or "(none)"),
@@ -23269,6 +23759,6 @@ print("[BLYXO diag] " .. l)
 end
 return lines
 end
-env.BlyxoDiag = diag
+env.NhoiiiXDiag = diag
 BX.try("startup.diag", diag)
 end
