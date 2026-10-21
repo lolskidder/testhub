@@ -4914,7 +4914,7 @@ MainButton.Size = UDim2.new(0, 55, 0, 55)
 
 MainButton.Position = UDim2.new(0, 10, 1, -58)
 
-MainButton.Image = "rbxassetid://81213277023664"
+MainButton.Image = "rbxassetid://70895505430795"
 
 MainButton.AutoButtonColor = false
 
@@ -24551,89 +24551,8 @@ Player:AddSection("Configs")
 
 
 
--- Khởi tạo biến cấu hình
-getgenv().SH = false
+-- Đã bỏ phần hiển thị chữ trắng TIME / FPS / PING ở góc màn hình.
 
--- Tạo ScreenGui độc lập để hiển thị ở góc phải màn hình
-local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Stats = game:GetService("Stats")
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FPS_Ping_Time_Display"
-screenGui.ResetOnSpawn = false
-if pcall(function() screenGui.Parent = CoreGui end) then
-else
-    screenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-end
-
--- Tạo khung chứa (Frame) đặt ở góc phải phía trên
-local container = Instance.new("Frame")
-container.Name = "Container"
-container.Size = UDim2.new(0, 220, 0, 30)
-container.Position = UDim2.new(1, -230, 0, 10) -- Góc phải màn hình
-container.BackgroundColor3 = Color3.fromRGB(30, 35, 40)
-container.BorderSizePixel = 0
-container.Visible = false
-container.Parent = screenGui
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 4)
-corner.Parent = container
-
--- Tạo chữ hiển thị (TextLabel)
-local textLabel = Instance.new("TextLabel")
-textLabel.Name = "DisplayLabel"
-textLabel.Size = UDim2.new(1, 0, 1, 0)
-textLabel.BackgroundTransparency = 1
-textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-textLabel.TextSize = 13
-textLabel.Font = Enum.Font.GothamBold
-textLabel.TextXAlignment = Enum.TextXAlignment.Center
-textLabel.Parent = container
-
--- Biến đếm thời gian chơi (tính từ khi vào server)
-local startTime = tick()
-
--- Vòng lặp cập nhật FPS, Ping và Time liên tục
-RunService.RenderStepped:Connect(function()
-    if getgenv().SH then
-        container.Visible = true
-        
-        -- Tính thời gian (Hours:Minutes:Seconds)
-        local elapsed = tick() - startTime
-        local hours = math.floor(elapsed / 3600)
-        local minutes = math.floor((elapsed % 3600) / 60)
-        local seconds = math.floor(elapsed % 60)
-        local timeStr = string.format("%d:%02d:%02d", hours, minutes, seconds)
-        
-        -- Lấy FPS (Dựa vào RenderStepped delta time)
-        local fps = math.floor(1 / RunService.RenderStepped:Wait())
-        
-        -- Lấy Ping thực tế từ Network
-        local ping = 0
-        pcall(function()
-            ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        end)
-        
-        -- Định dạng hiển thị giống hệt ảnh: TIME : H:M:S | FPS: XX | PING: XXX
-        textLabel.Text = string.format("TIME : %s | FPS: %d | PING: %d", timeStr, fps, ping)
-    else
-        container.Visible = false
-        -- Reset lại thời gian nếu tắt đi bật lại từ đầu nếu muốn (hoặc bỏ dòng này nếu muốn giữ nguyên thời gian cũ)
-        -- startTime = tick() 
-    end
-end)
-
--- Toggle để gắn vào UI của bạn
-Player:AddToggle({
-    Name = "Show Ping - Fps - Time",
-    Default = false,
-    Callback = function(Value)
-        getgenv().SH = Value
-    end
-})
 
 
 
