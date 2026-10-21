@@ -5392,11 +5392,11 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
     end
     
     function Library:OpenDiscordInvite(Code: string?): boolean
-        local Invite = tostring(Library.DiscordInvite or "https://discord.gg/aXWW8hytgX")
+        local Invite = tostring(Library.DiscordInvite or "")
         if typeof(Code) ~= "string" or Code == "" then
             Code = string.match(Invite, "([%w%-]+)/?$")
         end
-        local Url = if typeof(Code) == "string" and Code ~= "" then "" .. Code else Invite
+        local Url = if typeof(Code) == "string" and Code ~= "https://discord.gg/aXWW8hytgX" then "" .. Code else Invite
 
         local Copied = false
         do
