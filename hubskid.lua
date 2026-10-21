@@ -6115,21 +6115,50 @@ function NeverLose:CreateWindow(Config)
 
 	Window:SetAccount();
 
-	NeverLose:AddSignal(UserInputService.InputBegan:Connect(LPH_NO_VIRTUALIZE(function(value,ISTYPING)
-		if value.KeyCode == Window.Keybind or value.KeyCode.Name == Window.Keybind then
-			if not ISTYPING then
-				Window:ToggleInterface()
-			end
-		end;
-	end)));
+	-- NhoiiiX/WraithHub: nút logo luôn còn trên màn hình để mở lại hub sau khi đóng.
+	local HubToggleButton = Instance.new("ImageButton")
+	HubToggleButton.Name = "WraithHubToggleButton"
+	HubToggleButton.Parent = NeverLose.ScreenGui
+	HubToggleButton.AnchorPoint = Vector2.new(0, 0)
+	HubToggleButton.Position = UDim2.new(0, 12, 0, 120)
+	HubToggleButton.Size = UDim2.fromOffset(44, 44)
+	HubToggleButton.BackgroundColor3 = NeverLose.MainColor
+	HubToggleButton.BackgroundTransparency = 0.15
+	HubToggleButton.BorderSizePixel = 0
+	HubToggleButton.Image = Window.Logo or NeverLose.GlobalLogo
+	HubToggleButton.ScaleType = Enum.ScaleType.Fit
+	HubToggleButton.AutoButtonColor = true
+	HubToggleButton.ZIndex = 1000
+	local HubToggleCorner = Instance.new("UICorner")
+	HubToggleCorner.CornerRadius = UDim.new(0, 10)
+	HubToggleCorner.Parent = HubToggleButton
+	local HubToggleStroke = Instance.new("UIStroke")
+	HubToggleStroke.Color = NeverLose.AccentColor
+	HubToggleStroke.Thickness = 1
+	HubToggleStroke.Transparency = 0.15
+	HubToggleStroke.Parent = HubToggleButton
 
 	function Window:ToggleInterface()
-		Window.Signal:SetValue(not Window.Signal:GetValue());
-
+		local nextState = not Window.Signal:GetValue()
+		Window.Signal:SetValue(nextState)
+		-- Keep the floating logo available even while the main window is hidden.
+		HubToggleButton.Visible = true
 		if Window.__3DRender then
-			Window.Load3DBlock();
-		end;
-	end;
+			Window.Load3DBlock()
+		end
+	end
+
+	NeverLose:AddSignal(HubToggleButton.Activated:Connect(function()
+		Window:ToggleInterface()
+	end))
+
+	NeverLose:AddSignal(UserInputService.InputBegan:Connect(LPH_NO_VIRTUALIZE(function(input, gameProcessed)
+		if gameProcessed then return end
+		local keyName = input.KeyCode and input.KeyCode.Name
+		if keyName and keyName == tostring(Window.Keybind) then
+			Window:ToggleInterface()
+		end
+	end)))
 
 	function Window:Watermark()
 		if NeverLose.__WatermarkCache then
