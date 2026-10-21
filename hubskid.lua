@@ -4054,7 +4054,7 @@ function NeverLose:CreateWindow(Config)
 	WindowFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	WindowFrame.BorderSizePixel = 0
 	WindowFrame.ClipsDescendants = true
-	WindowFrame.Position = UDim2.new(255, 0, 255, 0)
+	WindowFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	WindowFrame.Size = Window.Size
 	WindowFrame.Active = true;
 
@@ -4274,7 +4274,7 @@ function NeverLose:CreateWindow(Config)
 	Window.Shadow:Render(false);
 
 	task.delay(0.25,function()
-		WindowFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+		-- Keep the existing window position; do not move it when opening the Hub.
 		Window:SetRender(true);
 		NeverLose:AddSignal(Window.Signal:Connect(LPH_NO_VIRTUALIZE(function(...)
 			Window:SetRender(...);
@@ -4346,7 +4346,7 @@ function NeverLose:CreateWindow(Config)
 	WindowName.Size = UDim2.new(0, 260, 0, 30)
 	WindowName.ZIndex = 7
 	WindowName.Font = Enum.Font.GothamMedium
-	WindowName.Text = string.upper(tostring(Window.Name or "WRAITH"))  Window.NameLabel = WindowName;
+	WindowName.Text = tostring(Window.Name or "NhoiiiX")  Window.NameLabel = WindowName;
     local HeadSep = Instance.new("Frame")
     HeadSep.Name = NeverLose.RandomString();
     HeadSep.Parent = HeadFrame
@@ -6921,7 +6921,7 @@ return NeverLose;
 
 					if genv.WRAITH_HVH_LOADED then
 						pcall(function()
-							game:GetService("StarterGui"):SetCore("SendNotification", { Title = "wraith", Text = "already loaded", Duration = 3 })
+							game:GetService("StarterGui"):SetCore("SendNotification", { Title = "NhoiiiX", Text = "already loaded", Duration = 3 })
 						end)
 
 						return
@@ -7195,32 +7195,8 @@ return NeverLose;
 					end
 				end)
 
-				task.spawn(function()
-					for i = 1, 3 do
-						task.wait(1)
+				-- Do not force Humanoid movement or reset PlayerModule controls on Hub startup.
 
-						pcall(function()
-							local character = LP.Character
-							character = character and character:FindFirstChildOfClass("Humanoid")
-
-							if character then
-								character:Move(Vector3.zero, false)
-								character.AutoRotate = true
-							end
-
-							local playerModule = LP:FindFirstChild("PlayerModule") or LP:FindFirstChild("PlayerScripts") and LP.PlayerScripts:FindFirstChild("PlayerModule")
-
-							if playerModule then
-								local module = require(playerModule)
-								module = module and module:GetControls()
-
-								if module then
-									module:Enable()
-								end
-							end
-						end)
-					end
-				end)
 
 				getgenv().WraithIconFor = function(arg)
 					local wraithIcons = getgenv().WraithIcons
@@ -7232,7 +7208,7 @@ return NeverLose;
 
 				v16 = lib:CreateWindow({
 					Logo = "rbxassetid://70895505430795",
-					Name = "WRAITH",
+					Name = "NhoiiiX",
 					Content = "",
 					ConfigFolder = "WraithConfigs",
 					Size = lib.Scales.Large,
@@ -7240,7 +7216,7 @@ return NeverLose;
 				})
 
 
-				-- Floating logo button: click to hide/show the Wraith hub.
+				-- Floating logo button: click to hide/show the NhoiiiX hub.
 				do
 					local parentOk, toggleParent = pcall(function()
 						return (gethui and gethui()) or game:GetService("CoreGui")
@@ -7295,7 +7271,7 @@ return NeverLose;
 						if wraithNotifyEnabled == false then
 							return
 						end
-						lib:CreateNotification().new({ Title = arg, Content = arg2, Duration = wraithNotifDuration or 3 })
+						lib:CreateNotification().new({ Title = (type(arg) == "string" and string.lower(arg) == "wraith" and "NhoiiiX" or arg), Content = arg2, Duration = wraithNotifDuration or 3 })
 					end)
 				end
 
@@ -7368,7 +7344,7 @@ return NeverLose;
 						textLabel.Size = UDim2.fromOffset(58, 18)
 						textLabel.TextYAlignment = Enum.TextYAlignment.Center
 						textLabel.Font = Enum.Font.GothamBold
-						textLabel.Text = "wraith"
+						textLabel.Text = "NhoiiiX"
 						textLabel.TextColor3 = Color3.fromRGB(229, 231, 241)
 						textLabel.TextSize = 14
 						textLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -11390,12 +11366,14 @@ return NeverLose;
 			end
 
 			local function fn54(disabled)
-				-- Anti-lag must not disable Roblox's grab/beam or character movement scripts.
+				-- Keep the game's mouse-grab / beam controllers enabled for normal pickup and dragging.
 				pcall(function()
 					local scripts = localPlayer:FindFirstChild("PlayerScripts")
-					if scripts then
-						for _, child in ipairs(scripts:GetChildren()) do
-							if child:IsA("LocalScript") and (child.Name == "CharacterAndBeamMove" or child.Name:find("Beam") or child.Name:find("GrabLine") or (child.Name:find("Character") and child.Name:find("Move"))) then
+					if not scripts then return end
+					for _, child in ipairs(scripts:GetDescendants()) do
+						if child:IsA("LocalScript") then
+							local name = child.Name:lower()
+							if name == "characterandbeammove" or name:find("beam", 1, true) or name:find("grabline", 1, true) or (name:find("character", 1, true) and name:find("move", 1, true)) then
 								child.Disabled = false
 							end
 						end
@@ -11403,8 +11381,15 @@ return NeverLose;
 				end)
 			end
 
-			-- Restore any interaction controller disabled by an earlier anti-lag run.
+			-- Repair the interaction scripts at load time and after each respawn.
 			fn54(false)
+			pcall(function()
+				localPlayer.CharacterAdded:Connect(function()
+					task.delay(1, function()
+						fn54(false)
+					end)
+				end)
+			end)
 
 			fn41 = function(arg)
 				flag11 = arg
@@ -12914,10 +12899,10 @@ if not game:IsLoaded() then game.Loaded:Wait() end
 
 local function killBeamScripts()
     pcall(function()
-        for _, sc in pairs(LP.PlayerScripts:GetChildren()) do
+        for _, sc in pairs(LP.PlayerScripts:GetDescendants()) do
             if sc:IsA("LocalScript") then
-                local nm = sc.Name
-                if nm == "CharacterAndBeamMove" or nm:find("Beam") or nm:find("GrabLine") or (nm:find("Character") and nm:find("Move")) then
+                local nm = sc.Name:lower()
+                if nm == "characterandbeammove" or nm:find("beam", 1, true) or nm:find("grabline", 1, true) or (nm:find("character", 1, true) and nm:find("move", 1, true)) then
                     sc.Disabled = false
                 end
             end
@@ -13021,7 +13006,7 @@ end)
 
 		v43:AddImage({ Image = lib.UserProfile, Size = UDim2.new(1, -16, 0, 170) })
 		v43:AddLabel("Thanks for buying")
-		v43:AddColoredLabel("WRAITH", Color3.fromRGB(138, 116, 255))
+		v43:AddColoredLabel("NhoiiiX", Color3.fromRGB(138, 116, 255))
 		v43:AddLabel("---------------------------------------")
 
 		do
@@ -33160,7 +33145,7 @@ end)
 					end)
 				end
 
-				local str6 = "WRAITH"
+				local str6 = "NhoiiiX"
 
 				local function fn59()
 					pcall(function()
@@ -33185,7 +33170,7 @@ end)
 						end
 
 						for _, descendant in ipairs(lib.ScreenGui:GetDescendants()) do
-							if (descendant:IsA("TextLabel") or descendant:IsA("TextButton")) and (descendant.Text == str6 or descendant.Text == "WRAITH") then
+							if (descendant:IsA("TextLabel") or descendant:IsA("TextButton")) and (descendant.Text == str6 or descendant.Text == string.upper(str6) or descendant.Text == "WRAITH") then
 								descendant.FontFace = fontFace
 							end
 						end
@@ -33198,7 +33183,7 @@ end)
 
 				v49:AddLabel("Window Title"):AddTextInput({
 					Flag = "WinTitle",
-					Default = "WRAITH",
+					Default = "NhoiiiX",
 					Callback = function(text)
 						if not text or text == "" then
 							return
@@ -33206,7 +33191,7 @@ end)
 
 						pcall(function()
 							for _, descendant in ipairs(lib.ScreenGui:GetDescendants()) do
-								if descendant:IsA("TextLabel") and (descendant.Text == string.upper(str6) or descendant.Text == "WRAITH") then
+								if descendant:IsA("TextLabel") and (descendant.Text == string.upper(str6) or descendant.Text == str6 or descendant.Text == "WRAITH") then
 									descendant.Text = text
 								end
 
@@ -33214,7 +33199,7 @@ end)
 								local flag15
 
 								if isTextButton then
-									flag15 = descendant.Text == string.upper(str6) or descendant.Text == "WRAITH"
+									flag15 = descendant.Text == string.upper(str6) or descendant.Text == str6 or descendant.Text == "WRAITH"
 								else
 									flag15 = isTextButton
 								end
@@ -34605,7 +34590,7 @@ end)
 			warn("[wraith build error] " .. tostring(arg))
 
 			pcall(function()
-				lib:CreateNotification().new({ Title = "wraith", Content = "build error: " .. tostring(arg), Duration = 8 })
+				lib:CreateNotification().new({ Title = "NhoiiiX", Content = "build error: " .. tostring(arg), Duration = 8 })
 			end)
 		end)
 	end
