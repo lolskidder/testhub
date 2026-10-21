@@ -115,16 +115,54 @@ screenGui.Parent         = playerGui
 screenGui.Enabled        = false -- Hide only the Anti-Die UI
 
 -- Anti Die runs automatically while its UI stays hidden.
-task.spawn(function()
-    while player.Parent do
-        local character = player.Character
-        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-        if humanoid and humanoid.Health > 0 and humanoid.Health < humanoid.MaxHealth then
-            humanoid.Health = humanoid.MaxHealth
-        end
-        task.wait(0.08)
+-- Re-arm on every respawn and react to health/state changes, including health reaching 0.
+local antiDieConnections = {}
+local function clearAntiDieConnections()
+    for _, connection in ipairs(antiDieConnections) do
+        pcall(function() connection:Disconnect() end)
     end
-end)
+    table.clear(antiDieConnections)
+end
+
+local function armAntiDie(character)
+    clearAntiDieConnections()
+    local humanoid = character and character:WaitForChild("Humanoid", 10)
+    if not humanoid or not humanoid:IsA("Humanoid") then return end
+
+    pcall(function()
+        humanoid.BreakJointsOnDeath = false
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    end)
+
+    local function restoreHealth()
+        if not humanoid.Parent then return end
+        if humanoid.Health < humanoid.MaxHealth then
+            pcall(function() humanoid.Health = humanoid.MaxHealth end)
+        end
+        pcall(function()
+            if humanoid:GetState() == Enum.HumanoidStateType.Dead then
+                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end)
+    end
+
+    table.insert(antiDieConnections, humanoid.HealthChanged:Connect(function(health)
+        if health < humanoid.MaxHealth then
+            task.defer(restoreHealth)
+        end
+    end))
+    table.insert(antiDieConnections, humanoid.StateChanged:Connect(function(_, state)
+        if state == Enum.HumanoidStateType.Dead then
+            task.defer(restoreHealth)
+        end
+    end))
+    task.defer(restoreHealth)
+end
+
+if player.Character then task.spawn(armAntiDie, player.Character) end
+table.insert(antiDieConnections, player.CharacterAdded:Connect(function(character)
+    task.spawn(armAntiDie, character)
+end))
 
 -- â”€â”€ OUTER BORDER WRAP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -- Reshaped: wider and slightly taller, more breathing room for side-by-side cards
