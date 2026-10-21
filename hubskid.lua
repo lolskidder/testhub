@@ -117,7 +117,7 @@ do
 	local title = Instance.new("TextLabel", titleFrame)
 	title.Size = UDim2.new(1, 0, 1, 0)
 	title.BackgroundTransparency = 1
-	title.Text = "ZEOHUB"
+	title.Text = "NhoiiiX Hub"
 	title.TextColor3 = Color3.fromRGB(255, 255, 255)
 	title.Font = Enum.Font.GothamBlack
 	title.TextSize = 55
@@ -377,7 +377,7 @@ local function MakeUI(cfg)
 		local args = { ... }
 		task.spawn(function()
 			local ok, err = pcall(cb, table.unpack(args))
-			if not ok then warn("[Zeohub] callback error: " .. tostring(err)) end
+			if not ok then warn("[NhoiiiX hub] callback error: " .. tostring(err)) end
 		end)
 	end
 
@@ -1095,8 +1095,8 @@ local function MakeUI(cfg)
 end
 
 local UI = MakeUI({
-	Name = "zeohub",
-	GuiName = "Zeohub_AnimeDice",
+	Name = "NhoiiiX Hub",
+	GuiName = "NhoiiiXhub_AnimeDice",
 	Version = "v1.0 · Anime Dice",
 	Folder = "NemoHubs",
 	File = "AnimeDice.json",
@@ -2169,7 +2169,7 @@ scriptCard:Button({
 	Name = "Stop all automation",
 	Callback = function()
 		stopAll()
-		notify("Zeohub", "All automation stopped.")
+		notify("NhoiiiXhub", "All automation stopped.")
 	end
 })
 scriptCard:Button({ Name = "Unload script", Callback = unload })
@@ -2196,4 +2196,4 @@ task.spawn(function()
 	refreshRoll()
 end)
 
-notify("zeohub", "Anime-Dice loaded.")
+notify("NhoiiiXhub", "Anime-Dice loaded.")
