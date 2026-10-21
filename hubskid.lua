@@ -1,4695 +1,2975 @@
--- language: Lua, file: sweet_tp_hub_halloween.lua
--- Sweet TP Hub + pub SlotsESP / BrainrotESP / AutoKick
--- discord.gg/sweettp — Halloween themed UI, pumpkins / webs / bats / ghosts
--- iPhone/iPad auto-scale + drag-resize grip on panel headers.
+--[=[
+    Deobfuscated Script: Redz Hub V5 Remake (Meme Sea)
+    Original Protection: Lumarge v3 (ChaCha20 + HMAC-SHA256 Constant Pool & LVM5 Virtual Machine)
+]=]
 
-loadstring([[
-    function LPH_NO_VIRTUALIZE(f) return f end;
-]])();
+local modules = { cache = {} }
 
-local Players           = game:GetService("Players")
-local TeleportService   = game:GetService("TeleportService")
-local RunService        = game:GetService("RunService")
-local TweenService      = game:GetService("TweenService")
-local UserInputService  = game:GetService("UserInputService")
-local HttpService       = game:GetService("HttpService")
-local Stats             = game:GetService("Stats")
-local Lighting          = game:GetService("Lighting")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LP                = Players.LocalPlayer
+local function registerModule(name, factory)
+    modules[name] = function()
+        local cached = modules.cache[name]
+        if not cached then
+            cached = { c = factory() }
+            modules.cache[name] = cached
+        end
+        return cached.c
+    end
+end
 
-local THEME_NAME = "halloween"
-
-local THEMES = {
-    halloween = {
-        Accent        = Color3.fromRGB(255, 140,  20),
-        AccentBright  = Color3.fromRGB(255, 205,  90),
-        AccentDark    = Color3.fromRGB(150,  65,   8),
-        TrackOn       = Color3.fromRGB(205,  95,  20),
-        Bg            = Color3.fromRGB( 12,   7,  18),
-        BgCard        = Color3.fromRGB( 24,  12,  34),
-        BgRow         = Color3.fromRGB( 34,  17,  46),
-        BgRowHov      = Color3.fromRGB( 52,  28,  68),
-        BtnBg         = Color3.fromRGB( 40,  20,  55),
-        BtnBgHov      = Color3.fromRGB( 62,  34,  82),
-        ResetAccent   = Color3.fromRGB(140, 255, 110),
-        ResetBg       = Color3.fromRGB( 22,  46,  14),
-        ResetBgHov    = Color3.fromRGB( 36,  72,  22),
-        DropAccent    = Color3.fromRGB(190, 120, 255),
-        DropBg        = Color3.fromRGB( 48,  22,  72),
-        DropBgHov     = Color3.fromRGB( 68,  36,  96),
-    },
-    purple = {
-        Accent = Color3.fromRGB(150,100,255), AccentBright = Color3.fromRGB(200,160,255), AccentDark = Color3.fromRGB(80,50,180),
-        TrackOn = Color3.fromRGB(130,85,240), Bg = Color3.fromRGB(14,10,24), BgCard = Color3.fromRGB(22,16,40),
-        BgRow = Color3.fromRGB(30,22,54), BgRowHov = Color3.fromRGB(42,30,74), BtnBg = Color3.fromRGB(40,28,80),
-        BtnBgHov = Color3.fromRGB(56,40,108), ResetAccent = Color3.fromRGB(255,100,130), ResetBg = Color3.fromRGB(55,22,38),
-        ResetBgHov = Color3.fromRGB(75,30,52), DropAccent = Color3.fromRGB(255,185,70), DropBg = Color3.fromRGB(58,40,14),
-        DropBgHov = Color3.fromRGB(78,54,20),
-    },
-    black = {
-        Accent = Color3.fromRGB(220,220,220), AccentBright = Color3.fromRGB(255,255,255), AccentDark = Color3.fromRGB(140,140,140),
-        TrackOn = Color3.fromRGB(200,200,200), Bg = Color3.fromRGB(8,8,8), BgCard = Color3.fromRGB(16,16,16),
-        BgRow = Color3.fromRGB(24,24,24), BgRowHov = Color3.fromRGB(36,36,36), BtnBg = Color3.fromRGB(28,28,28),
-        BtnBgHov = Color3.fromRGB(44,44,44), ResetAccent = Color3.fromRGB(255,80,80), ResetBg = Color3.fromRGB(40,14,14),
-        ResetBgHov = Color3.fromRGB(60,20,20), DropAccent = Color3.fromRGB(200,180,100), DropBg = Color3.fromRGB(38,34,12),
-        DropBgHov = Color3.fromRGB(56,50,18),
-    },
-    blue = {
-        Accent = Color3.fromRGB(80,160,255), AccentBright = Color3.fromRGB(140,200,255), AccentDark = Color3.fromRGB(40,100,200),
-        TrackOn = Color3.fromRGB(60,140,240), Bg = Color3.fromRGB(8,12,24), BgCard = Color3.fromRGB(12,20,40),
-        BgRow = Color3.fromRGB(18,30,58), BgRowHov = Color3.fromRGB(26,44,80), BtnBg = Color3.fromRGB(18,36,70),
-        BtnBgHov = Color3.fromRGB(28,54,100), ResetAccent = Color3.fromRGB(255,100,120), ResetBg = Color3.fromRGB(50,18,30),
-        ResetBgHov = Color3.fromRGB(70,26,44), DropAccent = Color3.fromRGB(255,200,80), DropBg = Color3.fromRGB(52,44,12),
-        DropBgHov = Color3.fromRGB(72,62,18),
-    },
-    red = {
-        Accent = Color3.fromRGB(255,80,80), AccentBright = Color3.fromRGB(255,140,140), AccentDark = Color3.fromRGB(180,40,40),
-        TrackOn = Color3.fromRGB(220,60,60), Bg = Color3.fromRGB(16,8,8), BgCard = Color3.fromRGB(28,12,12),
-        BgRow = Color3.fromRGB(40,18,18), BgRowHov = Color3.fromRGB(58,26,26), BtnBg = Color3.fromRGB(48,18,18),
-        BtnBgHov = Color3.fromRGB(68,26,26), ResetAccent = Color3.fromRGB(255,160,80), ResetBg = Color3.fromRGB(52,34,10),
-        ResetBgHov = Color3.fromRGB(72,48,14), DropAccent = Color3.fromRGB(255,220,100), DropBg = Color3.fromRGB(52,46,12),
-        DropBgHov = Color3.fromRGB(72,64,18),
-    },
-    green = {
-        Accent = Color3.fromRGB(60,200,120), AccentBright = Color3.fromRGB(120,240,170), AccentDark = Color3.fromRGB(30,130,75),
-        TrackOn = Color3.fromRGB(50,185,105), Bg = Color3.fromRGB(8,16,12), BgCard = Color3.fromRGB(12,26,18),
-        BgRow = Color3.fromRGB(18,38,26), BgRowHov = Color3.fromRGB(26,54,36), BtnBg = Color3.fromRGB(16,44,28),
-        BtnBgHov = Color3.fromRGB(24,64,40), ResetAccent = Color3.fromRGB(255,90,100), ResetBg = Color3.fromRGB(48,16,20),
-        ResetBgHov = Color3.fromRGB(68,22,28), DropAccent = Color3.fromRGB(255,200,80), DropBg = Color3.fromRGB(50,44,12),
-        DropBgHov = Color3.fromRGB(70,62,18),
-    },
-}
-
-local T = THEMES[THEME_NAME] or THEMES["halloween"]
-
-local Theme = {
-    Bg = T.Bg, BgCard = T.BgCard, BgRow = T.BgRow, BgRowHov = T.BgRowHov,
-    Stroke = T.Accent, StrokeSoft = T.AccentDark, Accent = T.Accent, AccentBright = T.AccentBright, AccentDark = T.AccentDark,
-    Text = Color3.fromRGB(245,242,255), TextDim = Color3.fromRGB(160,155,185), TextMuted = Color3.fromRGB(110,106,140),
-    BtnBg = T.BtnBg, BtnBgHover = T.BtnBgHov, BtnStroke = T.Accent,
-    TrackOff = Color3.fromRGB(46,26,58), TrackOn = T.TrackOn, KnobOff = Color3.fromRGB(120,116,150), KnobOn = Color3.fromRGB(255,255,255),
-    ResetAccent = T.ResetAccent, ResetBg = T.ResetBg, ResetBgHov = T.ResetBgHov,
-    DropAccent = T.DropAccent, DropBg = T.DropBg, DropBgHov = T.DropBgHov,
-    BindsAccent = T.AccentBright, BindsBg = T.BtnBg, BindsBgHov = T.BtnBgHov,
-}
-
-local CONFIG_FILE = "SweetTPHub.json"
-
-local function computeDefaultPositions()
-    local cam = workspace.CurrentCamera
-    local vp = (cam and cam.ViewportSize) or Vector2.new(1920, 1080)
-    local jobIdW, jobIdH = 270, 200
-    local jobIdX = math.floor(vp.X / 2 - jobIdW / 2)
-    local jobIdY = math.max(10, math.floor(vp.Y * 0.25 - jobIdH / 2))
-    local gearW, gearH = 270, 440
-    local gearX = math.min(math.floor(vp.X * 0.75 - gearW / 2), vp.X - gearW - 10)
-    local gearY = math.max(10, math.floor(vp.Y * 0.5 - gearH / 2))
+-- Module 'a': Shared State (Fetcher & UI Library References)
+registerModule("a", function()
     return {
-        JobId = { X = jobIdX, Y = jobIdY },
-        GearSafety = { X = gearX, Y = gearY },
-        BindsWindow = { X = 800, Y = 200 },
+        fetcher = nil,
+        library = nil
     }
-end
+end)
 
-local DEFAULT_POSITIONS = computeDefaultPositions()
+-- Module 'b' (LVM5 Chunk 3): Core Roblox Services & Executor Environment
+registerModule("b", function()
+    local v_1 = game:GetService("Players")
+    return { localizationService = game:GetService("LocalizationService"), replicatedStorage = game:GetService("ReplicatedStorage"), teleportService = game:GetService("TeleportService"), virtualUser = game:GetService("VirtualUser"), httpService = game:GetService("HttpService"), runService = game:GetService("RunService"), coreGui = game:GetService("CoreGui"), virtualInputManager = game:GetService("VirtualInputManager"), players = v_1, localPlayer = v_1.LocalPlayer, insert = table.insert, spawn = task.spawn, wait = task.wait, huge = math.huge, newCFrame = CFrame.new, newCFrameAngles = CFrame.Angles, newVector3 = Vector3.new, environment = getgenv(), setHiddenProperty = (sethiddenproperty or function()
+    end) }
+end)
 
-local CONFIG = {
-    NextBase = false,
-    AntiRagdoll = false,
-    CarpetSpeed = false,
-    InfiniteJump = false,
-    ShowJobId = false,
-    XRay = false,
-    AutoEquipOnSlot = false,
-    Aimbot = false,
-    SlotsESP = false,
-    BrainrotESP = false,
-    AutoKick = false,
-    StealBoost = false,
-    Bind_CarpetSpeed = "Q",
-    Bind_InstantReset = "R",
-    Bind_Drop = "G",
-    Bind_Aimbot = "C",
-    Bind_AutoKick = "K",
-    Bind_StealBoost = "V",
-    GuiScale = nil,
-    Positions = {
-        JobId = DEFAULT_POSITIONS.JobId,
-        GearSafety = DEFAULT_POSITIONS.GearSafety,
-        BindsWindow = DEFAULT_POSITIONS.BindsWindow,
-    },
-}
+-- Module 'c': Discord Invite URL
+registerModule("c", function()
+    return "https://discord.gg/7aR7kNVt4g"
+end)
 
-local function saveConfig()
-    if writefile then
-        pcall(function() writefile(CONFIG_FILE, HttpService:JSONEncode(CONFIG)) end)
+-- Module 'd' (LVM5 Chunk 5): Account Blacklist Verification
+registerModule("d", function()
+    local v_1 = modules.b()
+    local v_2 = modules.c()
+    local v_3 = v_1.localPlayer
+    local v_4 = v_1.wait
+    local v_5 = {}
+    local v_6 = function()
+        pcall(function()
+            writefile("bl_detected_rz", "return false")
+            v_4(0.3)
+        end)
+        local v_1 = v_2:gsub("^https://", "")
+        v_3:Kick(("this account is blacklisted\nby redzHub: " .. v_1))
+        v_4(0.3)
+        while true do end
     end
-end
-
-repeat task.wait(.1) until game:IsLoaded() and game.Players.LocalPlayer
-task.wait(1)
-
-local camera = workspace.CurrentCamera
-local FOV_LOCK = 70
-
--- ============================================================
--- EFFECT BLACKLIST + CLEAR
--- ============================================================
-local blacklist = {
-    "BlurEffect","ColorCorrectionEffect","BloomEffect","SunRaysEffect","DepthOfFieldEffect","Atmosphere","Sky","Smoke",
-    "ParticleEmitter","Beam","Trail","Highlight","PostEffect","SurfaceAppearance","Fire","Sparkles","Explosion",
-    "PointLight","SpotLight","SurfaceLight","Shadows","Blur","Fog","ColorGradingEffect","ToneMappingEffect",
-    "VignetteEffect","GodRays","Glare","ChromaticAberrationEffect","DistortionEffect","LensFlare","SunFlare",
-    "LightInfluence","AmbientOcclusionEffect","RefractionEffect","HeatDistortion","GlitchEffect","ScreenSpaceReflection",
-    "MotionBlur","VolumetricLight","RainEffect","SnowEffect","LightningEffect","NeonGlow","ContrastCorrection",
-    "ShadowMap","Bloom","Clouds","FogVolume","WaterEffect","WindEffect","PixelateEffect","FilmGrainEffect","CRTShader",
-    "NightVisionEffect","InfraredEffect","HazeEffect","ColorBalanceEffect","DynamicLight","AmbientEffect",
-    "ScreenDistortion","ScanlineEffect","UnderwaterEffect","ThermalVision","ShockwaveEffect","FlashEffect",
-    "ExplosionLight","VFXPart","GlitchScreen","ScreenFlash","OverlayEffect","ShadowEffect","GhostEffect","FogEmitter",
-    "WindEmitter","HeatWave","SunGlow","ColorOverlay","VisionDistort","EchoEffect","ScreenOverlay","RenderEffect",
-    "VisualEffect","LightingEffect","CameraEffect","WeatherEffect","SmokeTrail","FireTrail","NeonEffect",
-    "RefractionLayer","PostProcessingEffect","VisualNoise","ScreenNoise",
-}
-local function isBlacklisted(obj)
-    for _, name in ipairs(blacklist) do
-        if obj:IsA(name) then return true end
-    end
-    return false
-end
-local function clearEffects()
-    for _, v in pairs(Lighting:GetDescendants()) do
-        if isBlacklisted(v) then v:Destroy() end
-    end
-end
-clearEffects()
-Lighting.DescendantAdded:Connect(function(obj) task.wait() if isBlacklisted(obj) then obj:Destroy() end end)
-RunService.RenderStepped:Connect(function() if camera.FieldOfView ~= FOV_LOCK then camera.FieldOfView = FOV_LOCK end end)
-
-pcall(function() if setthreadidentity then setthreadidentity(8) end end)
-
--- ============================================================
--- P MODULE — used by auto grab
--- ============================================================
-local P = {
-    SelectedPetData = nil,
-    AllAnimalsCache = nil,
-    ListNeedsRedraw = true,
-}
-
--- ============================================================
--- AUTO GRAB — VERBATIM.
--- ============================================================
-do
-    local C = { AUTO_STEAL = false, RADIUS = 12 }
-    local r = {
-        { min = Vector3.new(-337.448303,-3.898971,-122.397758), max = Vector3.new(-328.004578,-3.898971,242.625626) },
-        { min = Vector3.new(-327.25766,-3.899109,-122.228622),  max = Vector3.new(-320.600891,-3.899109,242.612259) },
-        { min = Vector3.new(-319.783386,-3.89897,-122.227089),  max = Vector3.new(-312.908325,-3.89897,242.585617) },
-        { min = Vector3.new(-312.445648,-3.899108,-122.389832), max = Vector3.new(-305.489899,-3.899108,242.456818) },
-        { min = Vector3.new(-305.037048,-3.89897,-122.230743),  max = Vector3.new(-293.957489,-3.89897,242.606873) },
-        { min = Vector3.new(-491.448608,-3.898972,-122.253258), max = Vector3.new(-481.811737,-3.898972,242.615005) },
-        { min = Vector3.new(-498.971069,-3.89897,-122.382767),  max = Vector3.new(-491.74884,-3.89897,242.612061) },
-        { min = Vector3.new(-506.436737,-3.898972,-122.411476), max = Vector3.new(-499.318542,-3.898972,242.615982) },
-        { min = Vector3.new(-513.783569,-3.898972,-122.223297), max = Vector3.new(-506.801849,-3.898972,242.62709) },
-        { min = Vector3.new(-525.236938,-3.898972,-122.409813), max = Vector3.new(-514.265015,-3.898972,242.608932) },
-    }
-    local R = game:GetService("Players")
-    local d = game:GetService("RunService")
-    local n = R.LocalPlayer
-    do
-        local R
-        local function f()
-            n.DevEnableMouseLock = true
-            n.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Invisicam
-            if R then R:Disconnect() end
-            R = d.RenderStepped:Connect(function()
-                local R = workspace.CurrentCamera
-                if R and R.CameraSubject and R.CameraType == Enum.CameraType.Custom then
-                    R.CFrame = R.CFrame
-                end
-            end)
+    return function()
+        local v_1, v_2 = pcall(function()
+            return (isfile and isfile("bl_detected_rz"))
+        end)
+        local v_3 = (v_5[v_3.Name] and (v_5[v_3.Name] == v_3.UserId))
+        if ((v_1 and v_2) or v_3) then
+            v_6()
         end
-        f()
-        n.CharacterAdded:Connect(function() task.wait(0.5) f() end)
     end
-    local R = {}
-    local d = {}
-    local f = 0
-    function _G.getSafePollRate()
-        if os.clock() < f then return 0.27 end
-        return 0.1
-    end
-    function _G.triggerSafePollBoost()
-        f = os.clock() + 3
-    end
-    local f = {}
-    local function J()
-        local a = n.Character
-        return a and a:FindFirstChild("HumanoidRootPart")
-    end
-    local function n(a)
-        for e, x in ipairs(r) do
-            if a.X >= math.min(x.min.X, x.max.X) and a.X <= math.max(x.min.X, x.max.X)
-                and a.Z >= math.min(x.min.Z, x.max.Z) and a.Z <= math.max(x.min.Z, x.max.Z) then
-                return e
+end)
+
+-- Module 'e' (LVM5 Chunk 8): Default Hub Settings & Configuration
+registerModule("e", function()
+    local v_1 = modules.b()
+    local v_2 = (v_1.environment.hubSettings or { statsPoints = 3, bringMobs = true, farmDistance = 9, viewHitbox = false, antiAfk = true, autoHaki = true, autoClick = true, toolFarm = "Fight", skillsSelected = {} })
+    v_2.popcatClicksPerSecond = (v_2.popcatClicksPerSecond or 10)
+    v_2.gachaAmount = (v_2.gachaAmount or 1)
+    v_2.rerollPowerMethod = (v_2.rerollPowerMethod or "Money")
+    v_2.language = (v_2.language or "auto")
+    v_2.skillsSelected = (v_2.skillsSelected or {})
+    v_2.farmCFrame = (v_1.newCFrame(0, v_2.farmDistance, 0) * v_1.newCFrameAngles(math.rad(-90), 0, 0))
+    return v_2
+end)
+
+-- Module 'f' (LVM5 Chunk 9): Workspace & Player Data Folder References
+registerModule("f", function()
+    local v_1 = modules.b()
+    local v_2 = v_1.replicatedStorage
+    local v_3 = v_1.localPlayer
+    local v_4 = v_2:WaitForChild("ModuleScript")
+    local v_5 = workspace:WaitForChild("Location")
+    local v_6 = workspace:WaitForChild("NPCs")
+    local v_7 = v_3:WaitForChild("PlayerData")
+    return { monsters = { replicated = v_2:WaitForChild("MonsterSpawn"), inWorkspace = workspace:WaitForChild("Monster") }, gameModules = v_4, npcStorage = v_2:WaitForChild("NPC_Storage"), otherEvent = v_2:WaitForChild("OtherEvent"), characters = workspace:WaitForChild("Character"), location = v_5, region = workspace:WaitForChild("Region"), island = workspace:WaitForChild("Island"), raids = workspace:WaitForChild("Raids"), npcs = v_6, enemyLocation = v_5:WaitForChild("Enemy_Location"), questLocation = v_5:WaitForChild("QuestLocaion"), questNpcs = v_6:WaitForChild("Quests_Npc"), questFolder = v_3:WaitForChild("QuestFolder"), playerDataFolder = v_7, playerLevel = v_7:WaitForChild("Level"), abilityFolder = v_3:WaitForChild("Ability"), itemFolder = v_3:WaitForChild("Items"), gamepassFolder = v_3:WaitForChild("PlayerSpecial"), cooldownFolder = v_3:WaitForChild("Cooldown"), questSettings = require(v_4:WaitForChild("Quest_Settings")), gameSetting = require(v_4:WaitForChild("Setting")) }
+end)
+
+-- Module 'g' (LVM5 Chunk 11): Auto Team Selection (Loading Screen)
+registerModule("g", function()
+    local v_1 = modules.b()
+    return function()
+        xpcall(function()
+            local v2_1 = v_1.localPlayer.PlayerGui.LoadingGui
+            if v2_1.Enabled then
+                getconnections(v2_1.PlayBackground.Cheem.Select.Activated)[1].Function()
+                getconnections(v2_1.PlayBackground.Play.Activated)[1].Function()
+                v_1.wait(1)
             end
-        end
+        end, function(...)
+            print("!ERROR! Erro ao entrar no [ TIME ]: ", ...)
+        end)
     end
-    local function r(a)
-        local e = a.Parent
-        if not e then return end
-        if e:IsA("Attachment") and e.Parent then e = e.Parent end
-        if e:IsA("BasePart") then return e.Position
-        elseif e:IsA("Model") then return e:GetPivot().Position end
+end)
+
+-- Module 'h' (LVM5 Chunk 12): RemoteEvent / RemoteFunction Dispatcher
+registerModule("h", function()
+    local v_1 = modules.f()
+    local v_2 = { modules = { "MainEvents", "Modules" }, ability = { "MainEvents", "Ability" }, code = { "MainEvents", "Code" }, statsFunction = { "MainEvents", "StatsFunction" }, startRaid = { "MiscEvents", "StartRaid" }, updateInventory = { "ItemEvents", "UpdateInventory" }, buyProduct = { "BuyEvents", "BuyProduct" }, quest = { "QuestEvents", "Quest" }, serverHitbox = { "SkillEvents", "Server_Hitbox" }, serverSkills = { "SkillEvents", "Server_Skills" } }
+    local v_3 = {}
+    local v_4 = function(arg_1)
+        local v_2 = v_1.otherEvent
+        for v_3, v_4 in ipairs(v_2[arg_1]) do
+            v_2 = v_2[v_4]
+        end
+        return v_2
     end
-    local function a(e)
-        if not P then return false end
-        local x = P.SelectedPetData
-        if not x then return false end
-        local Q = e:FindFirstAncestorOfClass("Model")
-        if not Q then return false end
-        if x.plot then
-            local V = e:FindFirstAncestor(x.plot)
-            if not V then return false end
-        end
-        if x.slot then
-            local V = e:FindFirstAncestor(x.slot)
-            if V then return true end
-            if Q.Name == x.slot then return true end
-            if Q.Parent and Q.Parent.Name == x.slot then return true end
-        end
-        if x.name then
-            local e = string.lower(x.name)
-            local x = Q
-            while x do
-                if x.Name and string.lower(x.Name) == e then return true end
-                x = x.Parent
+    v_3.fire = function(arg_1, ...)
+        return v_4(arg_1):FireServer(...)
+    end
+    v_3.invoke = function(arg_1, ...)
+        return v_4(arg_1):InvokeServer(...)
+    end
+    return v_3
+end)
+
+-- Module 'i' (LVM5 Chunk 16): Character Movement, Teleportation & Enemy Queries
+registerModule("i", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = v_1.players
+    local v_4 = v_1.localPlayer
+    local v_5 = v_1.insert
+    local v_6 = v_2.monsters
+    local v_7 = {}
+    v_7.isAlive = function(arg_1)
+        local v_2 = (arg_1 and arg_1:FindFirstChild("Humanoid"))
+        return (v_2 and (v_2.Health > 0))
+    end
+    v_7.isSpawnedEnemy = function(arg_1)
+        return ((arg_1 ~= nil) and ((arg_1.Parent == v_6.inWorkspace) and ((arg_1.PrimaryPart ~= nil) and (v_7.isAlive(arg_1) == true))))
+    end
+    v_7.getEnemy = function(arg_1)
+        for v_2, v_3 in ipairs(v_6.inWorkspace:GetChildren()) do
+            if (((not arg_1) or (v_3.Name == arg_1)) and v_7.isSpawnedEnemy(v_3)) then
+                return v_3
             end
         end
         return false
     end
-    local function e(x, Q)
-        if not x or not x.Parent then return false end
-        if not x.Enabled then return false end
-        local V = r(x)
-        if not V then return false end
-        local r = x:FindFirstAncestorOfClass("Model")
-        if r then
-            local r = workspace:FindFirstChild("Plots")
-            if r then
-                local i = x:FindFirstAncestorWhichIsA("Model")
-                while i and i.Parent ~= r do i = i.Parent end
-                if i then
-                    local r = i:FindFirstChild("PlotSign")
-                    if r then
-                        local i = r:FindFirstChildWhichIsA("SurfaceGui", true)
-                        local r = i and i:FindFirstChildWhichIsA("TextLabel", true)
-                        if r then
-                            local i = r.Text:lower()
-                            if i:find(game.Players.LocalPlayer.Name:lower(), 1, true)
-                                or i:find(game.Players.LocalPlayer.DisplayName:lower(), 1, true) then
-                                return false
-                            end
-                        end
-                    end
-                end
-            end
+    v_7.standUp = function(arg_1)
+        arg_1 = (arg_1 or v_4.Character)
+        local v_2 = (arg_1 and arg_1:FindFirstChild("Humanoid"))
+        if (not v_2) then
+            return false
         end
-        if _G.NEAREST_INSTANT_MODE == true then
-            local r = n(Q)
-            local i = n(V)
-            if not r or r ~= i then return false end
+        if (v_2.Sit or v_2.SeatPart) then
+            v_2.Sit = false
+            v_2:ChangeState(Enum.HumanoidStateType.GettingUp)
+            local v_3 = (os.clock() + 1)
+            repeat
+                v_1.runService.Heartbeat:Wait()
+            until ((not v_2.SeatPart) or ((os.clock() >= v_3) or (not arg_1.Parent)))
+            return ((arg_1.Parent ~= nil) and ((not v_2.Sit) and (v_2.SeatPart == nil)))
         end
-        if _G.NEAREST_INSTANT_MODE ~= true then
-            if not a(x) then return false end
-        end
-        local r = typeof(x.MaxActivationDistance) == "number" and x.MaxActivationDistance > 0 and x.MaxActivationDistance or C.RADIUS
-        local n = math.min(C.RADIUS, r)
-        return (V - Q).Magnitude <= n
-    end
-    local function r(n, a)
-        local x = os.clock()
-        local Q = d[n]
-        if Q and x - Q < a then return false end
-        d[n] = x
         return true
     end
-    local function n(a, x, Q)
-        if not a or not a.Parent then return end
-        if not a.Enabled then return end
-        if not r(a, Q) then return end
-        for r = 1, x do
-            pcall(function() fireproximityprompt(a, 0) end)
+    v_7.goTo = function(arg_1, arg_2)
+        if (not arg_1) then
+            return false
         end
+        local v_3 = v_4.Character
+        if (not v_7.isAlive(v_3)) then
+            return false
+        end
+        if arg_2 then
+            return v_3:MoveTo(arg_1.Position)
+        end
+        if (not v_7.standUp(v_3)) then
+            return false
+        end
+        if ((v_4.Character ~= v_3) or (not v_7.isAlive(v_3))) then
+            return false
+        end
+        return v_3:PivotTo(arg_1)
     end
-    local function r(a)
-        if R[a] then return end
-        R[a] = true
-        local function x()
-            local Q = J()
-            if not Q then return end
-            local V = Q.Position
-            if e(a, V) then
-                C.AUTO_STEAL = true
-                local Q = os.clock()
-                local V = f[a]
-                if not V or Q - V >= 0.08 then
-                    f[a] = Q
-                    n(a, 25, 0)
+    v_7.getNearestList = function(arg_1)
+        local v_2 = {}
+        for v_3, v_4 in ipairs(v_3:GetPlayers()) do
+            local v_5 = v_4.Character
+            if ((v_4 ~= v_4) and v_7.isAlive(v_5)) then
+                local v_6 = v_5.PrimaryPart
+                if (v_6 and (v_4:DistanceFromCharacter(v_6.Position) <= arg_1)) then
+                    v_5(v_2, v_5)
                 end
             end
         end
-        task.defer(function() x() end)
-        pcall(function()
-            a:GetPropertyChangedSignal("Enabled"):Connect(function()
-                if a.Enabled then x() end
-            end)
-        end)
-        a.AncestryChanged:Connect(function()
-            if not a:IsDescendantOf(workspace) then
-                R[a] = nil
-                d[a] = nil
-                f[a] = nil
-            end
-        end)
+        return v_2
     end
-    local function d()
-        local f = workspace:FindFirstChild("Plots")
-        if not f then return end
-        for a, a in ipairs(f:GetChildren()) do
-            local f = a:FindFirstChild("AnimalPodiums")
-            if f then
-                for a, a in ipairs(f:GetDescendants()) do
-                    if a:IsA("ProximityPrompt") then r(a) end
-                end
-            end
-        end
-    end
-    d()
-    workspace.DescendantAdded:Connect(function(d)
-        if d:IsA("ProximityPrompt") and d:FindFirstAncestor("AnimalPodiums") then r(d) end
-    end)
-    task.spawn(function()
-        while task.wait(_G.getSafePollRate()) do
-            local r = J()
-            if not r then C.AUTO_STEAL = false continue end
-            local d = r.Position
-            local r = false
-            for f in pairs(R) do
-                if e(f, d) then
-                    r = true
-                    if C.AUTO_STEAL then n(f, 3, 0.12) end
-                end
-            end
-            C.AUTO_STEAL = r
-        end
-    end)
-end
-
--- ============================================================
--- ANIMALS/WEBHOOK/PLOT SCANNER/PROMPT FIRE — VERBATIM.
--- ============================================================
-task.spawn(function()
-    local S = ReplicatedStorage:WaitForChild("Packages")
-    local CG = ReplicatedStorage:WaitForChild("Datas")
-    local rG = ReplicatedStorage:WaitForChild("Shared")
-    local rG = ReplicatedStorage:WaitForChild("Utils")
-    local rG = require(S:WaitForChild("Synchronizer"))
-    local function S(dG)
-        if not dG then return false end
-        if typeof(dG) == "Instance" then return dG == LP end
-        if type(dG) == "string" then return dG == LP.Name end
-        return false
-    end
-    local function dG(nG)
-        local fG, JG = pcall(function()
-            local aG = getthreadidentity and getthreadidentity() or nil
-            if setthreadidentity then setthreadidentity(8) end
-            local eG = rG:GetTableFromChannel(nG)
-            if aG and setthreadidentity then pcall(setthreadidentity, aG) end
-            return eG
-        end)
-        if fG and type(JG) == "table" then return JG end
-        return nil
-    end
-    local rG = require(CG:WaitForChild("Animals"))
-    local nG = require(CG:WaitForChild("Mutations"))
-    local fG = require(CG:WaitForChild("Traits"))
-    local CG = { "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg", "Uvg", "Dvg", "Tvg" }
-    local function JG(aG, eG)
-        eG = eG or 1
-        local xG = math.abs(aG)
-        local QG = math.max(1, xG)
-        local xG = math.floor(math.log(QG, 1000))
-        local QG = CG[xG + 1] or "e+" .. xG
-        local CG = aG * (10 ^ eG / 1000 ^ xG)
-        local aG = math.floor(CG) / 10 ^ eG
-        return (("%." .. eG .. "f"):format(aG)):gsub("%.?0+$", "") .. QG
-    end
-    local function CG(aG, eG, xG)
-        local QG = rG[aG]
-        if not QG then return 0 end
-        local aG = QG.Generation or QG.Price * 0.1
-        local QG = 1
-        if eG and eG ~= "None" then
-            local VG = nG[eG]
-            if VG and VG.Modifier then QG = QG + VG.Modifier end
-        end
-        local nG = false
-        if type(xG) == "table" then
-            for eG, eG in ipairs(xG) do
-                if eG == "Sleepy" then nG = true
-                else
-                    local xG = fG[eG]
-                    if xG and xG.MultiplierModifier then QG = QG + xG.MultiplierModifier end
-                end
-            end
-        end
-        local fG = math.round(aG * QG)
-        if nG then fG = math.round(fG * 0.5) end
-        return fG
-    end
-
-    local nG = true
-    local i = {
-        PriorityList = {
-            "Strawberry Elephant","Meowl","Skibidi Toilet","Headless Horseman","Dragon Gingerini",
-            "Dragon Cannelloni","Ketupat Bros","Hydra Dragon Cannelloni","La Supreme Combinasion",
-            "Love Love Bear","Ginger Gerat","Cerberus","Capitano Moby","La Casa Boo",
-            "Burguro and Fryuro","Spooky and Pumpky","Cooki and Milki","Rosey and Teddy",
-            "Popcuru and Fizzuru","Reinito Sleighito","Fragrama and Chocrama","Garama and Madundung",
-            "Ketchuru and Musturu","La Secret Combinasion","Tralaledon","Tictac Sahur",
-            "Ketupat Kepat","Tang Tang Keletang","Orcaledon","La Ginger Sekolah","Los Spaghettis",
-            "Lavadorito Spinito","Swaggy Bros","La Taco Combinasion","Los Primos","Chillin Chili",
-            "Tuff Toucan","W or L","Chillin Chili","Chipso and Queso",
-        },
-        StealNearest = true, InstantSteal = true, StealHighest = false, StealPriority = false,
-    }
-    local fG = true
-    local aG = false
-    local eG = false
-    if i.InstantSteal == nil then i.InstantSteal = false end
-    local xG = i.InstantSteal == true
-    _G.NEAREST_INSTANT_MODE = (i.StealNearest == true and i.InstantSteal == true)
-    local QG = false
-    local VG = false
-    local iG = 1
-    local OG = nil
-    local UG = nil
-    local yG = {}
-    local function KG() nG = fG == true or aG == true or eG == true end
-    KG()
-    local qG = {}
-    local cG = {}
-    local zG = nil
-    local BG = nil
-    local oG = {}
-    local function YG(TG)
-        if not TG or not TG.plot then return false end
-        local IG = workspace:FindFirstChild("Plots")
-        if not IG then return false end
-        local pG = IG:FindFirstChild(TG.plot)
-        if not pG then return false end
-        local TG = dG(pG.Name)
-        if TG then return S(TG.Owner) end
-        return false
-    end
-    local function TG(IG)
-        if not IG or IG == "None" then return "" end
-        local pG = ""
-        if IG == "Cursed" then pG = "<font color='rgb(200,0,0)'>Cur</font><font color='rgb(0,0,0)'>sed</font>"
-        elseif IG == "Gold" then pG = "<font color='rgb(255,215,0)'>Gold</font>"
-        elseif IG == "Diamond" then pG = "<font color='rgb(0,255,255)'>Diamond</font>"
-        elseif IG == "YinYang" then pG = "<font color='rgb(255,255,255)'>Yin</font><font color='rgb(0,0,0)'>Yang</font>"
-        elseif IG == "Candy" then pG = "<font color='rgb(255,105,180)'>Candy</font>"
-        elseif IG == "Divine" then pG = "<font color='rgb(255,255,255)'>Divine</font>"
-        elseif IG == "Rainbow" then
-            local jG = { "rgb(255,0,0)", "rgb(255,127,0)", "rgb(255,255,0)", "rgb(0,255,0)", "rgb(0,0,255)", "rgb(75,0,130)", "rgb(148,0,211)" }
-            for lG = 1, #IG do pG = pG .. "<font color='" .. jG[(lG - 1) % #jG + 1] .. "'>" .. IG:sub(lG, lG) .. "</font>" end
-        elseif IG == "Radioactive" then pG = "<font color='rgb(132,255,0)'>Radioactive</font>"
-        elseif IG == "Galaxy" then pG = "<font color='rgb(170,85,255)'>Galaxy</font>"
-        else pG = IG end
-        return "<font weight='800'>" .. pG .. " </font>"
-    end
-    local function IG(pG)
-        if pG == "Gold" then return Color3.fromRGB(255, 215, 0)
-        elseif pG == "Diamond" then return Color3.fromRGB(0, 255, 255)
-        elseif pG == "Cursed" then return Color3.fromRGB(200, 0, 0)
-        elseif pG == "YinYang" then return Color3.fromRGB(255, 255, 255)
-        elseif pG == "Candy" then return Color3.fromRGB(255, 105, 180)
-        elseif pG == "Divine" then return Color3.fromRGB(255, 255, 255)
-        elseif pG == "Rainbow" then return Color3.fromRGB(148, 0, 211)
-        elseif pG == "Radioactive" then return Color3.fromRGB(132, 255, 0)
-        elseif pG == "Galaxy" then return Color3.fromRGB(170, 85, 255) end
-        return Color3.fromRGB(180, 180, 180)
-    end
-    local function pG(jG)
-        local lG = jG and jG.petName or "Unknown"
-        return lG
-    end
-    local function jG(lG)
-        local WG = lG and lG.mutation
-        if WG and WG ~= "None" and WG ~= "" then return TG(WG), true end
-        return "", false
-    end
-    local function TG()
-        local lG = {}
-        for WG, WG in ipairs(yG) do
-            if WG.genValue >= 1 and not YG(WG) then
-                table.insert(lG, {
-                    petName = WG.name, mpsText = WG.genText, mpsValue = WG.genValue,
-                    owner = WG.owner, plot = WG.plot, slot = WG.slot, uid = WG.uid,
-                    mutation = WG.mutation, animalData = WG,
-                })
-            end
-        end
-        return lG
-    end
-
-    local function M(entry)
-        if not entry then return nil end
-        local plots = workspace:FindFirstChild("Plots")
-        if not plots then return nil end
-        local plot = plots:FindFirstChild(entry.plot)
-        if not plot then return nil end
-        local podiums = plot:FindFirstChild("AnimalPodiums")
-        if not podiums then return nil end
-        local slot = podiums:FindFirstChild(entry.slot)
-        if not slot then return nil end
-        local base = slot:FindFirstChild("Base")
-        local spawn = base and base:FindFirstChild("Spawn")
-        if spawn then return spawn end
-        return base
-    end
-
-    local MG = LP:WaitForChild("PlayerGui"):FindFirstChild("bRXgmsaEVfze")
-    if MG then MG:Destroy() end
-    local MG = Instance.new("ScreenGui")
-    MG.Name = "bRXgmsaEVfze"
-    MG.ResetOnSpawn = false
-    MG.IgnoreGuiInset = true
-    MG.DisplayOrder = 998
-    MG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    MG.Parent = LP:WaitForChild("PlayerGui")
-
-    local wG = {
-        PANEL = Color3.fromRGB(24, 14, 32),
-        PANEL2 = Color3.fromRGB(40, 24, 56),
-        TEXT = Color3.fromRGB(245, 235, 255),
-        STROKE = Color3.fromRGB(255, 140, 20),
-        GLOW = Color3.fromRGB(255, 200, 90),
-        TRACK = Color3.fromRGB(30, 18, 42),
-        TRACK2 = Color3.fromRGB(50, 30, 68),
-        FILL1 = Color3.fromRGB(255, 140, 20),
-        FILL2 = Color3.fromRGB(255, 205, 90)
-    }
-
-    local bG = Instance.new("Frame", MG)
-    bG.Name = "CurrentTargetHUD"
-    bG.AnchorPoint = Vector2.new(0.5, 1)
-    bG.Size = UDim2.new(0, 260, 0, 52)
-    bG.Position = UDim2.new(0.5, 0, 1, -220.0)
-    bG.BackgroundColor3 = wG.PANEL
-    bG.BackgroundTransparency = 0.02
-    bG.BorderSizePixel = 0
-    bG.ZIndex = 70
-    Instance.new("UICorner", bG).CornerRadius = UDim.new(0, 12)
-
-    local MG = Instance.new("UIStroke", bG)
-    MG.Color = wG.STROKE
-    MG.Thickness = 1
-    MG.Transparency = 0.35
-
-    local MG = Instance.new("UIStroke", bG)
-    MG.Color = wG.GLOW
-    MG.Thickness = 3
-    MG.Transparency = 0.7
-    MG.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-    local MG = Instance.new("ImageLabel", bG)
-    MG.Name = "Shadow"
-    MG.AnchorPoint = Vector2.new(0.5, 0.5)
-    MG.Position = UDim2.new(0.5, 0, 0.5, 1)
-    MG.Size = UDim2.new(1, 20, 1, 20)
-    MG.BackgroundTransparency = 1
-    MG.Image = "rbxassetid://6014261993"
-    MG.ImageColor3 = Color3.new(0, 0, 0)
-    MG.ImageTransparency = 0.72
-    MG.ScaleType = Enum.ScaleType.Slice
-    MG.SliceCenter = Rect.new(49, 49, 450, 450)
-    MG.ZIndex = 69
-
-    local MG = Instance.new("TextLabel", bG)
-    MG.Name = "TargetName"
-    MG.Size = UDim2.new(1, -12, 0, 18)
-    MG.Position = UDim2.fromOffset(6, 3)
-    MG.BackgroundTransparency = 1
-    MG.Font = Enum.Font.GothamBold
-    MG.TextSize = 14
-    MG.TextColor3 = wG.TEXT
-    MG.TextXAlignment = Enum.TextXAlignment.Center
-    MG.TextTruncate = Enum.TextTruncate.AtEnd
-    MG.ZIndex = 72
-    MG.Text = "No target"
-
-    local DG = Instance.new("Frame", bG)
-    DG.Name = "ProgressBg"
-    DG.Size = UDim2.new(1, -10, 0, 22)
-    DG.Position = UDim2.fromOffset(5, 23)
-    DG.BackgroundColor3 = wG.TRACK
-    DG.BorderSizePixel = 0
-    DG.ZIndex = 72
-    Instance.new("UICorner", DG).CornerRadius = UDim.new(0, 8)
-
-    local bG = Instance.new("UIStroke", DG)
-    bG.Color = wG.STROKE
-    bG.Thickness = 1
-    bG.Transparency = 0.55
-
-    local bG = Instance.new("Frame", DG)
-    bG.Name = "InnerTrack"
-    bG.Size = UDim2.new(1, -2, 1, -2)
-    bG.Position = UDim2.fromOffset(1, 1)
-    bG.BackgroundColor3 = wG.TRACK2
-    bG.BackgroundTransparency = 0.15
-    bG.BorderSizePixel = 0
-    bG.ZIndex = 72
-    Instance.new("UICorner", bG).CornerRadius = UDim.new(0, 7)
-
-    local bG = Instance.new("Frame", DG)
-    bG.Name = "ProgressFill"
-    bG.Size = UDim2.new(0, 0, 1, 0)
-    bG.BackgroundColor3 = wG.FILL1
-    bG.BorderSizePixel = 0
-    bG.ZIndex = 73
-    Instance.new("UICorner", bG).CornerRadius = UDim.new(0, 8)
-
-    local FG = Instance.new("UIGradient", bG)
-    FG.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, wG.FILL1), ColorSequenceKeypoint.new(1, wG.FILL2) })
-
-    local FG = Instance.new("UIStroke", bG)
-    FG.Color = Color3.fromRGB(255, 210, 120)
-    FG.Thickness = 1
-    FG.Transparency = 0.45
-
-    local FG = Instance.new("TextLabel", DG)
-    FG.Name = "Percent"
-    FG.Size = UDim2.new(1, 0, 1, 0)
-    FG.BackgroundTransparency = 1
-    FG.Font = Enum.Font.GothamBold
-    FG.TextSize = 13
-    FG.TextColor3 = wG.TEXT
-    FG.TextStrokeTransparency = 0.7
-    FG.TextXAlignment = Enum.TextXAlignment.Center
-    FG.ZIndex = 74
-    FG.Text = "0%"
-    local wG = bG
-
-    local NoBrainrotsGui = Instance.new("ScreenGui")
-    NoBrainrotsGui.Name = "NoBrainrotsDangerNotification"
-    NoBrainrotsGui.ResetOnSpawn = false
-    NoBrainrotsGui.IgnoreGuiInset = true
-    NoBrainrotsGui.DisplayOrder = 10000
-    NoBrainrotsGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    NoBrainrotsGui.Parent = LP:WaitForChild("PlayerGui")
-
-    local NoBrainrotsSound = Instance.new("Sound", NoBrainrotsGui)
-    NoBrainrotsSound.Name = "NoBrainrotsNotification"
-    NoBrainrotsSound.SoundId = "rbxassetid://7383525713"
-    NoBrainrotsSound.Volume = 2.5
-    NoBrainrotsSound.PlaybackSpeed = 1.0
-
-    local NoBrainrotsText = Instance.new("TextLabel", NoBrainrotsGui)
-    NoBrainrotsText.Name = "NoBrainrotsNotice"
-    NoBrainrotsText.AnchorPoint = Vector2.new(0.5, 0.5)
-    NoBrainrotsText.Size = UDim2.new(0.9, 0, 0, 140)
-    NoBrainrotsText.Position = UDim2.new(0.5, 0, 0.5, 0)
-    NoBrainrotsText.BackgroundTransparency = 1
-    NoBrainrotsText.BorderSizePixel = 0
-    NoBrainrotsText.Visible = false
-    NoBrainrotsText.Font = Enum.Font.GothamBlack
-    NoBrainrotsText.TextSize = 42
-    NoBrainrotsText.TextColor3 = Color3.fromRGB(255, 140, 20)
-    NoBrainrotsText.TextStrokeColor3 = Color3.fromRGB(45, 12, 0)
-    NoBrainrotsText.TextStrokeTransparency = 0.05
-    NoBrainrotsText.TextWrapped = true
-    NoBrainrotsText.TextXAlignment = Enum.TextXAlignment.Center
-    NoBrainrotsText.TextYAlignment = Enum.TextYAlignment.Center
-    NoBrainrotsText.Text = "🎃 BUY A BRAINROT FOR AUTO GRAB TO WORK 🎃"
-    NoBrainrotsText.ZIndex = 999
-
-    local NoBrainrotsGradient = Instance.new("UIGradient", NoBrainrotsText)
-    NoBrainrotsGradient.Name = "DangerGradient"
-    NoBrainrotsGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(140, 0, 0)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 140, 20)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 0, 0)),
-    })
-    NoBrainrotsGradient.Rotation = 0
-
-    local noBrainrotsActive = false
-    local noBrainrotsNoticeToken = 0
-
-    local function setNoBrainrotsNotice(active)
-        if not active then
-            noBrainrotsActive = false
-            noBrainrotsNoticeToken = noBrainrotsNoticeToken + 1
-            NoBrainrotsText.Visible = false
-            pcall(function() NoBrainrotsSound:Stop() end)
-            return
-        end
-        if noBrainrotsActive then return end
-        noBrainrotsActive = true
-        noBrainrotsNoticeToken = noBrainrotsNoticeToken + 1
-        local token = noBrainrotsNoticeToken
-        task.spawn(function()
-            for i = 1, 2 do
-                if not noBrainrotsActive or noBrainrotsNoticeToken ~= token then return end
-                NoBrainrotsText.Visible = true
-                task.wait(0.003)
-                if not noBrainrotsActive or noBrainrotsNoticeToken ~= token then
-                    NoBrainrotsText.Visible = false
-                    return
-                end
-                local soundStarted = false
-                pcall(function()
-                    NoBrainrotsSound.Looped = false
-                    NoBrainrotsSound:Stop()
-                    NoBrainrotsSound.TimePosition = 0
-                    NoBrainrotsSound.Volume = 2.5
-                    NoBrainrotsSound:Play()
-                    soundStarted = true
-                end)
-                if soundStarted then
-                    local ended = false
-                    local connection
-                    connection = NoBrainrotsSound.Ended:Connect(function() ended = true end)
-                    local startedAt = os.clock()
-                    while not ended and noBrainrotsActive and noBrainrotsNoticeToken == token do
-                        if os.clock() - startedAt >= 15 then break end
-                        task.wait(0.05)
-                    end
-                    if connection then connection:Disconnect() end
-                end
-                NoBrainrotsText.Visible = false
-                if i < 3 then task.wait(0.05) end
-            end
-            if noBrainrotsNoticeToken == token then
-                NoBrainrotsText.Visible = false
-                pcall(function() NoBrainrotsSound:Stop() end)
-            end
-        end)
-    end
-
-    local function sG(SG, NG)
-        KG()
-        if OG and NG then
-            for CB, rB in ipairs(NG) do
-                if rB.uid == OG then iG = CB break end
-            end
-        end
-        local oG = NG and NG[iG]
-        P.SelectedPetData = oG
-        if NG and #NG > 0 then
-            setNoBrainrotsNotice(false)
-        elseif NG and #NG == 0 then
-            setNoBrainrotsNotice(true)
-        end
-        if SG then
-            if oG then
-                MG.Text = string.format("%s - %s", oG.petName or "Unknown", oG.mpsText or "")
-            else
-                MG.Text = "Searching..."
-            end
-        else
-            MG.Text = "No target"
-            if zG then zG:Cancel() zG = nil end
-            bG.Size = UDim2.new(0, 0, 1, 0)
-        end
-        FG.Text = string.format("%d%%", math.clamp(math.floor(bG.Size.X.Scale * 100 + 0.5), 0, 100))
-    end
-    P.UpdateAutoStealUI = function() sG(nG, TG()) end
-    task.spawn(function()
-        while bG and bG.Parent do
-            local oG = math.clamp(math.floor(bG.Size.X.Scale * 100 + 0.5), 0, 100)
-            FG.Text = tostring(oG) .. "%"
-            task.wait(0.05)
-        end
-    end)
-
-    task.spawn(function()
-        while true do
-            task.wait(1.5)
-            if not xG then continue end
-            xG = false QG = false VG = false
-            i.InstantSteal = false
-            _G.NEAREST_INSTANT_MODE = false
-            task.wait(0.05)
-            xG = true
-            i.InstantSteal = true
-            _G.NEAREST_INSTANT_MODE = (fG and true)
-        end
-    end)
-
-    local function b(KG)
-        if not KG then return nil end
-        local oG = cG[KG.uid]
-        if oG and oG.Parent then return oG end
-        local oG = workspace.Plots:FindFirstChild(KG.plot)
-        if not oG then return nil end
-        local IG = oG:FindFirstChild("AnimalPodiums")
-        if not IG then return nil end
-        local pG = dG(oG.Name)
-        local jG = pG and pG.AnimalList
-        if not jG then
-            local pG = IG:FindFirstChild(KG.slot)
-            if pG then
-                local lG = pG:FindFirstChild("Base")
-                local pG = lG and lG:FindFirstChild("Spawn")
-                if pG then
-                    local lG = pG:FindFirstChild("PromptAttachment")
-                    if lG then
-                        for pG, pG in ipairs(lG:GetChildren()) do
-                            if pG:IsA("ProximityPrompt") then cG[KG.uid] = pG return pG end
-                        end
-                    end
-                end
-            end
-            return nil
-        end
-        if not jG then return nil end
-        local pG = KG.name and KG.name:lower() or ""
-        local lG = KG.slot
-        local WG = nil
-        for XG, tG in pairs(jG) do
-            if type(tG) == "table" and tostring(XG) == lG then
-                local jG, lG = tG.Index, rG[tG.Index]
-                if lG and (lG.DisplayName or jG):lower() == pG then WG = IG:FindFirstChild(tostring(XG)) break end
-            end
-        end
-        if not WG then WG = IG:FindFirstChild(KG.slot) end
-        if WG then
-            local IG = WG:FindFirstChild("Base")
-            local jG = IG and IG:FindFirstChild("Spawn")
-            if jG then
-                local IG = jG:FindFirstChild("PromptAttachment")
-                if IG then
-                    for lG, lG in ipairs(IG:GetChildren()) do
-                        if lG:IsA("ProximityPrompt") and lG.Enabled and lG.ActionText == "Steal" then cG[KG.uid] = lG return lG end
-                    end
-                end
-                local IG = jG.Position
-                local jG, lG = IG.X, IG.Z
-                local WG = nil
-                local XG = math.huge
-                for tG, tG in pairs(oG:GetDescendants()) do
-                    if tG:IsA("ProximityPrompt") and tG.Enabled and tG.ActionText == "Steal" then
-                        local oG = tG.Parent
-                        local GG = nil
-                        if oG and oG:IsA("BasePart") then GG = oG.Position
-                        elseif oG and oG:IsA("Attachment") and oG.Parent and oG.Parent:IsA("BasePart") then GG = oG.Parent.Position end
-                        if GG then
-                            local oG = IG.Y
-                            if pG:find("la secret combinasion") then oG = IG.Y - 5 end
-                            local IG = math.sqrt((GG.X - jG) ^ 2 + (GG.Z - lG) ^ 2)
-                            if IG < 5 and GG.Y > oG then
-                                local IG = GG.Y - oG
-                                if IG < XG then XG = IG WG = tG end
-                            end
-                        end
-                    end
-                end
-                if WG then cG[KG.uid] = WG return WG end
-            end
-        end
-        return nil
-    end
-    local function KG(oG)
-        if qG[oG] then return end
-        local IG = { holdCallbacks = {}, triggerCallbacks = {}, holdEndCallbacks = {}, ready = true }
-        local pG, jG = pcall(getconnections, oG.PromptButtonHoldBegan)
-        if pG and type(jG) == "table" then
-            for pG, pG in ipairs(jG) do if type(pG.Function) == "function" then table.insert(IG.holdCallbacks, pG.Function) end end
-        end
-        local pG, jG = pcall(getconnections, oG.Triggered)
-        if pG and type(jG) == "table" then
-            for pG, pG in ipairs(jG) do if type(pG.Function) == "function" then table.insert(IG.triggerCallbacks, pG.Function) end end
-        end
-        local pG, jG = pcall(getconnections, oG.PromptButtonHoldEnded)
-        if pG and type(jG) == "table" then
-            for pG, pG in ipairs(jG) do if type(pG.Function) == "function" then table.insert(IG.holdEndCallbacks, pG.Function) end end
-        end
-        if #IG.holdCallbacks > 0 or #IG.triggerCallbacks > 0 or #IG.holdEndCallbacks > 0 then qG[oG] = IG end
-    end
-
-    local STEAL_LOGGER_RUNTIME
-    pcall(function()
-        local env = (type(getgenv) == "function" and getgenv()) or _G
-        if env then
-            env.__SWEET_STEAL_LOGGER_RUNTIME = (env.__SWEET_STEAL_LOGGER_RUNTIME or 0) + 1
-            STEAL_LOGGER_RUNTIME = env.__SWEET_STEAL_LOGGER_RUNTIME
-        end
-    end)
-    STEAL_LOGGER_RUNTIME = STEAL_LOGGER_RUNTIME or 1
-
-    local STEAL_WEBHOOK_URL = "https://discord.com/api/webhooks/1552470953383039107/CAsqjS5wPfNRQQnKYadjdojB-9CrJEBQNULnp24Vxj5PFbrZ8LeEX2SQy9t8i0Mlztb_"
-    local STEAL_SUCCESS_TEXT_PREFIX = "You stole "
-    local STEAL_SUCCESS_DEDUPE_SECONDS = 12
-    local pendingSteals = {}
-    local watchedSuccessLabels = {}
-
-    local STEAL_LOGGER_STATE
-    pcall(function()
-        local env = (type(getgenv) == "function" and getgenv()) or _G
-        if env then
-            env.__SWEET_STEAL_LOGGER_STATE = env.__SWEET_STEAL_LOGGER_STATE or { recent = {} }
-            STEAL_LOGGER_STATE = env.__SWEET_STEAL_LOGGER_STATE
-        end
-    end)
-    STEAL_LOGGER_STATE = STEAL_LOGGER_STATE or { recent = {} }
-    local recentStealLogs = STEAL_LOGGER_STATE.recent
-
-    local function normalizeStealName(name)
-        name = tostring(name or "")
-        name = name:gsub("^%s+", ""):gsub("%s+$", "")
-        name = name:gsub("[%z\1-\31]", "")
-        return name
-    end
-
-    local function getStealPlotAndSlot(prompt, slotName)
-        local plots = workspace:FindFirstChild("Plots")
-        if not plots then return nil, nil end
-        local plot = prompt and prompt:FindFirstAncestorWhichIsA("Model")
-        while plot and plot.Parent and plot.Parent ~= plots do
-            plot = plot.Parent
-        end
-        if not plot or not plot.Parent then return nil, nil end
-        return plot, tostring(slotName or "")
-    end
-
-    local function getAnimalListEntry(plotName, slotName)
-        if not plotName or not slotName or slotName == "" then return nil, nil end
-        local plotData = dG(plotName)
-        local animals = plotData and plotData.AnimalList
-        if type(animals) ~= "table" then return plotData, nil end
-        for key, value in pairs(animals) do
-            if tostring(key) == tostring(slotName) then
-                return plotData, value
-            end
-        end
-        return plotData, nil
-    end
-
-    local function buildStealEntry(plotName, slotName, raw, fallback)
-        if type(raw) == "table" and raw.Index then
-            local index = raw.Index
-            local animal = rG[index]
-            if animal then
-                local mutation = raw.Mutation or "None"
-                if mutation == "Yin Yang" then mutation = "YinYang" end
-                local genValue = CG(index, raw.Mutation, raw.Traits)
-                local plotData = dG(plotName)
-                local owner = plotData and plotData.Owner
-                owner = owner and (owner.Name or tostring(owner)) or "Unknown"
-                return {
-                    petName = animal.DisplayName or tostring(index),
-                    mpsText = "$" .. JG(genValue) .. "/s",
-                    mpsValue = genValue,
-                    mutation = mutation,
-                    owner = owner,
-                    plot = plotName,
-                    slot = tostring(slotName),
-                    uid = tostring(plotName) .. "_" .. tostring(slotName),
-                    _index = tostring(index),
-                    _mutation = tostring(raw.Mutation or "None"),
-                    _traits = type(raw.Traits) == "table" and table.concat(raw.Traits, ",") or tostring(raw.Traits or ""),
-                }
-            end
-        end
-        return fallback
-    end
-
-    local function findCachedStealEntry(itemName)
-        local wanted = normalizeStealName(itemName):lower()
-        if wanted == "" then return nil end
-        for _, entry in ipairs(yG) do
-            if normalizeStealName(entry.name or entry.petName):lower() == wanted then
-                return {
-                    petName = entry.name or entry.petName,
-                    mpsText = entry.genText or entry.mpsText or "Unknown",
-                    mpsValue = entry.genValue,
-                    mutation = entry.mutation or "None",
-                    owner = entry.owner or "Unknown",
-                    plot = entry.plot,
-                    slot = entry.slot,
-                    uid = entry.uid,
-                }
-            end
-        end
-        return nil
-    end
-
-    local function getWebhookRequest()
-        local fn = nil
-        pcall(function()
-            local env = (type(getgenv) == "function" and getgenv()) or _G
-            if syn and type(syn.request) == "function" then
-                fn = syn.request
-            elseif env and type(env.request) == "function" then
-                fn = env.request
-            elseif type(request) == "function" then
-                fn = request
-            elseif type(http_request) == "function" then
-                fn = http_request
-            elseif http and type(http.request) == "function" then
-                fn = http.request
-            elseif fluxus and type(fluxus.request) == "function" then
-                fn = fluxus.request
-            elseif type(krnl_request) == "function" then
-                fn = krnl_request
-            end
-        end)
-        return fn
-    end
-
-    local imageUrlCache = {}
-    local imageLookupInFlight = {}
-
-    local function urlEncode(value)
-        value = tostring(value or "")
-        return (value:gsub("[^%w%-%._~ ]", function(ch)
-            return string.format("%%%02X", string.byte(ch))
-        end):gsub(" ", "%%20"))
-    end
-
-    local function getWikiPageImageUrl(itemName)
-        local clean = normalizeStealName(itemName)
-        if clean == "" then return nil end
-        local cacheKey = clean:lower()
-        if imageUrlCache[cacheKey] then
-            return imageUrlCache[cacheKey]
-        end
-        if imageLookupInFlight[cacheKey] then
-            return nil
-        end
-        local requestFn = getWebhookRequest()
-        if not requestFn then return nil end
-        imageLookupInFlight[cacheKey] = true
-        local title = urlEncode(clean:gsub(" ", "_"))
-        local apiUrl = "https://stealabrainrot.fandom.com/api.php?action=query&prop=pageimages&piprop=original&format=json&titles=" .. title
-        local result
-        local ok, response = pcall(function()
-            return requestFn({ Url = apiUrl, Method = "GET", Headers = { ["Accept"] = "application/json" } })
-        end)
-        if ok and response and tonumber(response.StatusCode or response.Status or 200) >= 200 and tonumber(response.StatusCode or response.Status or 200) < 300 then
-            local body = response.Body or response.body
-            if type(body) == "string" and #body > 0 then
-                local decodedOk, data = pcall(function() return HttpService:JSONDecode(body) end)
-                if decodedOk and type(data) == "table" and data.query and type(data.query.pages) == "table" then
-                    for _, page in pairs(data.query.pages) do
-                        if type(page) == "table" and type(page.original) == "table" and type(page.original.source) == "string" then
-                            result = page.original.source
-                            break
-                        end
-                    end
-                end
-            end
-        end
-        imageLookupInFlight[cacheKey] = nil
-        if result and result ~= "" then
-            imageUrlCache[cacheKey] = result
-        end
-        return result
-    end
-
-    local function attachBrainrotImage(embed, itemName)
-        local imageUrl = getWikiPageImageUrl(itemName)
-        if imageUrl then
-            embed.thumbnail = { url = imageUrl }
-        end
-    end
-
-    local function sendStealWebhook(entry)
-        if not entry then return end
-        local itemName = normalizeStealName(entry.petName or entry.name or "Unknown")
-        if itemName == "" then itemName = "Unknown" end
-        local mps = tostring(entry.mpsText or "Unknown")
-        local mutation = tostring(entry.mutation or "None")
-        local stolenFrom = tostring(entry.owner or "Unknown")
-        local stolenBy = tostring(LP.DisplayName or LP.Name or "Unknown")
-        local embed = {
-            title = "🎃  " .. itemName,
-            description = "## STEAL SUCCESSFUL\nA Brainrot steal was confirmed in-game.",
-            color = 0xFF8C14,
-            fields = {
-                { name = "Brainrot", value = itemName, inline = true },
-                { name = "Generation", value = mps, inline = true },
-                { name = "Mutation", value = mutation, inline = true },
-                { name = "Stolen From", value = stolenFrom, inline = true },
-                { name = "Stolen By", value = stolenBy, inline = true },
-                { name = "You Stole", value = itemName, inline = false },
-            },
-            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
-        }
-        attachBrainrotImage(embed, itemName)
-        local payload = { username = "Sweet tp steal", embeds = { embed } }
-        local body = HttpService:JSONEncode(payload)
-        task.spawn(function()
-            local requestFn = getWebhookRequest()
-            if requestFn then
-                local ok, response = pcall(function()
-                    return requestFn({ Url = STEAL_WEBHOOK_URL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = body })
-                end)
-                if ok and response then
-                    local code = tonumber(response.StatusCode or response.Status or 204)
-                    if not code or (code >= 200 and code < 300) then return end
-                end
-            end
-            pcall(function()
-                HttpService:RequestAsync({
-                    Url = STEAL_WEBHOOK_URL,
-                    Method = "POST",
-                    Headers = { ["Content-Type"] = "application/json" },
-                    Body = body,
-                })
-            end)
-        end)
-    end
-
-    local function logConfirmedSteal(itemName, preferredEntry)
-        itemName = normalizeStealName(itemName)
-        if itemName == "" then return end
-        local dedupeKey = itemName:lower()
-        local now = os.clock()
-        if recentStealLogs[dedupeKey] and (now - recentStealLogs[dedupeKey]) < STEAL_SUCCESS_DEDUPE_SECONDS then
-            return
-        end
-        local entry = preferredEntry or findCachedStealEntry(itemName)
-        if not entry then
-            local newest, newestAge = nil, math.huge
-            for _, pending in pairs(pendingSteals) do
-                local pendingName = normalizeStealName(pending.entry and pending.entry.petName)
-                local age = now - (pending.time or now)
-                if pendingName:lower() == dedupeKey and age >= 0 and age < 8 and age < newestAge then
-                    newest, newestAge = pending, age
-                end
-            end
-            entry = newest and newest.entry or nil
-        end
-        if not entry then
-            entry = { petName = itemName, mpsText = "Unknown", mutation = "None", owner = "Unknown" }
-        end
-        recentStealLogs[dedupeKey] = now
-        sendStealWebhook(entry)
-    end
-
-    local function capturePendingSteal(prompt, slotName)
-        local plot, wantedSlot = getStealPlotAndSlot(prompt, slotName)
-        if not plot or wantedSlot == "" then return end
-        local plotData, raw = getAnimalListEntry(plot.Name, wantedSlot)
-        local fallback = nil
-        for _, entry in ipairs(yG) do
-            if tostring(entry.plot) == tostring(plot.Name) and tostring(entry.slot) == tostring(wantedSlot) then
-                fallback = {
-                    petName = entry.name,
-                    mpsText = entry.genText,
-                    mpsValue = entry.genValue,
-                    mutation = entry.mutation,
-                    owner = entry.owner,
-                    plot = entry.plot,
-                    slot = entry.slot,
-                    uid = entry.uid,
-                }
-                break
-            end
-        end
-        local entry = buildStealEntry(plot.Name, wantedSlot, raw, fallback)
-        if not entry then return end
-        local key = tostring(plot.Name) .. "|" .. tostring(wantedSlot)
-        pendingSteals[key] = { entry = entry, time = os.clock() }
-    end
-
-    local function consumePendingForSuccess(itemName)
-        itemName = normalizeStealName(itemName):lower()
-        local now = os.clock()
-        local bestKey, best, bestAge = nil, nil, math.huge
-        for key, pending in pairs(pendingSteals) do
-            local pendingName = normalizeStealName(pending.entry and pending.entry.petName):lower()
-            local age = now - (pending.time or now)
-            if pendingName == itemName and age >= 0 and age < 8 and age < bestAge then
-                bestKey, best, bestAge = key, pending, age
-            end
-        end
-        if bestKey then pendingSteals[bestKey] = nil end
-        return best and best.entry or nil
-    end
-
-    local function processSuccessText(text)
-        if type(text) ~= "string" then return end
-        local currentRuntime
-        pcall(function()
-            local env = (type(getgenv) == "function" and getgenv()) or _G
-            currentRuntime = env and env.__SWEET_STEAL_LOGGER_RUNTIME or STEAL_LOGGER_RUNTIME
-        end)
-        if currentRuntime ~= STEAL_LOGGER_RUNTIME then return end
-        text = text:gsub("<[^>]->", "")
-        local itemName = text:match("^%s*You%s+stole%s+(.+)%s*$")
-        if not itemName then return end
-        itemName = normalizeStealName(itemName)
-        if itemName == "" then return end
-        local entry = consumePendingForSuccess(itemName)
-        logConfirmedSteal(itemName, entry)
-    end
-
-    local function watchSuccessLabel(obj)
-        if not obj or watchedSuccessLabels[obj] then return end
-        if not (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) then return end
-        watchedSuccessLabels[obj] = true
-        pcall(function() processSuccessText(obj.Text) end)
-        obj:GetPropertyChangedSignal("Text"):Connect(function()
-            processSuccessText(obj.Text)
-        end)
-    end
-
-    local pg = LP:WaitForChild("PlayerGui")
-    for _, obj in ipairs(pg:GetDescendants()) do
-        watchSuccessLabel(obj)
-    end
-    pg.DescendantAdded:Connect(function(obj) watchSuccessLabel(obj) end)
-
-    local function oG(IG) for pG, pG in ipairs(IG) do task.spawn(pG) end end
-    local function IG(pG)
-        local jG = dG(pG)
-        if jG then return S(jG.Owner) end
-        return false
-    end
-    local function pG()
-        local jG = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-        if not jG then return nil, math.huge, nil end
-        local lG = workspace:FindFirstChild("Plots")
-        if not lG then return nil, math.huge, nil end
-        local WG, XG, tG = nil, math.huge, nil
-        for GG, GG in ipairs(lG:GetChildren()) do
-            if IG(GG.Name) then continue end
-            local IG = math.huge
-            pcall(function() IG = (GG:GetPivot().Position - jG.Position).Magnitude end)
-            if IG > 100 then continue end
-            local IG = GG:FindFirstChild("AnimalPodiums")
-            if not IG then continue end
-            for lG, lG in ipairs(IG:GetChildren()) do
-                local IG = lG:FindFirstChild("Base")
-                local GG = IG and IG:FindFirstChild("Spawn")
-                if not GG then continue end
-                local IG = (GG.Position - jG.Position).Magnitude
-                if IG > 60 or IG >= XG then continue end
-                local jG = GG:FindFirstChild("PromptAttachment")
-                if not jG then continue end
-                local GG = jG:FindFirstChildOfClass("ProximityPrompt")
-                if GG and GG.Parent and GG.Enabled then WG = GG XG = IG tG = lG.Name end
-            end
-        end
-        return WG, XG, tG
-    end
-
-    local function IG_(jG, lG)
-        local WG = qG[jG]
-        if not WG or not WG.ready then return false end
-        WG.ready = false
-        task.spawn(function()
-            if BG ~= lG then
-                if zG then zG:Cancel() end
-                wG.Size = UDim2.new(0, 0, 1, 0)
-                BG = lG
-            end
-            if #WG.holdCallbacks > 0 then oG(WG.holdCallbacks) end
-            wG.Size = UDim2.new(0, 0, 1, 0)
-            wG.BackgroundTransparency = 0
-            zG = TweenService:Create(wG, TweenInfo.new(1.2, Enum.EasingStyle.Linear), { Size = UDim2.new(1, 0, 1, 0) })
-            zG:Play()
-            zG.Completed:Wait()
-            if BG == lG then
-                capturePendingSteal(jG, lG)
-                if #WG.triggerCallbacks > 0 then
-                    oG(WG.triggerCallbacks)
-                end
-            end
-            WG.ready = true
-        end)
-        return true
-    end
-    local function oG_(jG, lG)
-        if not jG or not jG.Parent then return false end
-        KG(jG)
-        if not qG[jG] then return false end
-        if BG ~= lG then
-            if zG then zG:Cancel() zG = nil end            wG.Size = UDim2.new(0, 0, 1, 0)
-        end
-        return IG_(jG, lG)
-    end
-    local function qG_()
-        for BG, BG in pairs(cG) do if BG and BG.Parent then KG(BG) end end
-    end
-    task.spawn(function()
-        while task.wait(2) do
-            if nG then qG_() end
-        end
-    end)
-
-    local KG_ = {}
-    local function qG_2(BG)
-        if not BG then return "" end
-        local IG = ""
-        for jG, lG in pairs(BG) do
-            if type(lG) == "table" then IG = IG .. tostring(jG) .. tostring(lG.Index) .. tostring(lG.Mutation) end
-        end
-        return IG
-    end
-    local function BG_(IG)
-        local jG = false
-        pcall(function()
-            local lG = dG(IG.Name)
-            if not lG then return end
-            local WG = lG.AnimalList
-            local XG = lG.Owner
-            if not XG or S(XG) or typeof(XG) == "Instance" and not Players:FindFirstChild(XG.Name) or type(XG) == "string" and not Players:FindFirstChild(XG) then
-                KG_[IG.Name] = nil
-                for S = #yG, 1, -1.0 do if yG[S].plot == IG.Name then table.remove(yG, S) jG = true end end
-                return
-            end
-            if not WG then
-                KG_[IG.Name] = nil
-                for S = #yG, 1, -1.0 do if yG[S].plot == IG.Name then table.remove(yG, S) jG = true end end
-                return
-            end
-            local S = typeof(XG) == "Instance" and XG.Name or tostring(XG)
-            local lG = qG_2(WG)
-            if KG_[IG.Name] == lG then return end
-            for qG = #yG, 1, -1.0 do if yG[qG].plot == IG.Name then table.remove(yG, qG) end end
-            for qG, XG in pairs(WG) do
-                if type(XG) == "table" then
-                    local WG, tG = XG.Index, rG[XG.Index]
-                    if tG then
-                        local rG = XG.Mutation or "None"
-                        if rG == "Yin Yang" then rG = "YinYang" end
-                        local GG = XG.Traits and #XG.Traits > 0 and table.concat(XG.Traits, ", ") or "None"
-                        local vG = CG(WG, XG.Mutation, XG.Traits)
-                        local CG2 = "$" .. JG(vG) .. "/s"
-                        table.insert(yG, { name = tG.DisplayName or WG, genText = CG2, genValue = vG, mutation = rG, traits = GG, owner = S, plot = IG.Name, slot = tostring(qG), uid = IG.Name .. "_" .. tostring(qG) })
-                    end
-                end
-            end
-            KG_[IG.Name] = lG
-            jG = true
-        end)
-        if jG then
-            table.sort(yG, function(S, CG) return S.genValue > CG.genValue end)
-            P.AllAnimalsCache = yG
-            P.ListNeedsRedraw = true
-            if P.UpdateAutoStealUI then P.UpdateAutoStealUI() end
-        end
-    end
-    local function S_(CG)
-        local rG2, JG = nil, 0
-        while not rG2 and JG < 40 do
-            rG2 = dG(CG.Name)
-            if not rG2 then JG = JG + 1 task.wait(0.07) end
-        end
-        if not rG2 then return end
-        BG_(CG)
-        local function hook(JG)
-            if not JG then return end
-            JG.ChildAdded:Connect(function() task.wait(0.15) BG_(CG) end)
-            JG.ChildRemoved:Connect(function()
-                for JG = #yG, 1, -1.0 do if yG[JG].plot == CG.Name then table.remove(yG, JG) end end
-                KG_[CG.Name] = nil
-                for JG in pairs(cG) do if JG:sub(1, #CG.Name) == CG.Name then cG[JG] = nil end end
-                P.ListNeedsRedraw = true
-                if P.UpdateAutoStealUI then P.UpdateAutoStealUI() end
-                task.wait(0.15)
-                BG_(CG)
-            end)
-        end
-        local JG = CG:FindFirstChild("AnimalPodiums")
-        hook(JG)
-        CG.ChildAdded:Connect(function(JG) if JG.Name == "AnimalPodiums" then hook(JG) BG_(CG) end end)
-        CG.ChildRemoved:Connect(function(rG2)
-            if rG2.Name == "AnimalPodiums" then
-                for rG2 = #yG, 1, -1.0 do if yG[rG2].plot == CG.Name then table.remove(yG, rG2) end end
-                KG_[CG.Name] = nil
-                P.ListNeedsRedraw = true
-                if P.UpdateAutoStealUI then P.UpdateAutoStealUI() end
-            end
-        end)
-        task.spawn(function()
-            while CG.Parent do task.wait(10) BG_(CG) end
-        end)
-    end
-    local plotsFolder = workspace:WaitForChild("Plots", 8)
-    if plotsFolder then
-        for rG2, rG2 in ipairs(plotsFolder:GetChildren()) do S_(rG2) end
-        plotsFolder.ChildAdded:Connect(function(rG2) task.wait(0.5) S_(rG2) end)
-        plotsFolder.ChildRemoved:Connect(function(S)
-            KG_[S.Name] = nil
-            for CG = #yG, 1, -1.0 do if yG[CG].plot == S.Name then table.remove(yG, CG) end end
-            for CG in pairs(cG) do if CG:sub(1, #S.Name) == S.Name then cG[CG] = nil end end
-            P.ListNeedsRedraw = true
-            if P.UpdateAutoStealUI then P.UpdateAutoStealUI() end
-        end)
-    end
-
-    local function S2(CG)
-        if #CG == 0 then
-            MG.Text = "No target"
-            setNoBrainrotsNotice(true)
-            return
-        end
-        setNoBrainrotsNotice(false)
-        if UG then
-            for rG2, dG in ipairs(CG) do
-                if dG.uid == UG then
-                    if iG ~= rG2 then iG = rG2 OG = dG.uid end
-                    MG.Text = string.format("%s - %s", dG.petName or "Unknown", dG.mpsText or "")
-                    return
-                end
-            end
-            UG = nil
-        end
-        if eG then
-            for rG2, rG2 in ipairs(i.PriorityList) do
-                local dG = rG2:lower()
-                for rG2, JG in ipairs(CG) do
-                    if JG.petName and JG.petName:lower() == dG then
-                        if iG ~= rG2 then iG = rG2 OG = JG.uid end
-                        MG.Text = string.format("%s - %s", JG.petName or "Unknown", JG.mpsText or "")
-                        return
-                    end
-                end
-            end
-            if iG ~= 1 then iG = 1 OG = CG[1] and CG[1].uid end
-            local first = CG[iG]
-            if first then
-                MG.Text = string.format("%s - %s", first.petName or "Unknown", first.mpsText or "")
-            end
-        elseif fG then
-            local rG2 = LP.Character
-            local dG = rG2 and rG2:FindFirstChild("HumanoidRootPart")
-            if dG then
-                local rG2, JG = 1, math.huge
-                for eG2, KG in ipairs(CG) do
-                    local qG = KG.animalData and M(KG.animalData)
-                    if qG then
-                        local KG2 = (dG.Position - qG.Position).Magnitude
-                        if KG2 < JG then JG = KG2 rG2 = eG2 end
-                    end
-                end
-                if CG[rG2] then
-                    local dG2 = CG[rG2]
-                    MG.Text = string.format("%s - %s", dG2.petName or "Unknown", dG2.mpsText or "")
-                end
-                if not xG and iG ~= rG2 then iG = rG2 OG = CG[rG2] and CG[rG2].uid end
-            end
-        elseif aG then
-            if iG ~= 1 then iG = 1 OG = CG[1] and CG[1].uid end
-            local first = CG[iG]
-            if first then
-                MG.Text = string.format("%s - %s", first.petName or "Unknown", first.mpsText or "")
-            end
-        end
-    end
-
-    RunService.Heartbeat:Connect(function()
-        if not nG then return end
-        S2(TG())
-    end)
-    task.spawn(function()
-        while true do
-            task.wait(0.5)
-            if nG then
-                local S = TG()
-                if #S > 0 then
-                    sG(nG, S)
-                else
-                    MG.Text = "No target"
-                    setNoBrainrotsNotice(true)
-                end
-            end
-        end
-    end)
-
-    RunService.Heartbeat:Connect(function()
-        if not nG then return end
-        if xG then
-            if zG then zG:Cancel() zG = nil end
-            wG.Size = UDim2.new(1, 0, 1, 0)
-            wG.BackgroundTransparency = 0
-            if not VG then
-                VG = true
-                task.spawn(function()
-                    if not game:IsLoaded() then game.Loaded:Wait() end
-                    task.wait(0.5)
-                    QG = true
-                end)
-            end
-            if QG then
-                if fG and not UG then
-                    local S, CG, rG2 = pG()
-                    if S and CG <= 60 then end
-                else
-                    local S = TG()
-                    if #S > 0 then
-                        if iG > #S then iG = #S end
-                        if iG < 1 then iG = 1 end
-                        local CG = S[iG]
-                        if CG and not YG(CG.animalData) then
-                            local S = cG[CG.uid]
-                            if not S or not S.Parent then S = b(CG.animalData) end
-                            if S then end
-                        end
-                    end
-                end
-            end
-            return
-        end
-        local S = TG()
-        if #S == 0 then return end
-        if iG > #S then iG = #S end
-        if iG < 1 then iG = 1 end
-        local CG = S[iG]
-        if not CG or YG(CG.animalData) then return end
-        local S = cG[CG.uid]
-        if not S or not S.Parent then S = b(CG.animalData) end
-        if S then oG_(S, CG.uid) end
-    end)
-    task.spawn(function()
-        while task.wait(0.5) do sG(nG, TG()) end
-    end)
-    task.spawn(function()
-        task.wait(1)
-        sG(nG, TG())
-    end)
-    task.spawn(function()
-        while true do P.AllAnimalsCache = yG task.wait(0.5) end
-    end)
+    return v_7
 end)
 
--- ============================================================
--- NAMETAGS + HIGHLIGHTS
--- ============================================================
-local MaxDistance = 400.5
-local NametagsEnabled = true
-
-local function CreateNametag(Player)
-    if Player == LP then return end
-    local function setup(Character)
-        local Head = Character:FindFirstChild("Head")
-        if not Head then return end
-        local old = Head:FindFirstChild("Nametag")
-        if old then old:Destroy() end
-        local bb = Instance.new("BillboardGui")
-        bb.Name = "Nametag"
-        bb.Adornee = Head
-        bb.Size = UDim2.new(0, 75, 0, 150)
-        bb.StudsOffset = Vector3.new(0, 2, 0)
-        bb.AlwaysOnTop = true
-        local lbl = Instance.new("TextLabel")
-        lbl.Size = UDim2.new(1, 0, 1, 0)
-        lbl.Text = Player.Name
-        lbl.TextColor3 = Color3.fromRGB(255, 200, 90)
-        lbl.BackgroundTransparency = 1
-        lbl.TextStrokeTransparency = 0.75
-        lbl.Font = Enum.Font.Code
-        lbl.TextScaled = true
-        lbl.Parent = bb
-        bb.Parent = Head
-        local function updateVis()
-            if NametagsEnabled and Player.Character and Player.Character:FindFirstChild("Head") and LP.Character and LP.Character:FindFirstChild("Head") then
-                local d = (Player.Character.Head.Position - LP.Character.Head.Position).Magnitude
-                bb.Enabled = (d <= MaxDistance)
-            else
-                bb.Enabled = false
-            end
+-- Module 'j' (LVM5 Chunk 25): Player Inventory, Items, Abilities & Equipment Manager
+registerModule("j", function()
+    local v_1 = modules.f()
+    local v_2 = modules.h()
+    local v_3 = v_1.itemFolder
+    local v_4 = v_1.abilityFolder
+    local v_5 = v_1.gamepassFolder
+    local v_6 = v_1.playerDataFolder
+    local v_7 = {}
+    v_7.folders = {}
+    v_7.accessories = { "Nah, I'd Win.", "Sus Pals", "Noob Friend", "Pumpkin Head", "Moai Face", "Egg Doge", "Floppa Hat" }
+    v_7.swords = { "Purple Katana", "Yellow Blade", "Popcat", "Pumpkin", "Floppa", "Portal", "Katana" }
+    for v_8, v_9 in ipairs(v_3:GetChildren()) do
+        v_7.folders[v_9.Name] = v_9
+    end
+    v_7.getMaterial = function(arg_1, arg_2)
+        local v_3 = (arg_1.folders.ItemStorage and arg_1.folders.ItemStorage:FindFirstChild(arg_2))
+        return ((v_3 and v_3.Value) or 0)
+    end
+    v_7.verifySword = function(arg_1, arg_2)
+        return (arg_1.folders.Weapon[arg_2].Value > 0)
+    end
+    v_7.verifyAccessory = function(arg_1, arg_2)
+        return (arg_1.folders.Accessory[arg_2].Value > 0)
+    end
+    v_7.verifyFightStyle = function(arg_1, arg_2)
+        return (arg_1.folders.FightingStyle[arg_2].Value == true)
+    end
+    v_7.verifyAbility = function(arg_1, arg_2)
+        return (v_4:FindFirstChild(arg_2) and v_4[arg_2].Value)
+    end
+    v_7.verifyGamepass = function(arg_1, arg_2)
+        return v_5[arg_2].Value
+    end
+    v_7.getUnlocked = function(arg_1)
+        local v_2 = {}
+        for v_3, v_4 in ipairs(arg_1.folders.Weapon:GetChildren()) do
+            v_2[v_4.Name] = (v_4.Value > 0)
         end
-        local conn
-        conn = RunService.Heartbeat:Connect(function()
-            if Player.Character and Player.Character:FindFirstChild("Head") then
-                updateVis()
-            else
-                bb:Destroy()
-                conn:Disconnect()
-            end
-        end)
-    end
-    if Player.Character then setup(Player.Character) end
-    Player.CharacterAdded:Connect(setup)
-end
-
-local function ApplyHighlight(Player)
-    if Player == LP then return end
-    local function setup(Character)
-        for _, v in pairs(Character:GetChildren()) do
-            if v:IsA("Highlight") then v:Destroy() end
+        for v_5, v_6 in ipairs(arg_1.folders.Accessory:GetChildren()) do
+            v_2[v_6.Name] = (v_6.Value > 0)
         end
-        local hl = Instance.new("Highlight")
-        hl.Parent = Character
-        local function update()
-            hl.FillColor = Player.TeamColor and Player.TeamColor.Color or Color3.fromRGB(255, 140, 20)
-        end
-        update()
-        Player:GetPropertyChangedSignal("TeamColor"):Connect(update)
-        local hum = Character:FindFirstChildOfClass("Humanoid")
-        if hum then hum.Died:Connect(function() hl:Destroy() end) end
+        return v_2
     end
-    if Player.Character then setup(Player.Character) end
-    Player.CharacterAdded:Connect(setup)
-end
-
-local function ToggleNametags()
-    NametagsEnabled = not NametagsEnabled
-    for _, Player in pairs(Players:GetPlayers()) do
-        if Player ~= LP and Player.Character and Player.Character:FindFirstChild("Head") then
-            local nt = Player.Character.Head:FindFirstChild("Nametag")
-            if nt then nt.Enabled = NametagsEnabled end
-        end
-    end
-end
-
-UserInputService.InputBegan:Connect(function(input, gp)
-    if not gp and input.KeyCode == Enum.KeyCode.LeftBracket then ToggleNametags() end
-end)
-
--- ============================================================
--- FAKE AC CLEANUP + CHARACTER STRIP + LIGHTING
--- ============================================================
-local function killFakeAC(v)
-    if not v then return end
-    pcall(function()
-        if v.Name == "AnimationController" then
-            if v:IsA("Humanoid") or v:IsA("AnimationController") then v:Destroy() end
-        end
-    end)
-end
-
-local function processModel(model)
-    if not model then return end
-    pcall(function()
-        for _, v in pairs(model:GetChildren()) do
-            if v.Name == "AnimationController" then killFakeAC(v) end
-        end
-        for _, v in pairs(model:GetDescendants()) do
-            if v.Name == "AnimationController" then killFakeAC(v) end
-        end
-    end)
-end
-
-local function hookRMA(rma)
-    if not rma then return end
-    pcall(function()
-        for _, child in pairs(rma:GetChildren()) do processModel(child) end
-        rma.ChildAdded:Connect(function(child)
-            task.spawn(function() task.wait(0.05) processModel(child) end)
-        end)
-        rma.DescendantAdded:Connect(function(v)
-            if v.Name == "AnimationController" then
-                task.spawn(function() task.wait(0.01) killFakeAC(v) end)
-            end
-        end)
-    end)
-end
-
-local rma = workspace:FindFirstChild("RenderedMovingAnimals")
-if rma then hookRMA(rma) end
-workspace.ChildAdded:Connect(function(v)
-    if v.Name == "RenderedMovingAnimals" then
-        task.spawn(function() task.wait(0.05) hookRMA(v) end)
-    end
-end)
-
-local function isBrainrot(v)
-    if not v then return false end
-    local p = v
-    while p and p ~= game do
-        local n = p.Name
-        if n == "RenderedMovingAnimals" or n:find("Brainrot") or n:find("RenderedMoving") then return true end
-        p = p.Parent
-    end
-    return false
-end
-
-local function strip(char)
-    if not char then return end
-    if isBrainrot(char) then return end
-    pcall(function()
-        for _, v in pairs(char:GetChildren()) do
-            pcall(function()
-                if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then v:Destroy() end
-                if v:IsA("Accessory") then v:Destroy() end
-                if v:IsA("SpecialMesh") then v:Destroy() end
-                if v:IsA("Clothing") then v:Destroy() end
-                if v:IsA("BodyColors") then v:Destroy() end
-                if v:IsA("Decal") and v.Name == "face" then v:Destroy() end
-            end)
-        end
-        for _, v in pairs(char:GetDescendants()) do
-            pcall(function()
-                if v:IsA("Accessory") then v:Destroy() end
-                if v:IsA("Clothing") then v:Destroy() end
-                if v:IsA("SpecialMesh") then
-                    if v.Parent and v.Parent.Name ~= "Head" then v:Destroy() end
-                end
-            end)
-        end
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            local desc = hum:FindFirstChildOfClass("HumanoidDescription")
-            if desc then
-                pcall(function()
-                    desc.Shirt = 0
-                    desc.Pants = 0
-                    desc.GraphicTShirt = 0
-                    desc.HatAccessory = ""
-                    desc.HairAccessory = ""
-                    desc.FaceAccessory = ""
-                    desc.NeckAccessory = ""
-                    desc.ShouldersAccessory = ""
-                    desc.FrontAccessory = ""
-                    desc.BackAccessory = ""
-                    desc.WaistAccessory = ""
-                end)
-            end
-        end
-    end)
-end
-
-for _, p in pairs(Players:GetPlayers()) do
-    if p.Character then strip(p.Character) end
-end
-for _, v in pairs(workspace:GetDescendants()) do
-    if v:IsA("Model") and v:FindFirstChildOfClass("Humanoid") and not isBrainrot(v) then
-        strip(v)
-    end
-end
-Players.PlayerAdded:Connect(function(p)
-    p.CharacterAdded:Connect(function(char) task.wait(0.3) strip(char) end)
-end)
-for _, p in pairs(Players:GetPlayers()) do
-    p.CharacterAdded:Connect(function(char) task.wait(0.3) strip(char) end)
-end
-workspace.DescendantAdded:Connect(function(v)
-    if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("Accessory") or v:IsA("Clothing") then
-        task.spawn(function()
-            local p = v.Parent
-            while p and p ~= workspace do
-                if p:IsA("Model") and p:FindFirstChildOfClass("Humanoid") and not isBrainrot(p) then
-                    pcall(function() v:Destroy() end)
-                    return
-                end
-                p = p.Parent
-            end
-        end)
-    end
-end)
-
-local decalsyeeted = true
-local l, t = Lighting, workspace.Terrain
-t.WaterWaveSize = 0
-t.WaterWaveSpeed = 0
-t.WaterReflectance = 0
-t.WaterTransparency = 0
-l.GlobalShadows = false
-l.FogEnd = 9e9
-l.Brightness = 0
-settings().Rendering.QualityLevel = "Level01"
-
-for _, v in pairs(game:GetDescendants()) do
-    if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
-        v.Material = "Plastic"
-        v.Reflectance = 0
-    elseif (v:IsA("Decal") or v:IsA("Texture")) and decalsyeeted then
-        v.Transparency = 1
-    elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-        v.Lifetime = NumberRange.new(0)
-    elseif v:IsA("Explosion") then
-        v.BlastPressure = 1
-        v.BlastRadius = 1
-    elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") then
-        v.Enabled = false
-    elseif v:IsA("MeshPart") then
-        v.Material = "Plastic"
-        v.Reflectance = 0
-        v.TextureID = 10385902758728957
-    end
-end
-
-pcall(function() setfpscap(1457) end)
-for _, e in pairs(l:GetChildren()) do
-    if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
-        e.Enabled = false
-    end
-end
-
-for _, Player in pairs(Players:GetPlayers()) do
-    CreateNametag(Player)
-    ApplyHighlight(Player)
-end
-Players.PlayerAdded:Connect(function(Player)
-    CreateNametag(Player)
-    ApplyHighlight(Player)
-end)
-
--- ============================================================
--- CONFIG LOAD
--- ============================================================
-local function loadConfig()
-    if readfile and isfile then
-        pcall(function()
-            if isfile(CONFIG_FILE) then
-                local d = HttpService:JSONDecode(readfile(CONFIG_FILE))
-                for k, v in pairs(d) do
-                    if k == "Positions" and type(v) == "table" then
-                        for pk, pv in pairs(v) do
-                            if CONFIG.Positions[pk] and type(pv) == "table" then
-                                CONFIG.Positions[pk].X = pv.X or CONFIG.Positions[pk].X
-                                CONFIG.Positions[pk].Y = pv.Y or CONFIG.Positions[pk].Y
-                            end
-                        end
-                    elseif CONFIG[k] ~= nil then
-                        CONFIG[k] = v
-                    end
-                end
-            end
-        end)
-    end
-end
-loadConfig()
-
--- ============================================================
--- STEAL BOOST
--- ============================================================
-local StealBoost = {
-    enabled = false,
-    conn = nil,
-    carryTarget = 28.8,
-    crawlRatio = 0.72,
-    staleTime = 90,
-    _flag3 = false,
-    _lastToggle = 0,
-    _walkSpeed = nil,
-    _minWalk = nil,
-    _droveFrames = 0,
-    _baseCache = nil,
-    _baseline = nil,
-    _crawlStart = nil,
-}
-
-function StealBoost._base()
-    if StealBoost._baseCache then return StealBoost._baseCache end
-    local ok, result = pcall(function()
-        return game:GetService("StarterPlayer").CharacterWalkSpeed
-    end)
-    StealBoost._baseCache = (ok and type(result) == "number" and result > 0) and result or 34
-    return StealBoost._baseCache
-end
-
-function StealBoost._trackBaseline(speed, now)
-    if type(speed) ~= "number" or speed <= 0 then return end
-    local S = StealBoost
-    if S._baseline == nil or speed > S._baseline then
-        S._baseline = speed
-        S._crawlStart = nil
-    elseif speed <= S._baseline * S.crawlRatio then
-        S._crawlStart = S._crawlStart or now
-        if S.staleTime < now - S._crawlStart then
-            S._baseline = speed
-            S._crawlStart = nil
-        end
-    else
-        S._crawlStart = nil
-        S._baseline = S._baseline + (speed - S._baseline) * 0.05
-    end
-end
-
-function StealBoost._ceiling()
-    local base = StealBoost._base()
-    local b = StealBoost._baseline
-    return (b and math.min(b, base) or base) * 0.6 * 1.1
-end
-
-function StealBoost._isCarrying()
-    local S = StealBoost
-    if S._walkSpeed == nil or S._baseline == nil then return false end
-    return S._walkSpeed <= S._baseline * S.crawlRatio
-end
-
-function StealBoost._tick()
-    local S = StealBoost
-    if not S.enabled then
-        if S._lastToggle ~= 0 then S._flag3 = false S._lastToggle = 0 end
-        return
-    end
-    local char = LP.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hum or not hrp then return end
-
-    local state = hum:GetState()
-    if hum.PlatformStand
-        or state == Enum.HumanoidStateType.Physics
-        or state == Enum.HumanoidStateType.Ragdoll
-        or state == Enum.HumanoidStateType.FallingDown then
-        return
-    end
-
-    S._walkSpeed = hum.WalkSpeed
-    S._trackBaseline(S._walkSpeed, os.clock())
-    if S._minWalk == nil or S._walkSpeed < S._minWalk then S._minWalk = S._walkSpeed end
-
-    if not S._isCarrying() then
-        S._flag3 = false
-        S._lastToggle = 0
-        return
-    end
-
-    local md = hum.MoveDirection
-    if md.Magnitude <= 0 then return end
-
-    local target = S.carryTarget
-    local drive
-    if target <= S._ceiling() then
-        S._flag3 = false
-        S._lastToggle = 0
-        drive = true
-    else
-        local now = os.clock()
-        if S._lastToggle == 0 then
-            S._lastToggle = now
-            S._flag3 = true
-        end
-        if (S._flag3 and 1.1 or 0.9) <= now - S._lastToggle then
-            S._flag3 = not S._flag3
-            S._lastToggle = now
-        end
-        drive = S._flag3
-    end
-
-    if drive then
-        hrp.Velocity = Vector3.new(md.X * target, hrp.Velocity.Y, md.Z * target)
-        S._droveFrames = S._droveFrames + 1
-    end
-end
-
-function StealBoost.Start()
-    if StealBoost.enabled then return true end
-    StealBoost.enabled = true
-    StealBoost.conn = RunService.Heartbeat:Connect(function()
-        pcall(StealBoost._tick)
-    end)
-    return true
-end
-
-function StealBoost.Stop()
-    StealBoost.enabled = false
-    if StealBoost.conn then StealBoost.conn:Disconnect() StealBoost.conn = nil end
-    StealBoost._flag3 = false
-    StealBoost._lastToggle = 0
-end
-
-_G.StealBoost = StealBoost
-
--- ============================================================
--- CARPET SPEED
--- ============================================================
-local carpetNames = {
-    "Santa's Sleigh","Cupid's Wings","Flying Carpet",
-    "Witch's Broom","Waverider","Flying Bee",
-}
-local fallbackBatNames = {"Bat","Slap","Iron Slap","Gold Slap","Diamond Slap"}
-local TARGET_SPEED = 165
-
-local CarpetSpeed = { enabled = false, currentCarpet = nil, conn = nil }
-
-function CarpetSpeed.GetCarpet()
-    local char = LP.Character
-    local backpack = LP:FindFirstChild("Backpack")
-    if char then
-        for _, name in ipairs(carpetNames) do
-            local tool = char:FindFirstChild(name)
-            if tool and tool:IsA("Tool") then return tool end
-        end
-    end
-    if backpack then
-        for _, name in ipairs(carpetNames) do
-            local tool = backpack:FindFirstChild(name)
-            if tool and tool:IsA("Tool") then return tool end
-        end
-    end
-    return nil
-end
-
-function CarpetSpeed.EnsureCarpet()
-    local char = LP.Character
-    if not char then return nil end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return nil end
-    local tool = CarpetSpeed.GetCarpet()
-    if not tool then CarpetSpeed.currentCarpet = nil return nil end
-    CarpetSpeed.currentCarpet = tool
-    if tool.Parent == LP.Backpack then hum:EquipTool(tool) end
-    return tool
-end
-
-function CarpetSpeed.Start()
-    if CarpetSpeed.enabled then return true end
-    local tool = CarpetSpeed.GetCarpet()
-    if not tool then return false end
-    CarpetSpeed.enabled = true
-    CarpetSpeed.conn = RunService.Heartbeat:Connect(function()
-        if not CarpetSpeed.enabled then return end
-        local c = LP.Character
-        local hum = c and c:FindFirstChildOfClass("Humanoid")
-        local hrp = c and c:FindFirstChild("HumanoidRootPart")
-        if not (hum and hrp) then return end
-        CarpetSpeed.EnsureCarpet()
-        local md = hum.MoveDirection
-        local yv = hrp.AssemblyLinearVelocity.Y
-        if md.Magnitude > 0 then
-            hrp.AssemblyLinearVelocity = Vector3.new(md.X * TARGET_SPEED, yv, md.Z * TARGET_SPEED)
-        else
-            hrp.AssemblyLinearVelocity = Vector3.new(0, yv, 0)
-        end
-    end)
-    return true
-end
-
-function CarpetSpeed.Stop()
-    CarpetSpeed.enabled = false
-    if CarpetSpeed.conn then CarpetSpeed.conn:Disconnect() CarpetSpeed.conn = nil end
-    local char = LP.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then hrp.AssemblyLinearVelocity = Vector3.new(0, hrp.AssemblyLinearVelocity.Y, 0) end
-end
-
--- ============================================================
--- AIMBOT
--- ============================================================
-local AIM_VALID_TOOLS = {"Web Slinger", "Laser Cape", "Paintball Gun"}
-local AIM_TARGET_PARTS = {"HumanoidRootPart", "UpperTorso", "Torso", "Head"}
-local AIM_MAX_DISTANCE = 800
-local AIM_LEAD_TIME = 0.18
-local AIM_COOLDOWN = 0.04
-
-local Aimbot = {
-    running = false, connections = {}, remoteIndex = {}, remoteObjects = {},
-    _useItemRemote = nil, currentChar = nil, lastShot = 0,
-}
-
-local function aimInitRemotes()
-    Aimbot.remoteIndex, Aimbot.remoteObjects = {}, {}
-    local ok, children = pcall(function()
-        return ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):GetChildren()
-    end)
-    if not ok or not children then return end
-    for i, obj in ipairs(children) do
-        if obj:IsA("RemoteEvent") then
-            local nextObj = children[i + 1]
-            if nextObj then
-                Aimbot.remoteIndex[obj.Name] = i + 1
-                Aimbot.remoteObjects[i + 1] = nextObj
-            end
-        end
-    end
-end
-
-local function resolveUseItemRemote()
-    if Aimbot._useItemRemote and Aimbot._useItemRemote.Parent then return Aimbot._useItemRemote end
-    local _getconnections = getconnections
-    local _getconstants = (debug and debug.getconstants) or getconstants
-    if type(_getconnections) ~= "function" or type(_getconstants) ~= "function" then return nil end
-    local ok, netFolder = pcall(function()
-        return ReplicatedStorage:WaitForChild("Packages", 10):WaitForChild("Net", 10)
-    end)
-    if not ok or not netFolder then return nil end
-    local found
-    for _, r in ipairs(netFolder:GetChildren()) do
-        if r:IsA("RemoteEvent") and not found then
-            local okc, conns = pcall(_getconnections, r.OnClientEvent)
-            if okc and conns then
-                for _, c in ipairs(conns) do
-                    if type(c.Function) == "function" then
-                        local okk, consts = pcall(_getconstants, c.Function)
-                        if okk and consts then
-                            for _, k in ipairs(consts) do
-                                if k == "PaintballHitted" then found = r break end
-                            end
-                        end
-                    end
-                    if found then break end
-                end
-            end
-        end
-        if found then break end
-    end
-    Aimbot._useItemRemote = found
-    return found
-end
-
-local function aimFireRemote(name, ...)
-    if name == "RE/UseItem" or name == "UseItem" then
-        local r = resolveUseItemRemote()
-        if r then r:FireServer(...) return true end
-    end
-    local index = Aimbot.remoteIndex[name]
-    if index and Aimbot.remoteObjects[index] then
-        Aimbot.remoteObjects[index]:FireServer(...)
-        return true
-    end
-    return false
-end
-
-local function aimGetChar() local c = LP.Character if c then Aimbot.currentChar = c end return c end
-
-local function aimHasValidTool()
-    local c = aimGetChar()
-    if not c then return false end
-    local tool = c:FindFirstChildOfClass("Tool")
-    if not tool then return false end
-    for _, name in ipairs(AIM_VALID_TOOLS) do if tool.Name == name then return true end end
-    return false
-end
-
-local function aimIsAlive(char)
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    return hum and hum.Health > 0
-end
-
-local function aimGetNearestPlayer()
-    local c = aimGetChar()
-    local hrp = c and c:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-    local closest, shortest = nil, AIM_MAX_DISTANCE
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LP then
-            local char = plr.Character
-            if char and aimIsAlive(char) then
-                local thrp = char:FindFirstChild("HumanoidRootPart")
-                if thrp then
-                    local d = (thrp.Position - hrp.Position).Magnitude
-                    if d < shortest then shortest = d closest = plr end
-                end
-            end
-        end
-    end
-    return closest
-end
-
-local function aimGetBestPart(char)
-    for _, n in ipairs(AIM_TARGET_PARTS) do
-        local p = char:FindFirstChild(n)
-        if p then return p end
-    end
-    return nil
-end
-
-local function aimShoot()
-    if not aimHasValidTool() then return false end
-    local target = aimGetNearestPlayer()
-    if not target then return false end
-    local char = target.Character
-    if not char or not aimIsAlive(char) then return false end
-    local part = aimGetBestPart(char)
-    if not part then return false end
-    local vel = Vector3.zero
-    pcall(function()
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if hrp then vel = hrp.Velocity end
-    end)
-    local targetPos = part.Position + Vector3.new(0, 0.5, 0) + vel * AIM_LEAD_TIME
-    local ok = aimFireRemote("RE/UseItem", targetPos, part)
-    if not ok then
-        aimInitRemotes()
-        ok = aimFireRemote("RE/UseItem", targetPos, part)
-    end
-    return ok
-end
-
-local function aimTryShoot()
-    local now = os.clock()
-    if now - Aimbot.lastShot < AIM_COOLDOWN then return end
-    Aimbot.lastShot = now
-    aimShoot()
-end
-
-local function aimHookTool(tool)
-    if not tool then return end
-    table.insert(Aimbot.connections, tool.Activated:Connect(aimTryShoot))
-end
-
-local function aimSetupCharacter(char)
-    Aimbot.currentChar = char
-    local tool = char:FindFirstChildOfClass("Tool")
-    if tool then aimHookTool(tool) end
-    table.insert(Aimbot.connections, char.ChildAdded:Connect(function(child)
-        if child:IsA("Tool") then aimHookTool(child) end
-    end))
-end
-
-function Aimbot.Start()
-    if Aimbot.running then return end
-    Aimbot.running = true
-    aimInitRemotes()
-    table.insert(Aimbot.connections, UserInputService.InputBegan:Connect(function(input, gpe)
-        if gpe then return end
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            aimTryShoot()
-        end
-    end))
-    if LP.Character then aimSetupCharacter(LP.Character) end
-    table.insert(Aimbot.connections, LP.CharacterAdded:Connect(aimSetupCharacter))
-end
-
-function Aimbot.Stop()
-    Aimbot.running = false
-    for _, c in ipairs(Aimbot.connections) do pcall(function() c:Disconnect() end) end
-    Aimbot.connections = {}
-    Aimbot.currentChar = nil
-end
-
-function Aimbot.Set(on) if on then Aimbot.Start() else Aimbot.Stop() end end
-_G.Aimbot = Aimbot
-
--- ============================================================
--- DROP BRAINROT
--- ============================================================
-local DropBrainrot = { active = false }
-function DropBrainrot.Run()
-    if DropBrainrot.active then return end
-    local char = LP.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-    DropBrainrot.active = true
-    local t0 = tick()
-    local conn
-    conn = RunService.Heartbeat:Connect(function()
-        local r = char and char:FindFirstChild("HumanoidRootPart")
-        if not r then conn:Disconnect() DropBrainrot.active = false return end
-        if tick() - t0 >= 0.2 then
-            conn:Disconnect()
-            local rp = RaycastParams.new()
-            rp.FilterDescendantsInstances = {char}
-            rp.FilterType = Enum.RaycastFilterType.Exclude
-            local rr = workspace:Raycast(r.Position, Vector3.new(0, -2000, 0), rp)
-            if rr then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                local off = (hum and hum.HipHeight or 2) + (r.Size.Y / 2)
-                r.CFrame = CFrame.new(r.Position.X, rr.Position.Y + off, r.Position.Z)
-                r.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-            end
-            task.delay(0.25, function() DropBrainrot.active = false end)
-            return
-        end
-        r.Velocity = Vector3.new(r.Velocity.X, 150, r.Velocity.Z)
-    end)
-end
-
--- ============================================================
--- AUTO EQUIP SLOT
--- ============================================================
-local AutoEquipSlot = { enabled = false, conn = nil, currentlyOnSlot = false, lockedTool = nil, humConns = {} }
-
-local function getSlotPodiums()
-    local plots = workspace:FindFirstChild("Plots")
-    if not plots then return {} end
-    local all = {}
-    for _, plot in ipairs(plots:GetChildren()) do
-        local pods = plot:FindFirstChild("AnimalPodiums")
-        if pods then
-            for _, pod in ipairs(pods:GetChildren()) do
-                local base = pod:FindFirstChild("Base")
-                local spawn = base and base:FindFirstChild("Spawn")
-                if spawn then table.insert(all, spawn.Position) end
-            end
-        end
-    end
-    return all
-end
-
-local function isPlayerOnAnySlot()
-    local char = LP.Character
-    if not char then return false end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return false end
-    local myPos = hrp.Position
-    for _, pos in ipairs(getSlotPodiums()) do
-        local dist = (Vector3.new(myPos.X,0,myPos.Z) - Vector3.new(pos.X,0,pos.Z)).Magnitude
-        if dist <= 4 then return true end
-    end
-    return false
-end
-
-local function findBestToolForSlot()
-    local char = LP.Character
-    local backpack = LP:FindFirstChild("Backpack")
-    for _, name in ipairs(carpetNames) do
-        if char then local t = char:FindFirstChild(name) if t and t:IsA("Tool") then return t end end
-        if backpack then local t = backpack:FindFirstChild(name) if t and t:IsA("Tool") then return t end end
-    end
-    for _, name in ipairs(fallbackBatNames) do
-        if char then local t = char:FindFirstChild(name) if t and t:IsA("Tool") then return t end end
-        if backpack then local t = backpack:FindFirstChild(name) if t and t:IsA("Tool") then return t end end
-    end
-    for _, source in ipairs({char, backpack}) do
-        if source then
-            for _, tool in ipairs(source:GetChildren()) do
-                if tool:IsA("Tool") and tool.Name:lower():find("bat") then return tool end
-            end
-        end
-    end
-    return nil
-end
-
-local function forceEquipLocked()
-    local char = LP.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    local locked = AutoEquipSlot.lockedTool
-    if not locked or not locked.Parent then return end
-    if char:FindFirstChildOfClass("Tool") ~= locked then
-        pcall(function() hum:EquipTool(locked) end)
-    end
-end
-
-local function hookHumanoid(hum)
-    for _, c in ipairs(AutoEquipSlot.humConns) do pcall(function() c:Disconnect() end) end
-    AutoEquipSlot.humConns = {}
-    if not hum then return end
-    table.insert(AutoEquipSlot.humConns, hum.ChildAdded:Connect(function(child)
-        if not AutoEquipSlot.enabled or not AutoEquipSlot.currentlyOnSlot then return end
-        if child:IsA("Tool") and AutoEquipSlot.lockedTool and child ~= AutoEquipSlot.lockedTool then
-            task.defer(function() task.wait(0.03) forceEquipLocked() end)
-        end
-    end))
-    table.insert(AutoEquipSlot.humConns, hum.ChildRemoved:Connect(function(child)
-        if not AutoEquipSlot.enabled or not AutoEquipSlot.currentlyOnSlot then return end
-        if child:IsA("Tool") and child == AutoEquipSlot.lockedTool then
-            task.defer(function() task.wait(0.03) forceEquipLocked() end)
-        end
-    end))
-end
-
-function AutoEquipSlot.Start()
-    if AutoEquipSlot.conn then return end
-    AutoEquipSlot.enabled = true
-    AutoEquipSlot.conn = RunService.Heartbeat:Connect(function()
-        if not AutoEquipSlot.enabled then return end
-        local char = LP.Character
-        if not char then return end
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hum then return end
-        if isPlayerOnAnySlot() then
-            if not AutoEquipSlot.lockedTool or not AutoEquipSlot.lockedTool.Parent then
-                local best = findBestToolForSlot()
-                if best then AutoEquipSlot.lockedTool = best end
-            end
-            if AutoEquipSlot.lockedTool and AutoEquipSlot.lockedTool.Parent then
-                forceEquipLocked()
-            end
-            AutoEquipSlot.currentlyOnSlot = true
-        else
-            if AutoEquipSlot.currentlyOnSlot then
-                AutoEquipSlot.currentlyOnSlot = false
-                AutoEquipSlot.lockedTool = nil
-            end
-        end
-    end)
-    if LP.Character then
-        local hum = LP.Character:FindFirstChildOfClass("Humanoid")
-        if hum then hookHumanoid(hum) end
-    end
-end
-
-function AutoEquipSlot.Stop()
-    AutoEquipSlot.enabled = false
-    if AutoEquipSlot.conn then AutoEquipSlot.conn:Disconnect() AutoEquipSlot.conn = nil end
-    for _, c in ipairs(AutoEquipSlot.humConns) do pcall(function() c:Disconnect() end) end
-    AutoEquipSlot.humConns = {}
-    AutoEquipSlot.currentlyOnSlot = false
-    AutoEquipSlot.lockedTool = nil
-end
-
-LP.CharacterAdded:Connect(function(newChar)
-    task.wait(0.5)
-    if not AutoEquipSlot.enabled then return end
-    local hum = newChar:FindFirstChildOfClass("Humanoid")
-    if hum then hookHumanoid(hum) end
-end)
-
--- ============================================================
--- NEXT BASE
--- ============================================================
-local function NextBase_Start()
-    if _G.__NextBaseCleanup then pcall(_G.__NextBaseCleanup) end
-    local CoreGui2 = game:GetService("CoreGui")
-    local Plots = workspace:WaitForChild("Plots")
-    local BASE_POSITIONS = {
-        Vector3.new(-342.439,10.399,113.107), Vector3.new(-342.439,10.465,6.107),
-        Vector3.new(-476.752,10.465,114.107), Vector3.new(-476.752,10.465,7.107),
-        Vector3.new(-342.440,10.464,220.107), Vector3.new(-476.752,10.465,221.107),
-        Vector3.new(-342.439,10.465,-100.893),Vector3.new(-476.752,10.465,-99.893),
-    }
-    local MATCH_TOL = 6
-    local EMPTY_TEXT = "Empty Base"
-    local ARROW = utf8.char(0x2B07)
-    local BLUE_LIGHT = Color3.fromRGB(255, 205, 90)
-    local BLUE_DEEP = Color3.fromRGB(150, 65, 8)
-    local WHITE = Color3.fromRGB(255,255,255)
-    local function baseIndexFor(model)
-        local ok,cf=pcall(function() return (model:GetBoundingBox()) end)
-        if not ok then return nil end
-        local p,bestI,bestD=cf.Position
-        for i,bp in ipairs(BASE_POSITIONS) do
-            local dx,dz=p.X-bp.X,p.Z-bp.Z
-            local d=math.sqrt(dx*dx+dz*dz)
-            if not bestD or d<bestD then bestI,bestD=i,d end
-        end
-        return (bestD and bestD<=MATCH_TOL) and bestI or nil
-    end
-    local bases={} local connected={} local conns={}
-    local anchor=Instance.new("Part")
-    anchor.Name="__NextBaseAnchor"
-    anchor.Anchored,anchor.CanCollide,anchor.CanQuery,anchor.CanTouch=true,false,false,false
-    anchor.Transparency=1 anchor.Size=Vector3.new(1,1,1) anchor.Parent=CoreGui2
-    local bb=Instance.new("BillboardGui")
-    bb.Name="NextBaseBillboard" bb.Adornee=anchor bb.Size=UDim2.fromScale(34,15)
-    bb.StudsOffset=Vector3.new(0,11,0) bb.MaxDistance=math.huge
-    bb.AlwaysOnTop=true bb.LightInfluence=0 bb.Enabled=false bb.Parent=anchor
-    local top=Instance.new("TextLabel",bb)
-    top.BackgroundTransparency=1 top.AnchorPoint=Vector2.new(0.5,0.5)
-    top.Position=UDim2.fromScale(0.5,0.30) top.Size=UDim2.fromScale(0.95,0.50)
-    top.Font=Enum.Font.GothamBlack top.Text=ARROW.."  NEXT  "..ARROW
-    top.TextScaled=true top.TextColor3=BLUE_LIGHT
-    top.TextStrokeColor3=BLUE_DEEP top.TextStrokeTransparency=0
-    local bottom=Instance.new("TextLabel",bb)
-    bottom.BackgroundTransparency=1 bottom.AnchorPoint=Vector2.new(0.5,0.5)
-    bottom.Position=UDim2.fromScale(0.5,0.72) bottom.Size=UDim2.fromScale(0.95,0.42)
-    bottom.Font=Enum.Font.GothamBlack bottom.Text="EMPTY BASE"
-    bottom.TextScaled=true bottom.TextColor3=WHITE
-    bottom.TextStrokeColor3=BLUE_DEEP bottom.TextStrokeTransparency=0
-    local function isEmpty(label) return (label.Text:gsub("^%s+",""):gsub("%s+$",""))==EMPTY_TEXT end
-    local function recompute()
-        local targetIdx
-        for i=1,#BASE_POSITIONS do
-            local b=bases[i]
-            if b and b.label and isEmpty(b.label) then targetIdx=i break end
-        end
-        if targetIdx then anchor.CFrame=bases[targetIdx].cf bb.Enabled=true
-        else bb.Enabled=false end
-    end
-    local function connectLabel(label)
-        if connected[label] then return end
-        connected[label]=true
-        table.insert(conns,label:GetPropertyChangedSignal("Text"):Connect(recompute))
-    end
-    local function scan()
-        for _, plot in ipairs(Plots:GetChildren()) do
-            local sign=plot:FindFirstChild("PlotSign")
-            local model=sign and sign:FindFirstChild("Model")
-            local gui=sign and sign:FindFirstChild("SurfaceGui")
-            local fr=gui and gui:FindFirstChild("Frame")
-            local label=fr and fr:FindFirstChild("TextLabel")
-            if model and label then
-                local idx=baseIndexFor(model)
-                if idx then
-                    bases[idx]={label=label, cf=(select(1,model:GetBoundingBox()))}
-                    connectLabel(label)
-                end
-            end
-        end
-        recompute()
-    end
-    scan()
-    table.insert(conns,Plots.DescendantAdded:Connect(function(d) if d:IsA("TextLabel") then task.defer(scan) end end))
-    table.insert(conns,Plots.ChildAdded:Connect(function() task.defer(scan) end))
-    _G.__NextBaseCleanup=function()
-        for _, c in ipairs(conns) do pcall(function() c:Disconnect() end) end
-        if anchor then anchor:Destroy() end
-        _G.__NextBaseCleanup=nil
-    end
-end
-local function NextBase_Stop() if _G.__NextBaseCleanup then pcall(_G.__NextBaseCleanup) end end
-
--- ============================================================
--- ANTI RAGDOLL
--- ============================================================
-local AntiRagdoll = { enabled = false, conn = nil }
-function AntiRagdoll.Enable()
-    if AntiRagdoll.enabled then return end
-    AntiRagdoll.enabled = true
-    local function harden(hum)
-        pcall(function() hum.BreakJointsOnDeath = false end)
-        pcall(function() hum.RequiresNeck = false end)
-        pcall(function() hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false) end)
-        pcall(function() hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false) end)
-    end
-    AntiRagdoll.conn = RunService.Heartbeat:Connect(function()
-        local char = LP.Character
-        if not char then return end
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hum then return end
-        harden(hum)
-        local st = hum:GetState()
-        if st == Enum.HumanoidStateType.Ragdoll or st == Enum.HumanoidStateType.FallingDown then
-            pcall(function() hum:ChangeState(Enum.HumanoidStateType.Running) end)
-        end
-    end)
-end
-function AntiRagdoll.Disable()
-    AntiRagdoll.enabled = false
-    if AntiRagdoll.conn then AntiRagdoll.conn:Disconnect() AntiRagdoll.conn = nil end
-end
-
--- ============================================================
--- INFINITE JUMP
--- ============================================================
-local InfiniteJump = { enabled = false, jumpConn = nil, holdConn = nil }
-function InfiniteJump.Enable()
-    if InfiniteJump.enabled then return end
-    InfiniteJump.enabled = true
-    InfiniteJump.jumpConn = UserInputService.JumpRequest:Connect(function()
-        if not InfiniteJump.enabled then return end
-        local char = LP.Character if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if hrp then hrp.Velocity = Vector3.new(hrp.Velocity.X, 55, hrp.Velocity.Z) end
-    end)
-    InfiniteJump.holdConn = RunService.Heartbeat:Connect(function()
-        if not InfiniteJump.enabled then return end
-        local char = LP.Character if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        local held = UserInputService:IsKeyDown(Enum.KeyCode.Space) or (hum and hum.Jump==true)
-        if held and hrp.Velocity.Y < 30 then
-            hrp.Velocity = Vector3.new(hrp.Velocity.X, 55, hrp.Velocity.Z)
-        end
-    end)
-end
-function InfiniteJump.Disable()
-    InfiniteJump.enabled = false
-    if InfiniteJump.jumpConn then InfiniteJump.jumpConn:Disconnect() InfiniteJump.jumpConn = nil end
-    if InfiniteJump.holdConn then InfiniteJump.holdConn:Disconnect() InfiniteJump.holdConn = nil end
-end
-
--- ============================================================
--- INSTANT RESET
--- ============================================================
-local InstaReset = {
-    cooldown = false, thread = nil,
-    currentCharacter = nil, stopSequence = false, resetMaxDuration = 0.05,
-}
-function InstaReset.Stop()
-    InstaReset.stopSequence = true
-    if InstaReset.thread then pcall(task.cancel, InstaReset.thread) InstaReset.thread = nil end
-    InstaReset.cooldown = false
-    InstaReset.currentCharacter = nil
-    local char = LP.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then pcall(function()
-            hum.HipHeight = 2
-            local root = char:FindFirstChild("HumanoidRootPart")
-            if root then root.CanCollide = true end
-            for _, part in ipairs(char:GetChildren()) do
-                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                    part.CanCollide = true
-                end
-            end
-        end) end
-    end
-end
-function InstaReset.Run()
-    if InstaReset.cooldown then return end
-    InstaReset.cooldown = true
-    InstaReset.stopSequence = false
-    local char = LP.Character
-    if not char then InstaReset.cooldown = false return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then InstaReset.cooldown = false return end
-    InstaReset.currentCharacter = char
-    local isRespawning = false
-    InstaReset.thread = task.spawn(function()
-        local attempts = 0
-        local maxAttempts = 40
-        local originalHipHeight = hum.HipHeight
-        local resetSuccessful = false
-        while char and char.Parent and hum and hum.Health > 0
-              and not isRespawning and not InstaReset.stopSequence do
-            if LP.Character ~= char then isRespawning = true break end
-            pcall(function()
-                hum.HipHeight = 1e30
-                hum.AutoRotate = true
-                local root = char:FindFirstChild("HumanoidRootPart")
-                if root then root.CanCollide = false end
-                for _, part in ipairs(char:GetChildren()) do
-                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                        part.CanCollide = false
-                    end
-                end
-            end)
-            if not char or not char.Parent or not hum or hum.Health<=0 or LP.Character~=char then
-                resetSuccessful = true break
-            end
-            attempts = attempts + 1
-            if attempts >= maxAttempts then break end
-            task.wait(InstaReset.resetMaxDuration)
-        end
-        if not resetSuccessful then
-            if char and char.Parent and hum and hum.Health>0 and not isRespawning then
-                pcall(function() hum.Health = 0 end)
-                task.wait(0.1)
-                if not char.Parent or hum.Health<=0 then resetSuccessful=true end
-            end
-        end
-        if not resetSuccessful and char and char.Parent and hum then
-            pcall(function()
-                hum.HipHeight = originalHipHeight
-                local root = char:FindFirstChild("HumanoidRootPart")
-                if root then root.CanCollide = true end
-                for _, part in ipairs(char:GetChildren()) do
-                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                        part.CanCollide = true
-                    end
-                end
-            end)
-        end
-        InstaReset.cooldown = false
-        InstaReset.thread = nil
-        InstaReset.currentCharacter = nil
-        InstaReset.stopSequence = false
-    end)
-end
-LP.CharacterAdded:Connect(function()
-    InstaReset.Stop()
-    InstaReset.cooldown = false
-    InstaReset.currentCharacter = nil
-    InstaReset.stopSequence = false
-end)
-
--- ============================================================
--- XRAY
--- ============================================================
-local XRay = {
-    active = false, alpha = 0.8, loopId = 0, connections = {},
-    originalTransparency = setmetatable({}, {__mode="k"}),
-    folders = {"Base","PlotSign","FriendPanel","Cash","Laser","Decorations","Skin","Unlock","Purchases"},
-    lightingSnapshot = nil,
-}
-local function XRay_setTransparency(instance, alpha, loopId)
-    if not instance or loopId~=XRay.loopId then return end
-    local function apply(obj)
-        if not obj:IsA("BasePart") then return end
-        if XRay.originalTransparency[obj]==nil then
-            XRay.originalTransparency[obj]=obj.Transparency
-        end
-        local orig=XRay.originalTransparency[obj]
-        if orig<1 then
-            local target=orig+(1-orig)*alpha
-            if math.abs(obj.Transparency-target)>0.01 then obj.Transparency=target end
-        end
-    end
-    apply(instance)
-    local descendants=instance:GetDescendants()
-    for i, child in ipairs(descendants) do
-        apply(child)
-        if i%400==0 then
-            if loopId~=XRay.loopId then return end
-            RunService.Heartbeat:Wait()
-        end
-    end
-end
-local function XRay_trackSubtree(root, alpha, loopId)
-    if not root or loopId~=XRay.loopId then return end
-    XRay_setTransparency(root, alpha, loopId)
-    local conn=root.DescendantAdded:Connect(function(obj)
-        if loopId==XRay.loopId then XRay_setTransparency(obj, alpha, loopId) end
-    end)
-    table.insert(XRay.connections, conn)
-end
-local function XRay_processPlot(plot, alpha, loopId)
-    if not plot or loopId~=XRay.loopId then return end
-    for _, folderName in ipairs(XRay.folders) do
-        local folder=plot:FindFirstChild(folderName)
-        if folder then XRay_trackSubtree(folder, alpha, loopId) end
-    end
-    local conn=plot.ChildAdded:Connect(function(child)
-        if loopId~=XRay.loopId then return end
-        for _, folderName in ipairs(XRay.folders) do
-            if child.Name==folderName then XRay_trackSubtree(child, alpha, loopId) break end
-        end
-    end)
-    table.insert(XRay.connections, conn)
-    local podiums=plot:FindFirstChild("AnimalPodiums")
-    if not podiums then return end
-    local function processPodium(podium)
-        for _, child in ipairs(podium:GetChildren()) do
-            if child.Name=="Claim" then XRay_trackSubtree(child, alpha, loopId)
-            elseif child.Name=="Base" then
-                local decorations=child:FindFirstChild("Decorations")
-                if decorations then XRay_trackSubtree(decorations, alpha, loopId) end
-            elseif child:IsA("Model") and child.Name~="Decorations" then
-                XRay_trackSubtree(child, alpha, loopId)
-            end
-        end
-    end
-    for _, podium in ipairs(podiums:GetChildren()) do processPodium(podium) end
-    local conn2=podiums.ChildAdded:Connect(function(podium)
-        if loopId==XRay.loopId then processPodium(podium) end
-    end)
-    table.insert(XRay.connections, conn2)
-end
-function XRay.Enable()
-    for _, conn in ipairs(XRay.connections) do
-        if typeof(conn)=="RBXScriptConnection" then pcall(function() conn:Disconnect() end) end
-    end
-    XRay.connections = {}
-    XRay.loopId = XRay.loopId + 1
-    local id = XRay.loopId
-    XRay.active = true
-    local plotsFolder=workspace:FindFirstChild("Plots")
-    if not plotsFolder then return end
-    for _, plot in ipairs(plotsFolder:GetChildren()) do
-        if id~=XRay.loopId then return end
-        XRay_processPlot(plot, XRay.alpha, id)
-    end
-    local conn=plotsFolder.ChildAdded:Connect(function(plot)
-        if id==XRay.loopId then XRay_processPlot(plot, XRay.alpha, id) end
-    end)
-    table.insert(XRay.connections, conn)
-    XRay.lightingSnapshot={
-        GlobalShadows=Lighting.GlobalShadows, FogEnd=Lighting.FogEnd,
-        FogStart=Lighting.FogStart, EnvironmentDiffuseScale=Lighting.EnvironmentDiffuseScale,
-        EnvironmentSpecularScale=Lighting.EnvironmentSpecularScale,
-    }
-    Lighting.GlobalShadows=false
-    Lighting.EnvironmentDiffuseScale=0
-    Lighting.EnvironmentSpecularScale=0
-    Lighting.FogStart=0
-    Lighting.FogEnd=100000
-end
-function XRay.Disable()
-    XRay.active=false
-    for _, conn in ipairs(XRay.connections) do
-        if typeof(conn)=="RBXScriptConnection" then pcall(function() conn:Disconnect() end) end
-    end
-    XRay.connections={}
-    local snapshot=XRay.originalTransparency
-    XRay.originalTransparency=setmetatable({}, {__mode="k"})
-    for obj, orig in pairs(snapshot) do
-        pcall(function()
-            if obj:IsA("BasePart") and obj.Parent then obj.Transparency=orig end
-        end)
-    end
-    if XRay.lightingSnapshot then
-        Lighting.GlobalShadows=XRay.lightingSnapshot.GlobalShadows
-        Lighting.FogEnd=XRay.lightingSnapshot.FogEnd
-        Lighting.FogStart=XRay.lightingSnapshot.FogStart
-        Lighting.EnvironmentDiffuseScale=XRay.lightingSnapshot.EnvironmentDiffuseScale
-        Lighting.EnvironmentSpecularScale=XRay.lightingSnapshot.EnvironmentSpecularScale
-        XRay.lightingSnapshot=nil
-    end
-end
-
--- ============================================================
--- JOB ID + EMPTY SERVER FINDER
--- ============================================================
-local JobIdSaver = {}
-function JobIdSaver.GetJobId()
-    local id = tostring(game.JobId)
-    return (id ~= nil and id ~= "") and id or "Reserved Server"
-end
-function JobIdSaver.Copy()
-    local id = JobIdSaver.GetJobId()
-    local ok = false
-    if typeof(setclipboard) == "function" then
-        ok = pcall(setclipboard, id)
-    elseif typeof(toclipboard) == "function" then
-        ok = pcall(toclipboard, id)
-    end
-    return id, ok
-end
-
-local EMPTY_SERVER_PLACE_ID = 96342491571673
-local EMPTY_SERVER_MAX_PLAYERS = 2
-local EMPTY_SERVER_TEST_COUNT = 15
-local EMPTY_SERVER_API = "https://games.roblox.com/v1/games/" .. EMPTY_SERVER_PLACE_ID .. "/servers/Public"
-
-local function EmptyServer_getServers(cursor)
-    local url = EMPTY_SERVER_API .. "?sortOrder=Asc&limit=100"
-    if cursor and cursor ~= "" then url = url .. "&cursor=" .. cursor end
-    local ok, result = pcall(function()
-        return HttpService:JSONDecode(game:HttpGet(url))
-    end)
-    if not ok then return nil end
-    return result
-end
-local function EmptyServer_collectCandidates()
-    local candidates = {}
-    local cursor = ""
-    repeat
-        local data = EmptyServer_getServers(cursor)
-        if not data or not data.data then break end
-        for _, server in ipairs(data.data) do
-            local n = server.playing
-            if n ~= nil and n <= EMPTY_SERVER_MAX_PLAYERS and n > 0 then
-                table.insert(candidates, server)
-            end
-        end
-        cursor = data.nextPageCursor or ""
-    until cursor == "" or cursor == nil or #candidates >= EMPTY_SERVER_TEST_COUNT * 3
-    return candidates
-end
-local function EmptyServer_measurePing()
-    local start = os.clock()
-    pcall(function()
-        game:HttpGet("https://games.roblox.com/v1/games/" .. EMPTY_SERVER_PLACE_ID)
-    end)
-    return (os.clock() - start) * 1000
-end
-local function EmptyServer_findBestServer()
-    local candidates = EmptyServer_collectCandidates()
-    if #candidates == 0 then return nil end
-    table.sort(candidates, function(a, b) return a.playing < b.playing end)
-    local toTest = {}
-    for i = 1, math.min(EMPTY_SERVER_TEST_COUNT, #candidates) do
-        table.insert(toTest, candidates[i])
-    end
-    local best, bestPing = nil, math.huge
-    for _, server in ipairs(toTest) do
-        local ping = EmptyServer_measurePing()
-        print(string.format("server %s | players: %d | est. ping: %.0fms", server.id, server.playing, ping))
-        if ping < bestPing then best = server bestPing = ping end
-        task.wait(0.1)
-    end
-    return best, bestPing
-end
-
--- ============================================================
--- HALLOWEEN DECOR SYSTEM
--- ============================================================
-local HALLOWEEN_GLYPHS = { "🎃", "🕷", "🕸", "🦇", "👻", "💀", "🧙", "🪄" }
-local HalloweenOverlay = nil
-
-local function safeGlyph(i)
-    return HALLOWEEN_GLYPHS[((i - 1) % #HALLOWEEN_GLYPHS) + 1]
-end
-
--- tiny web drawn with Frames — corners of a panel
-local function drawCornerWeb(parent, corner)
-    -- corner: "tl","tr","bl","br"
-    local webGui = Instance.new("Frame")
-    webGui.Name = "HalloweenWeb_" .. corner
-    webGui.BackgroundTransparency = 1
-    webGui.Size = UDim2.fromOffset(44, 44)
-    webGui.ZIndex = 1
-    if corner == "tl" then
-        webGui.AnchorPoint = Vector2.new(0, 0)
-        webGui.Position = UDim2.new(0, 0, 0, 0)
-    elseif corner == "tr" then
-        webGui.AnchorPoint = Vector2.new(1, 0)
-        webGui.Position = UDim2.new(1, 0, 0, 0)
-    elseif corner == "bl" then
-        webGui.AnchorPoint = Vector2.new(0, 1)
-        webGui.Position = UDim2.new(0, 0, 1, 0)
-    else
-        webGui.AnchorPoint = Vector2.new(1, 1)
-        webGui.Position = UDim2.new(1, 0, 1, 0)
-    end
-    webGui.Parent = parent
-
-    -- outer arc (line) using text glyph for simplicity + a few anchor strands
-    local webIcon = Instance.new("TextLabel", webGui)
-    webIcon.BackgroundTransparency = 1
-    webIcon.Size = UDim2.fromScale(1, 1)
-    webIcon.Font = Enum.Font.GothamBlack
-    webIcon.TextSize = 34
-    webIcon.TextColor3 = Theme.Accent
-    webIcon.TextTransparency = 0.55
-    webIcon.Text = "🕸"
-    webIcon.Rotation = (corner == "tr" and 90) or (corner == "bl" and 270) or (corner == "br" and 180) or 0
-    webIcon.ZIndex = 1
-end
-
-local function addPanelHalloweenDecor(Panel, Header)
-    -- corner webs — only bottom-left for a subtle look
-    drawCornerWeb(Panel, "bl")
-    drawCornerWeb(Panel, "br")
-
-    -- pumpkin accent near top-right of the header
-    local pumpkin = Instance.new("TextLabel", Panel)
-    pumpkin.Name = "HalloweenPumpkin"
-    pumpkin.BackgroundTransparency = 1
-    pumpkin.AnchorPoint = Vector2.new(1, 0)
-    pumpkin.Position = UDim2.new(1, -30, 0, 5)
-    pumpkin.Size = UDim2.fromOffset(22, 22)
-    pumpkin.Font = Enum.Font.GothamBlack
-    pumpkin.Text = "🎃"
-    pumpkin.TextSize = 16
-    pumpkin.TextTransparency = 0.05
-    pumpkin.ZIndex = 5
-
-    -- soft pulsing scale
-    task.spawn(function()
-        local t0 = tick()
-        while pumpkin.Parent do
-            local s = 1 + math.sin((tick() - t0) * 2.2) * 0.08
-            pumpkin.TextSize = math.floor(16 * s + 0.5)
-            task.wait(0.05)
-        end
-    end)
-
-    -- a soft orange under-glow stroke on the panel
-    local glow = Instance.new("UIStroke", Panel)
-    glow.Name = "HalloweenGlow"
-    glow.Color = Theme.AccentBright
-    glow.Thickness = 2
-    glow.Transparency = 0.75
-    glow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    task.spawn(function()
-        while glow.Parent do
-            TweenService:Create(glow, TweenInfo.new(2.4, Enum.EasingStyle.Sine), { Transparency = 0.55 }):Play()
-            task.wait(2.4)
-            if not glow.Parent then break end
-            TweenService:Create(glow, TweenInfo.new(2.4, Enum.EasingStyle.Sine), { Transparency = 0.8 }):Play()
-            task.wait(2.4)
-        end
-    end)
-end
-
--- floating bats/ghosts/pumpkins around the screen edge
-local function buildHalloweenOverlay()
-    local hui = (gethui and gethui()) or game:GetService("CoreGui")
-    local old = hui:FindFirstChild("SweetHalloweenOverlay")
-    if old then old:Destroy() end
-
-    local gui = Instance.new("ScreenGui")
-    gui.Name = "SweetHalloweenOverlay"
-    gui.ResetOnSpawn = false
-    gui.IgnoreGuiInset = true
-    gui.DisplayOrder = 4
-    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    gui.Parent = hui
-
-    local vp = (workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize) or Vector2.new(1920, 1080)
-
-    local function spawnFloat(glyph, xPct, yPct, size, phase, speed, amp)
-        local lbl = Instance.new("TextLabel", gui)
-        lbl.BackgroundTransparency = 1
-        lbl.Size = UDim2.fromOffset(size * 1.6, size * 1.6)
-        lbl.Font = Enum.Font.GothamBlack
-        lbl.Text = glyph
-        lbl.TextSize = size
-        lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-        lbl.TextTransparency = 0.35
-        lbl.AnchorPoint = Vector2.new(0.5, 0.5)
-        lbl.Position = UDim2.new(xPct, 0, yPct, 0)
-        lbl.ZIndex = 1
-        task.spawn(function()
-            local t0 = tick()
-            local baseX, baseY = xPct, yPct
-            while lbl.Parent do
-                local t = tick() - t0 + phase
-                lbl.Position = UDim2.new(
-                    baseX + math.sin(t * speed) * (amp / vp.X),
-                    0,
-                    baseY + math.cos(t * speed * 0.7) * (amp / vp.Y),
-                    0
-                )
-                lbl.Rotation = math.sin(t * 0.6) * 12
-                task.wait(0.05)
-            end
-        end)
-        return lbl
-    end
-
-    -- scattered along top and bottom edges
-    local placed = {}
-    local function trySpawn(glyph, edge)
-        for _ = 1, 8 do
-            local xPct, yPct
-            if edge == "top" then
-                xPct = 0.05 + math.random() * 0.9
-                yPct = 0.02 + math.random() * 0.06
-            else
-                xPct = 0.05 + math.random() * 0.9
-                yPct = 0.92 + math.random() * 0.06
-            end
-            local ok = true
-            for _, p in ipairs(placed) do
-                if math.abs(p.x - xPct) < 0.09 and math.abs(p.y - yPct) < 0.08 then ok = false break end
-            end
-            if ok then
-                table.insert(placed, { x = xPct, y = yPct })
-                spawnFloat(glyph, xPct, yPct, 18 + math.random(0, 12),
-                    math.random() * math.pi * 2,
-                    0.4 + math.random() * 0.6,
-                    6 + math.random() * 10)
+    v_7.canRerollAura = function(arg_1)
+        for v_2, v_3 in ipairs(arg_1.folders.AuraColor:GetChildren()) do
+            if (not v_3.Value) then
                 return true
             end
         end
         return false
     end
-
-    local topGlyphs = { "🦇", "🦇", "👻", "🎃", "💀", "🕷" }
-    local botGlyphs = { "🎃", "🎃", "🕸", "🕷", "👻", "💀" }
-    for i = 1, 5 do trySpawn(topGlyphs[((i - 1) % #topGlyphs) + 1], "top") end
-    for i = 1, 5 do trySpawn(botGlyphs[((i - 1) % #botGlyphs) + 1], "bottom") end
-
-    return gui
-end
-
-HalloweenOverlay = buildHalloweenOverlay()
-task.spawn(function()
-    while true do
-        task.wait(6)
-        if not HalloweenOverlay or not HalloweenOverlay.Parent then
-            HalloweenOverlay = buildHalloweenOverlay()
-        end
+    v_7.canStorePower = function(arg_1, arg_2)
+        local v_3 = v_3.Power:FindFirstChild(arg_2)
+        return (v_3 and (v_3.Value < 99))
     end
-end)
-
--- ============================================================
--- PUBLIC HUD
--- ============================================================
-local function buildPublicHUD()
-    local hui = (gethui and gethui()) or game:GetService("CoreGui")
-    for _, parent in ipairs({hui, LP:FindFirstChild("PlayerGui")}) do
-        if parent then
-            local old = parent:FindFirstChild("XiPublicHUD")
-            if old then old:Destroy() end
-        end
-    end
-    local function corner(p,r) local c=Instance.new("UICorner") c.CornerRadius=UDim.new(0,r or 10) c.Parent=p return c end
-    local function tw(obj,time,props,style,dir)
-        local t=TweenService:Create(obj,TweenInfo.new(time or 0.2,style or Enum.EasingStyle.Quint,dir or Enum.EasingDirection.Out),props)
-        t:Play() return t
-    end
-    local Gui=Instance.new("ScreenGui")
-    Gui.Name="XiPublicHUD" Gui.ResetOnSpawn=false Gui.IgnoreGuiInset=true
-    Gui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling Gui.DisplayOrder=100 Gui.Parent=hui
-    local Root=Instance.new("Frame")
-    Root.AnchorPoint=Vector2.new(0.5,1) Root.Size=UDim2.new(0,540,0,44)
-    Root.Position=UDim2.new(0.5,0,1,-86) Root.BackgroundColor3=Theme.Bg
-    Root.BorderSizePixel=0 Root.Parent=Gui
-    corner(Root,22)
-    local UIStroke=Instance.new("UIStroke",Root)
-    UIStroke.Color=Theme.Accent UIStroke.Thickness=1.3 UIStroke.Transparency=0.3
-    UIStroke.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-
-    -- halloween accent: pumpkin on the left
-    local PumpkinLeft = Instance.new("TextLabel", Root)
-    PumpkinLeft.BackgroundTransparency = 1
-    PumpkinLeft.AnchorPoint = Vector2.new(0, 0.5)
-    PumpkinLeft.Position = UDim2.new(0, 4, 0.5, 0)
-    PumpkinLeft.Size = UDim2.fromOffset(20, 20)
-    PumpkinLeft.Font = Enum.Font.GothamBlack
-    PumpkinLeft.TextSize = 14
-    PumpkinLeft.Text = "🎃"
-    PumpkinLeft.ZIndex = 5
-
-    local Dot=Instance.new("Frame",Root)
-    Dot.AnchorPoint=Vector2.new(0,0.5) Dot.Position=UDim2.new(0,26,0.5,0)
-    Dot.Size=UDim2.fromOffset(9,9) Dot.BackgroundColor3=Theme.Accent
-    Dot.BorderSizePixel=0 corner(Dot,5)
-    local TitleLabel=Instance.new("TextLabel",Root)
-    TitleLabel.AnchorPoint=Vector2.new(0,0.5) TitleLabel.Position=UDim2.new(0,42,0.5,0)
-    TitleLabel.Size=UDim2.fromOffset(170,24) TitleLabel.BackgroundTransparency=1
-    TitleLabel.Font=Enum.Font.GothamBlack TitleLabel.TextSize=15
-    TitleLabel.TextColor3=Color3.fromRGB(245,242,255) TitleLabel.TextXAlignment=Enum.TextXAlignment.Left
-    TitleLabel.Text="SWEET TP HUB"
-    local Div1=Instance.new("Frame",Root)
-    Div1.AnchorPoint=Vector2.new(0.5,0.5) Div1.Position=UDim2.new(0,225,0.5,0)
-    Div1.Size=UDim2.new(0,1,0,22) Div1.BackgroundColor3=Theme.AccentDark
-    Div1.BorderSizePixel=0 Div1.BackgroundTransparency=0.3
-    local Username=Instance.new("TextLabel",Root)
-    Username.AnchorPoint=Vector2.new(0,0.5) Username.Position=UDim2.new(0,240,0.5,0)
-    Username.Size=UDim2.fromOffset(180,24) Username.BackgroundTransparency=1
-    Username.Font=Enum.Font.GothamBold Username.TextSize=14
-    Username.TextColor3=Theme.AccentBright Username.TextXAlignment=Enum.TextXAlignment.Left
-    Username.Text="discord.gg/sweettp"
-    local Div2=Instance.new("Frame",Root)
-    Div2.AnchorPoint=Vector2.new(0.5,0.5) Div2.Position=UDim2.new(0,415,0.5,0)
-    Div2.Size=UDim2.new(0,1,0,22) Div2.BackgroundColor3=Theme.AccentDark
-    Div2.BorderSizePixel=0 Div2.BackgroundTransparency=0.3
-    local FpsLabel=Instance.new("TextLabel",Root)
-    FpsLabel.AnchorPoint=Vector2.new(0,0.5) FpsLabel.Position=UDim2.new(0,430,0.5,-7)
-    FpsLabel.Size=UDim2.fromOffset(50,12) FpsLabel.BackgroundTransparency=1
-    FpsLabel.Font=Enum.Font.GothamBold FpsLabel.TextSize=10
-    FpsLabel.TextColor3=Color3.fromRGB(110,106,140) FpsLabel.TextXAlignment=Enum.TextXAlignment.Left
-    FpsLabel.Text="FPS"
-    local FpsValue=Instance.new("TextLabel",Root)
-    FpsValue.AnchorPoint=Vector2.new(0,0.5) FpsValue.Position=UDim2.new(0,430,0.5,8)
-    FpsValue.Size=UDim2.fromOffset(50,18) FpsValue.BackgroundTransparency=1
-    FpsValue.Font=Enum.Font.GothamBlack FpsValue.TextSize=15
-    FpsValue.TextColor3=Color3.fromRGB(140,255,110) FpsValue.TextXAlignment=Enum.TextXAlignment.Left
-    FpsValue.Text="0"
-    local PingLabel=Instance.new("TextLabel",Root)
-    PingLabel.AnchorPoint=Vector2.new(0,0.5) PingLabel.Position=UDim2.new(0,485,0.5,-7)
-    PingLabel.Size=UDim2.fromOffset(60,12) PingLabel.BackgroundTransparency=1
-    PingLabel.Font=Enum.Font.GothamBold PingLabel.TextSize=10
-    PingLabel.TextColor3=Color3.fromRGB(110,106,140) PingLabel.TextXAlignment=Enum.TextXAlignment.Left
-    PingLabel.Text="PING"
-    local PingValue=Instance.new("TextLabel",Root)
-    PingValue.AnchorPoint=Vector2.new(0,0.5) PingValue.Position=UDim2.new(0,485,0.5,8)
-    PingValue.Size=UDim2.fromOffset(70,18) PingValue.BackgroundTransparency=1
-    PingValue.Font=Enum.Font.GothamBlack PingValue.TextSize=15
-    PingValue.TextColor3=Color3.fromRGB(140,255,110) PingValue.TextXAlignment=Enum.TextXAlignment.Left
-    PingValue.Text="0ms"
-    local fpsFrames=0 local fpsStart=os.clock() local currentFps=0
-    RunService.Heartbeat:Connect(function()
-        fpsFrames=fpsFrames+1
-        if os.clock()-fpsStart>=0.5 then
-            currentFps=math.floor(fpsFrames/(os.clock()-fpsStart)+0.5)
-            fpsFrames=0 fpsStart=os.clock()
-        end
-    end)
-    local function getPing()
-        local ok,ping=pcall(function() return Stats.Network.ServerStatsItem["Data Ping"]:GetValue() end)
-        if ok and ping and ping>0 then return math.floor(ping) end
-        ok,ping=pcall(function() return LP:GetNetworkPing()*1000 end)
-        if ok and ping then return math.floor(ping) end
-        return 0
-    end
-    task.spawn(function()
-        while Gui.Parent do
-            FpsValue.Text=tostring(currentFps)
-            FpsValue.TextColor3 = currentFps>=60 and Color3.fromRGB(140,255,110)
-                or currentFps>=30 and Color3.fromRGB(255,190,70)
-                or Color3.fromRGB(255,80,110)
-            local ping=getPing()
-            PingValue.Text=tostring(ping).."ms"
-            PingValue.TextColor3 = ping<80 and Color3.fromRGB(140,255,110)
-                or ping<150 and Color3.fromRGB(255,190,70)
-                or Color3.fromRGB(255,80,110)
-            task.wait(0.5)
-        end
-    end)
-    task.spawn(function()
-        while Gui.Parent do
-            tw(UIStroke,1.4,{Transparency=0.65},Enum.EasingStyle.Sine) task.wait(1.4)
-            if not Gui.Parent then break end
-            tw(UIStroke,1.4,{Transparency=0.2},Enum.EasingStyle.Sine) task.wait(1.4)
-        end
-    end)
-    return Gui
-end
-local PublicHUD=buildPublicHUD()
-task.spawn(function()
-    while true do
-        task.wait(2)
-        if not PublicHUD or not PublicHUD.Parent then
-            PublicHUD=buildPublicHUD()
-        else
-            PublicHUD.Enabled=true
-        end
-    end
-end)
-
--- ============================================================
--- MAIN MENU GUI
--- ============================================================
-local function getHui() return (gethui and gethui()) or game:GetService("CoreGui") end
-for _, parent in ipairs({getHui(), LP:FindFirstChild("PlayerGui")}) do
-    if parent then
-        local old = parent:FindFirstChild("XiUnifiedMenu")
-        if old then old:Destroy() end
-    end
-end
-local Gui = Instance.new("ScreenGui")
-Gui.Name="XiUnifiedMenu" Gui.ResetOnSpawn=false Gui.IgnoreGuiInset=true
-Gui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling Gui.DisplayOrder=100 Gui.Parent=getHui()
-
-local ClickSound = Instance.new("Sound")
-ClickSound.Name = "CleanButtonClick"
-ClickSound.SoundId = "rbxassetid://12221967"
-ClickSound.Volume = 0.35
-ClickSound.PlaybackSpeed = 1.08
-ClickSound.Parent = Gui
-
-local hookedButtons = setmetatable({}, {__mode = "k"})
-local function playCleanClick()
-    ClickSound.TimePosition = 0
-    ClickSound:Play()
-end
-local function hookButton(obj)
-    if obj:IsA("GuiButton") and not hookedButtons[obj] then
-        hookedButtons[obj] = true
-        obj.Activated:Connect(playCleanClick)
-    end
-end
-for _, obj in ipairs(Gui:GetDescendants()) do hookButton(obj) end
-Gui.DescendantAdded:Connect(hookButton)
-
-local function corner(p, r)
-    local c = Instance.new("UICorner") c.CornerRadius=UDim.new(0,r or 10) c.Parent=p return c
-end
-local function mkStroke(p, color, t, tr)
-    local s = Instance.new("UIStroke") s.Color=color s.Thickness=t or 1 s.Transparency=tr or 0.3
-    s.ApplyStrokeMode=Enum.ApplyStrokeMode.Border s.Parent=p return s
-end
-local function tween(obj, time, props, style, dir)
-    local t=TweenService:Create(obj,TweenInfo.new(time or 0.2,style or Enum.EasingStyle.Quint,dir or Enum.EasingDirection.Out),props)
-    t:Play() return t
-end
-
--- ============================================================
--- DEVICE DETECTION + GUI SCALE
--- ============================================================
-local function detectDevice()
-    local touch = UserInputService.TouchEnabled
-    local kb = UserInputService.KeyboardEnabled
-    local mouse = UserInputService.MouseEnabled
-    local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
-    local shortSide = math.min(vp.X, vp.Y)
-    local longSide = math.max(vp.X, vp.Y)
-    if touch and not kb and not mouse then
-        if shortSide <= 500 then return "iphone", shortSide end
-        return "ipad", shortSide
-    end
-    return "desktop", longSide
-end
-
-local DEVICE, DEVICE_SHORT = detectDevice()
-
-local function computeDefaultScale()
-    if DEVICE == "iphone" then return 0.65 end
-    if DEVICE == "ipad" then return 0.9 end
-    local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
-    return math.clamp(vp.X / 1920, 0.85, 1.1)
-end
-
-if CONFIG.GuiScale == nil then
-    CONFIG.GuiScale = computeDefaultScale()
-end
-
-local guiScale = Instance.new("UIScale", Gui)
-guiScale.Scale = CONFIG.GuiScale
-
-local function setGuiScale(s)
-    s = math.clamp(s, 0.4, 1.6)
-    guiScale.Scale = s
-    CONFIG.GuiScale = s
-    saveConfig()
-end
-
-local function isDefaultish(s) return math.abs(s - computeDefaultScale()) < 0.02 end
-local userCustomScale = not isDefaultish(CONFIG.GuiScale)
-
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-    if not userCustomScale then
-        guiScale.Scale = computeDefaultScale()
-        CONFIG.GuiScale = guiScale.Scale
-    end
-end)
-
-_G.SweetSetScale = setGuiScale
-_G.SweetGetDevice = function() return DEVICE end
--- legacy aliases
-_G.CorsaSetScale = setGuiScale
-_G.CorsaGetDevice = function() return DEVICE end
-
--- ============================================================
--- DRAG + RESIZE
--- ============================================================
-local function makeDraggable(handle, target, saveKey)
-    local dragging, dragStart, startPos
-    handle.InputBegan:Connect(function(input)
-        if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-            dragging=true dragStart=input.Position startPos=target.Position
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
-            local delta=input.Position-dragStart
-            local s = guiScale.Scale
-            target.Position=UDim2.new(0, startPos.X.Offset + delta.X / s, 0, startPos.Y.Offset + delta.Y / s)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-            if dragging and saveKey then
-                CONFIG.Positions[saveKey]={X=target.Position.X.Offset,Y=target.Position.Y.Offset}
-                saveConfig()
-            end
-            dragging=false
-        end
-    end)
-end
-
-local function makeScalable(handle, panel)
-    local resizing, resizeStart, startSize
-    handle.InputBegan:Connect(function(input)
-        if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-            resizing = true
-            resizeStart = input.Position
-            startSize = guiScale.Scale
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if not resizing then return end
-        if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
-        local delta = input.Position - resizeStart
-        local change = (delta.X + delta.Y) * 0.0016
-        local newScale = math.clamp(startSize + change, 0.4, 1.6)
-        guiScale.Scale = newScale
-        CONFIG.GuiScale = newScale
-        userCustomScale = true
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-            if resizing then
-                resizing = false
-                saveConfig()
+    v_7.equipSword = function(arg_1)
+        for v_2, v_3 in ipairs(arg_1.swords) do
+            if (arg_1.folders.Weapon[v_3].Value > 0) then
+                if (v_6.SwordEquip.Value ~= v_3) then
+                    v_2.invoke("updateInventory", "Weapon", { SelectedItem = v_3 })
+                end
+                return
             end
         end
-    end)
-end
-
-local function createPanel(title, saveKey, width)
-    local pos = CONFIG.Positions[saveKey] or DEFAULT_POSITIONS[saveKey] or {X=20,Y=80}
-    local Panel = Instance.new("Frame")
-    Panel.Name = title:gsub("%s+","")
-    Panel.Position = UDim2.new(0, pos.X, 0, pos.Y)
-    Panel.Size = UDim2.new(0, width, 0, 0)
-    Panel.AutomaticSize = Enum.AutomaticSize.Y
-    Panel.BackgroundColor3 = Theme.Bg
-    Panel.BorderSizePixel = 0
-    Panel.Parent = Gui
-    corner(Panel, 14)
-    mkStroke(Panel, Theme.Accent, 1.2, 0.4)
-
-    local Header = Instance.new("Frame", Panel)
-    Header.Size = UDim2.new(1,0,0,48)
-    Header.BackgroundColor3 = Theme.BgCard
-    Header.BorderSizePixel = 0
-    corner(Header, 14)
-
-    local HeaderFill = Instance.new("Frame", Panel)
-    HeaderFill.Position = UDim2.new(0,0,0,28)
-    HeaderFill.Size = UDim2.new(1,0,0,20)
-    HeaderFill.BackgroundColor3 = Theme.BgCard
-    HeaderFill.BorderSizePixel = 0
-    HeaderFill.ZIndex = 2
-
-    local AccentBar = Instance.new("Frame", Panel)
-    AccentBar.Position = UDim2.new(0,0,0,10)
-    AccentBar.Size = UDim2.new(0,3,0,28)
-    AccentBar.BackgroundColor3 = Theme.Accent
-    AccentBar.BorderSizePixel = 0
-    corner(AccentBar, 3)
-    AccentBar.ZIndex = 3
-
-    local TitleDot = Instance.new("Frame", Panel)
-    TitleDot.AnchorPoint = Vector2.new(0,0.5)
-    TitleDot.Position = UDim2.new(0,16,0,24)
-    TitleDot.Size = UDim2.fromOffset(8,8)
-    TitleDot.BackgroundColor3 = Theme.Accent
-    TitleDot.BorderSizePixel = 0
-    TitleDot.ZIndex = 4
-    corner(TitleDot, 4)
-
-    local HeaderLabel = Instance.new("TextLabel", Panel)
-    HeaderLabel.Position = UDim2.new(0,32,0,12)
-    HeaderLabel.Size = UDim2.new(1,-44,0,24)
-    HeaderLabel.BackgroundTransparency = 1
-    HeaderLabel.Font = Enum.Font.GothamBlack
-    HeaderLabel.TextSize = 15
-    HeaderLabel.TextColor3 = Theme.Text
-    HeaderLabel.TextXAlignment = Enum.TextXAlignment.Left
-    HeaderLabel.Text = title:upper()
-    HeaderLabel.ZIndex = 4
-
-    local Div = Instance.new("Frame", Panel)
-    Div.Position = UDim2.new(0,0,0,48)
-    Div.Size = UDim2.new(1,0,0,1)
-    Div.BackgroundColor3 = Theme.Accent
-    Div.BackgroundTransparency = 0.7
-    Div.BorderSizePixel = 0
-    Div.ZIndex = 3
-
-    local Holder = Instance.new("Frame", Panel)
-    Holder.Name = "Holder"
-    Holder.Position = UDim2.new(0,10,0,56)
-    Holder.Size = UDim2.new(1,-20,0,0)
-    Holder.AutomaticSize = Enum.AutomaticSize.Y
-    Holder.BackgroundTransparency = 1
-    local Layout = Instance.new("UIListLayout", Holder)
-    Layout.Padding = UDim.new(0,5)
-    Layout.SortOrder = Enum.SortOrder.LayoutOrder
-    local Pad = Instance.new("UIPadding", Holder)
-    Pad.PaddingBottom = UDim.new(0,10)
-
-    local Grip = Instance.new("TextButton", Panel)
-    Grip.Name = "ResizeGrip"
-    Grip.AnchorPoint = Vector2.new(1,0)
-    Grip.Position = UDim2.new(1,-4,0,4)
-    Grip.Size = UDim2.fromOffset(20,20)
-    Grip.BackgroundColor3 = Theme.BgCard
-    Grip.BackgroundTransparency = 0.1
-    Grip.Text = "⤡"
-    Grip.Font = Enum.Font.GothamBold
-    Grip.TextSize = 12
-    Grip.TextColor3 = Theme.AccentBright
-    Grip.AutoButtonColor = false
-    Grip.ZIndex = 6
-    corner(Grip, 6)
-    mkStroke(Grip, Theme.Accent, 1, 0.5)
-    Grip.MouseEnter:Connect(function() tween(Grip, 0.12, {BackgroundColor3=Theme.BtnBgHover}) end)
-    Grip.MouseLeave:Connect(function() tween(Grip, 0.12, {BackgroundColor3=Theme.BgCard}) end)
-    makeScalable(Grip, Panel)
-
-    makeDraggable(Header, Panel, saveKey)
-
-    -- Halloween decorations per panel
-    addPanelHalloweenDecor(Panel, Header)
-
-    return Panel, Holder
-end
-
-local function createToggle(parent, text, value, callback)
-    local Row = Instance.new("Frame", parent)
-    Row.Size = UDim2.new(1,0,0,38)
-    Row.BackgroundColor3 = Theme.BgRow
-    Row.BorderSizePixel = 0
-    corner(Row, 9)
-    local rowStroke = mkStroke(Row, Theme.StrokeSoft, 1, 0.72)
-
-    local StatusDot = Instance.new("Frame", Row)
-    StatusDot.AnchorPoint = Vector2.new(0,0.5)
-    StatusDot.Position = UDim2.new(0,12,0.5,0)
-    StatusDot.Size = UDim2.fromOffset(6,6)
-    StatusDot.BackgroundColor3 = value and Theme.TrackOn or Theme.TrackOff
-    StatusDot.BorderSizePixel = 0
-    corner(StatusDot, 3)
-
-    local Label = Instance.new("TextLabel", Row)
-    Label.Position = UDim2.new(0,26,0,0)
-    Label.Size = UDim2.new(1,-80,1,0)
-    Label.BackgroundTransparency = 1
-    Label.Font = Enum.Font.GothamBold
-    Label.TextSize = 14
-    Label.TextColor3 = value and Theme.Text or Theme.TextDim
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Text = text
-
-    local PillBg = Instance.new("Frame", Row)
-    PillBg.AnchorPoint = Vector2.new(1,0.5)
-    PillBg.Position = UDim2.new(1,-12,0.5,0)
-    PillBg.Size = UDim2.fromOffset(44,22)
-    PillBg.BackgroundColor3 = value and Theme.TrackOn or Theme.TrackOff
-    PillBg.BorderSizePixel = 0
-    corner(PillBg, 11)
-
-    local Knob = Instance.new("Frame", PillBg)
-    Knob.AnchorPoint = Vector2.new(0.5,0.5)
-    Knob.Size = UDim2.fromOffset(16,16)
-    Knob.Position = value and UDim2.new(1,-11,0.5,0) or UDim2.new(0,11,0.5,0)
-    Knob.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    Knob.BorderSizePixel = 0
-    corner(Knob, 8)
-    mkStroke(Knob, Color3.fromRGB(0,0,0), 1, 0.85)
-
-    local Clickable = Instance.new("TextButton", Row)
-    Clickable.AnchorPoint = Vector2.new(1,0.5)
-    Clickable.Position = UDim2.new(1,-8,0.5,0)
-    Clickable.Size = UDim2.fromOffset(60,34)
-    Clickable.ZIndex = 10
-    Clickable.BackgroundTransparency = 1
-    Clickable.Text = ""
-    Clickable.AutoButtonColor = false
-
-    local function render(state)
-        tween(PillBg, 0.18, {BackgroundColor3 = state and Theme.TrackOn or Theme.TrackOff})
-        tween(Knob, 0.2, {Position = state and UDim2.new(1,-11,0.5,0) or UDim2.new(0,11,0.5,0)}, Enum.EasingStyle.Back)
-        tween(StatusDot, 0.18, {BackgroundColor3 = state and Theme.Accent or Color3.fromRGB(55,50,75)})
-        tween(Label, 0.18, {TextColor3 = state and Theme.Text or Theme.TextDim})
     end
-    render(value)
-
-    Clickable.MouseButton1Click:Connect(function()
-        value = not value
-        render(value)
-        callback(value)
-    end)
-    Row.MouseEnter:Connect(function()
-        tween(Row, 0.12, {BackgroundColor3 = Theme.BgRowHov})
-        tween(rowStroke, 0.12, {Color=Theme.Accent, Transparency=0.5})
-    end)
-    Row.MouseLeave:Connect(function()
-        tween(Row, 0.12, {BackgroundColor3 = Theme.BgRow})
-        tween(rowStroke, 0.12, {Color=Theme.StrokeSoft, Transparency=0.72})
-    end)
-    return { Set = render, Get = function() return value end }
-end
-
-local function createButton(parent, text, accentColor, bgColor, hoverColor, callback)
-    local Btn = Instance.new("TextButton", parent)
-    Btn.Size = UDim2.new(1,0,0,34)
-    Btn.BackgroundColor3 = bgColor
-    Btn.Text = text
-    Btn.AutoButtonColor = false
-    Btn.Font = Enum.Font.GothamBlack
-    Btn.TextSize = 13
-    Btn.TextColor3 = accentColor
-    corner(Btn, 9)
-    local s = mkStroke(Btn, accentColor, 1, 0.6)
-    local sc = Instance.new("UIScale", Btn)
-    sc.Scale = 1
-
-    Btn.MouseEnter:Connect(function()
-        tween(Btn, 0.12, {BackgroundColor3=hoverColor})
-        tween(s, 0.12, {Transparency=0.2, Thickness=1.3})
-    end)
-    Btn.MouseLeave:Connect(function()
-        tween(Btn, 0.12, {BackgroundColor3=bgColor})
-        tween(s, 0.12, {Transparency=0.6, Thickness=1})
-    end)
-    Btn.MouseButton1Down:Connect(function()
-        tween(sc, 0.07, {Scale=0.96})
-        tween(Btn, 0.07, {BackgroundColor3=accentColor})
-        tween(Btn, 0.07, {TextColor3=bgColor})
-    end)
-    Btn.MouseButton1Up:Connect(function()
-        tween(sc, 0.14, {Scale=1}, Enum.EasingStyle.Back)
-        tween(Btn, 0.1, {BackgroundColor3=hoverColor})
-        tween(Btn, 0.1, {TextColor3=accentColor})
-    end)
-    Btn.MouseButton1Click:Connect(callback)
-    return Btn
-end
-
--- ============================================================
--- MERGED: SlotsESP + BrainrotESP + AutoKick
--- ============================================================
-do
-    -- ---------------- SLOTS ESP ----------------
-    local SlotsESP = { running = false, conns = {}, folder = nil, currentPlot = nil, last = 0 }
-    local PODS_PER_FLOOR, F2_COUNT, F3_COUNT = 10, 10, 10
-    local F2_MAP = { 11, 12, 13, 14, 15, nil, nil, 18, 17, 16 }
-    local F3_MAP = { 19, 20, 21, 22, 23, 28, 27, 26, 25, 24 }
-    local FLOOR_TOL, BASE_GAP = 8, 0.5
-    local SLOT_SHRINK = 0.82
-
-    local function getBox(inst)
-        local base = inst:FindFirstChild("Base", true) or inst
-        if base:IsA("Model") then
-            local ok, cf, sz = pcall(function() return base:GetBoundingBox() end)
-            if ok then return cf, sz end
-        elseif base:IsA("BasePart") then
-            return base.CFrame, base.Size
+    v_7.equipAccessory = function(arg_1)
+        for v_2, v_3 in ipairs(arg_1.accessories) do
+            if (arg_1.folders.Accessory[v_3].Value > 0) then
+                if (v_6.AccessoryEquip.Value ~= v_3) then
+                    v_2.invoke("updateInventory", "Accessory", { SelectedItem = v_3 })
+                end
+                return
+            end
         end
-        return nil, nil
     end
+    return v_7
+end)
 
-    local function clusterFloors(podiums)
-        local out = {}
-        for _, c in ipairs(podiums:GetChildren()) do
-            local cf = getBox(c)
-            if cf then
-                local y = cf.Position.Y
-                local hit = false
-                for _, cl in ipairs(out) do
-                    if math.abs(cl.y - y) <= FLOOR_TOL then
-                        cl.count = cl.count + 1
-                        cl.y = cl.y + (y - cl.y) / cl.count
-                        hit = true
-                        break
+-- Module 'k' (LVM5 Chunk 26): Infinite Damage Exploit Controller
+registerModule("k", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.i()
+    local v_4 = modules.h()
+    local v_5 = v_1.localPlayer
+    local v_6 = v_2.monsters.inWorkspace
+    local v_7 = {}
+    local v_8 = { Popcat = "Z", Baller = "V", ["Paw Power"] = "X", ["Snow Power"] = "V", ["Sand Power"] = "Z", ["Water Power"] = "X" }
+    local v_9 = 50
+    local v_10 = -9000000000
+    local v_11 = v_10
+    local v_12 = nil
+    local v_13 = function()
+        local v_1 = os.clock()
+        if ((not v_12) or ((v_1 - v_12) > 60)) then
+            v_12 = v_1
+            v_11 = v_10
+        end
+        v_11 = (v_11 + 1)
+        return v_11
+    end
+    v_7.attack = function(arg_1)
+        if ((not v_1.environment.infiniteDamage) or (not v_3.isSpawnedEnemy(arg_1))) then
+            return false
+        end
+        local v_2 = v_5.Character
+        if (not v_3.isAlive(v_2)) then
+            return false
+        end
+        local v_3 = (v_2:FindFirstChild("HumanoidRootPart") or v_2.PrimaryPart)
+        local v_4 = v_2:FindFirstChildOfClass("Tool")
+        local v_5 = (v_4 and v_8[v_4.Name])
+        if ((not v_3) or (not v_5)) then
+            return false
+        end
+        local v_6 = arg_1.PrimaryPart.Position
+        local v_7 = { arg_1 }
+        for v_8, v_9 in ipairs(v_6:GetChildren()) do
+            if ((v_9 ~= arg_1) and (v_3.isSpawnedEnemy(v_9) and ((v_9.PrimaryPart.Position - v_6).Magnitude <= v_9))) then
+                v_7[((#v_7) + 1)] = v_9
+            end
+        end
+        v_4.fire("serverSkills", v_2, v_4.Name, v_5, "Hold", { Mouse_Position = v_6 })
+        for v_10, v_11 in ipairs(v_7) do
+            v_4.fire("serverHitbox", v_11, v_4.Name, v_5, { Skill_Type = "Enemy_Effect", Loop = v_13(), Mouse_Position = v_11.PrimaryPart.Position, Moving_Speed = 250, Weapon_Effect = true, RootPart_Position = v_3.Position })
+        end
+        v_4.fire("serverSkills", v_2, v_4.Name, v_5, "Release")
+        return true
+    end
+    return v_7
+end)
+
+-- Module 'l' (LVM5 Chunk 28): Combat, Auto-Click, Bring Mobs, Skills & AimBot Controller
+registerModule("l", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.e()
+    local v_4 = modules.h()
+    local v_5 = modules.i()
+    local v_6 = modules.j()
+    local v_7 = modules.k()
+    local v_8 = v_1.localPlayer
+    local v_9 = v_1.virtualInputManager
+    local v_10 = v_1.environment
+    local v_11 = v_1.spawn
+    local v_12 = v_1.wait
+    local v_13 = v_1.huge
+    local v_14 = v_1.insert
+    local v_15 = v_1.newVector3
+    local v_16 = v_2.monsters
+    local v_17 = v_2.cooldownFolder
+    local v_18 = v_2.enemyLocation
+    local v_19 = {}
+    local v_20 = {}
+    local v_21 = {}
+    local v_22 = {}
+    local v_23 = 500
+    local v_24 = 25
+    local v_25 = Instance.new("Attachment")
+    local v_26 = Instance.new("AlignPosition")
+    v_26.Mode = Enum.PositionAlignmentMode.OneAttachment
+    v_26.Position = v_15(0, 20, 0)
+    v_26.Responsiveness = 200
+    v_26.MaxForce = v_13
+    v_26.Attachment0 = v_25
+    v_26.Parent = v_25
+    v_19.playerClick = function()
+        local v_1 = v_8.Character
+        if (not v_1) then
+            return
+        end
+        if (v_3.autoHaki and ((not v_1:GetAttribute("Using_Aura")) and v_6:verifyAbility("Aura"))) then
+            v_4.invoke("ability", "Aura")
+        end
+        local v_2 = v_1:FindFirstChildOfClass("Tool")
+        if v_2 then
+            v_2.Enabled = true
+            v_2:Activate()
+        end
+    end
+    v_19.equipWeapon = function()
+        local v_1 = v_8.Character
+        local v_2 = v_3.toolFarm
+        if (not (v_2 and v_5.isAlive(v_1))) then
+            return
+        end
+        local v_3 = v_1:FindFirstChildOfClass("Tool")
+        if (v_3 and v_3.ToolTip:find(v_2)) then
+            return
+        end
+        for v_4, v_5 in ipairs(v_8.Backpack:GetChildren()) do
+            if (v_5:IsA("Tool") and v_5.ToolTip:find(v_2)) then
+                v_10.equippedTool = v_5
+                return v_1.Humanoid:EquipTool(v_5)
+            end
+        end
+    end
+    local v_27 = function(arg_1, arg_2)
+        local v_3 = v_21[arg_1]
+        if ((not v_3) or ((arg_2.Position - v_3.Position).Magnitude > v_24)) then
+            v_21[arg_1] = arg_2
+        end
+    end
+    local v_28 = function(arg_1, arg_2)
+        local v_3 = arg_1.PrimaryPart
+        local v_4 = v_25:Clone()
+        local v_5 = v_4.AlignPosition
+        v_4.Parent = v_3
+        while (v_3.bringMobs and ((arg_1.Parent == v_16.inWorkspace) and (v_5.isAlive(arg_1) and (v_3.Parent == arg_1)))) do
+            local v_6 = v_21[arg_2]
+            if ((v_6.Position - v_3.Position).Magnitude > v_23) then
+                break
+            end
+            if (v_5.Position ~= v_6.Position) then
+                v_5.Position = v_6.Position
+            end
+            v_12()
+        end
+        v_22[arg_1] = nil
+        v_4:Destroy()
+    end
+    v_19.bringMobsTo = function(arg_1, arg_2, arg_3)
+        local v_4 = v_8.Character
+        local v_5 = ((arg_3 and "ALL_MOBS") or arg_1)
+        v_27(v_5, arg_2)
+        local v_6 = (v_4 and v_4:GetPivot().Position)
+        if v_6 then
+            for v_7, v_8 in ipairs(v_16.inWorkspace:GetChildren()) do
+                if ((arg_3 or (v_8.Name == arg_1)) and v_5.isAlive(v_8)) then
+                    local v_9 = v_8.PrimaryPart
+                    local v_10 = v_8.Humanoid
+                    if (v_9 and ((v_9.Position - v_6).Magnitude < v_23)) then
+                        v_10.WalkSpeed = 0
+                        v_10:ChangeState(14)
+                        v_9.CanCollide = false
+                        v_9.Size = v_15(40, 40, 40)
+                        local v_11 = v_21[v_5]
+                        if ((not v_22[v_8]) and ((v_9.Position - v_11.Position).Magnitude < v_23)) then
+                            v_22[v_8] = true
+                            v_11(v_28, v_8, v_5)
+                        end
                     end
                 end
-                if not hit then table.insert(out, { y = y, count = 1 }) end
             end
         end
-        table.sort(out, function(a, b) return a.y < b.y end)
-        return out
+        return pcall(v_1.setHiddenProperty, v_8, "SimulationRadius", v_13)
     end
-
-    local function floorOffset(cf, floor, gap)
-        local off = gap * (floor - 1)
-        if floor == 3 then off = off - 0.85 end
-        return cf + Vector3.new(0, off, 0)
+    v_19.getBringCFrame = function(arg_1, arg_2)
+        local v_3 = {}
+        for v_4, v_5 in ipairs(v_18:GetChildren()) do
+            if ((v_5.Name == arg_1) and (v_5:IsA("BasePart") or v_5:IsA("Attachment"))) then
+                v_14(v_3, v_5.CFrame.Position)
+            end
+        end
+        if ((#v_3) < 2) then
+            return arg_2
+        end
+        local v_6 = Vector3.zero
+        for v_7, v_8 in ipairs(v_3) do
+            v_6 = (v_6 + v_8)
+        end
+        return CFrame.new((v_6 / (#v_3)))
     end
-
-    local function noOverlap(pos, existing)
-        for _, p in ipairs(existing) do
-            if Vector2.new(pos.X - p.X, pos.Z - p.Z).Magnitude <= 1.5 and math.abs(pos.Y - p.Y) <= 2 then
+    v_19.canUseSkill = function(arg_1)
+        for v_2, v_3 in ipairs(v_17:GetChildren()) do
+            if v_3.Name:find(("_" .. arg_1)) then
                 return false
             end
         end
         return true
     end
-
-    local function drawSlot(cf, size, slotNum)
-        if not SlotsESP.running or not SlotsESP.folder or not SlotsESP.folder.Parent then return end
-        local smallSize = Vector3.new(size.X * SLOT_SHRINK, size.Y * SLOT_SHRINK, size.Z * SLOT_SHRINK)
-
-        local part = Instance.new("Part")
-        part.Name = "zab"
-        part.Anchored = true
-        part.CanCollide = false
-        part.CanQuery = false
-        part.CanTouch = false
-        part.CastShadow = false
-        part.Transparency = 1
-        part.Size = smallSize
-        part.CFrame = cf
-        part.Parent = SlotsESP.folder
-
-        local sb = Instance.new("SelectionBox")
-        sb.Name = "zab"
-        sb.Adornee = part
-        sb.Color3 = Theme.AccentDark
-        sb.SurfaceColor3 = Theme.AccentBright
-        sb.LineThickness = 0.04
-        sb.Transparency = 0.2
-        sb.SurfaceTransparency = 0.85
-        sb.Parent = part
-
-        local floor = Instance.new("Part")
-        floor.Name = "zab"
-        floor.Anchored = true
-        floor.CanCollide = true
-        floor.CanQuery = true
-        floor.CanTouch = false
-        floor.CastShadow = false
-        floor.Transparency = 1
-        floor.Size = Vector3.new(smallSize.X, 0.5, smallSize.Z)
-        floor.CFrame = cf * CFrame.new(0, -(smallSize.Y - BASE_GAP) / 2, 0)
-        floor.Parent = SlotsESP.folder
-
-        if slotNum then
-            local bb = Instance.new("BillboardGui")
-            bb.Name = "SlotNum"
-            bb.Adornee = part
-            bb.AlwaysOnTop = true
-            bb.Size = UDim2.new(0, 46, 0, 20)
-            bb.StudsOffset = Vector3.new(0, smallSize.Y / 2 + 1.4, 0)
-            bb.MaxDistance = 140
-            bb.LightInfluence = 0
-            bb.Parent = part
-
-            local fr = Instance.new("Frame", bb)
-            fr.BackgroundColor3 = Theme.BgCard
-            fr.BackgroundTransparency = 0.12
-            fr.BorderSizePixel = 0
-            fr.Size = UDim2.new(1, 0, 1, 0)
-            Instance.new("UICorner", fr).CornerRadius = UDim.new(0, 6)
-            local st = Instance.new("UIStroke", fr)
-            st.Color = Theme.Accent
-            st.Thickness = 1
-            st.Transparency = 0.4
-            st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-            local tl = Instance.new("TextLabel", fr)
-            tl.Size = UDim2.new(1, 0, 1, 0)
-            tl.BackgroundTransparency = 1
-            tl.Text = "#" .. tostring(slotNum)
-            tl.Font = Enum.Font.GothamBold
-            tl.TextSize = 14
-            tl.TextColor3 = Theme.AccentBright
+    v_19.useSkills = function()
+        if (not v_10.autoSkill) then
+            return
         end
-    end
-
-    local function buildPlot(plot, gap)
-        local podiums = plot:FindFirstChild("AnimalPodiums")
-        if not podiums then return end
-        local floors = clusterFloors(podiums)
-        if #floors == 0 then return end
-        if #floors >= 2 then
-            local d = floors[2].y - floors[1].y
-            if FLOOR_TOL < d then gap = d end
-        end
-        local children = podiums:GetChildren()
-        table.sort(children, function(a, b) return (tonumber(a.Name) or 0) < (tonumber(b.Name) or 0) end)
-
-        local groundY = floors[1].y
-        local ground, groundPos = {}, {}
-        for _, c in ipairs(children) do
-            local cf, sz = getBox(c)
-            if cf and sz and math.abs(cf.Position.Y - groundY) <= FLOOR_TOL then
-                table.insert(ground, { cf = cf, sz = sz })
-                table.insert(groundPos, cf.Position)
-            end
-        end
-        local n = #ground
-        for i = 1, math.min(PODS_PER_FLOOR, n) do
-            if ground[i] then drawSlot(ground[i].cf, ground[i].sz, i) end
-        end
-        for i = 1, math.min(F2_COUNT, n) do
-            local map = F2_MAP[i]
-            if map ~= nil and ground[i] then
-                local cf = floorOffset(ground[i].cf, 2, gap)
-                if noOverlap(cf.Position, groundPos) then
-                    drawSlot(cf, ground[i].sz, map)
-                    table.insert(groundPos, cf.Position)
-                end
-            end
-        end
-        for i = 1, math.min(F3_COUNT, n) do
-            local map = F3_MAP[i]
-            if map ~= nil and ground[i] then
-                local cf = floorOffset(ground[i].cf, 3, gap)
-                if noOverlap(cf.Position, groundPos) then
-                    drawSlot(cf, ground[i].sz, map)
-                    table.insert(groundPos, cf.Position)
-                end
-            end
-        end
-    end
-
-    local function nearestPlot()
-        local char = LP.Character
-        if not char then return nil end
-        local hrp = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("UpperTorso")
-        if not hrp then return nil end
-        local plots = workspace:FindFirstChild("Plots")
-        if not plots then return nil end
-        local best, bestD = nil, math.huge
-        for _, plot in ipairs(plots:GetChildren()) do
-            local sign = plot:FindFirstChild("PlotSign")
-            local model = sign and sign:FindFirstChild("Model")
-            if model and model:IsA("Model") then
-                local ok, cf = pcall(function() return model:GetBoundingBox() end)
-                if ok then
-                    local dx = cf.Position.X - hrp.Position.X
-                    local dz = cf.Position.Z - hrp.Position.Z
-                    local d = math.sqrt(dx * dx + dz * dz)
-                    if d < bestD then bestD = d best = plot end
-                end
-            end
-        end
-        return best
-    end
-
-    local rebuilding = false
-    local function rebuild()
-        if rebuilding then return end
-        rebuilding = true
-        task.delay(0.4, function()
-            rebuilding = false
-            if not SlotsESP.running or not SlotsESP.folder then return end
-            local plot = nearestPlot()
-            if not plot then return end
-            if plot == SlotsESP.currentPlot and SlotsESP.folder:GetChildren()[1] then return end
-            SlotsESP.currentPlot = plot
-            SlotsESP.folder:ClearAllChildren()
-            buildPlot(plot, 18)
+        for v_1, v_2 in pairs((v_3.skillsSelected or {})) do
+            if (v_2 and ((not v_20[v_1]) and v_19.canUseSkill(v_1))) then
+                v_9:SendKeyEvent(true, v_1, false, game)
+                v_9:SendKeyEvent(false, v_1, false, game)
+                v_11(function()
+            v_20[v_1] = true
+            v_12(0.5)
+            v_20[v_1] = false
         end)
+            end
+        end
     end
-
-    _G.SlotsESP_Start = function()
-        if SlotsESP.running then return end
-        SlotsESP.running = true
-        SlotsESP.folder = Instance.new("Folder")
-        SlotsESP.folder.Name = "zab"
-        SlotsESP.folder.Parent = workspace
-        local plots = workspace:FindFirstChild("Plots")
-        if plots then
-            for _, plot in ipairs(plots:GetChildren()) do
-                local podiums = plot:FindFirstChild("AnimalPodiums")
-                if podiums then
-                    table.insert(SlotsESP.conns, podiums.ChildAdded:Connect(rebuild))
-                    table.insert(SlotsESP.conns, podiums.ChildRemoved:Connect(rebuild))
-                    table.insert(SlotsESP.conns, podiums.DescendantAdded:Connect(rebuild))
-                    table.insert(SlotsESP.conns, podiums.DescendantRemoving:Connect(rebuild))
+    v_19.infiniteDamage = function(arg_1)
+        return v_7.attack(arg_1)
+    end
+    v_19.killEnemy = function(arg_1, arg_2)
+        local v_3 = arg_1
+        if (type(arg_1) == "string") then
+            v_3 = v_5.getEnemy(arg_1)
+        end
+        local v_4 = (v_3 and v_3.PrimaryPart)
+        if ((not v_4) or (not v_5.isSpawnedEnemy(v_3))) then
+            return false
+        end
+        if (v_5.goTo((v_4.CFrame * v_3.farmCFrame)) == false) then
+            return false
+        end
+        v_19.equipWeapon()
+        v_19.infiniteDamage(v_3)
+        v_19.useSkills()
+        if (not v_3:FindFirstChild("Reverse_Mark")) then
+            v_19.playerClick()
+        end
+        if v_3.bringMobs then
+            v_19.bringMobsTo(v_3.Name, v_19.getBringCFrame(v_3.Name, v_4.CFrame), arg_2)
+        end
+        return true
+    end
+    v_19.aimBot = function(arg_1, arg_2, ...)
+        local v_3, v_4, v_5, v_6, v_7 = ...
+        if ((v_3 == v_8.Character) and ((v_6 == "Release") and v_7)) then
+            if v_10.nearestPlayer then
+                local v_8 = v_10.nearestPlayer.Position
+                if rawget(v_7, "Hit_Position") then
+                    v_7.Hit_Position = v_8
+                end
+                if rawget(v_7, "Mouse_Position") then
+                    v_7.Mouse_Position = v_8
                 end
             end
-            table.insert(SlotsESP.conns, plots.DescendantAdded:Connect(rebuild))
-            table.insert(SlotsESP.conns, plots.DescendantRemoving:Connect(rebuild))
-        end
-        table.insert(SlotsESP.conns, RunService.Heartbeat:Connect(function()
-            if not SlotsESP.running then return end
-            local now = os.clock()
-            if now - SlotsESP.last < 0.4 then return end
-            SlotsESP.last = now
-            local plot = nearestPlot()
-            if plot and plot ~= SlotsESP.currentPlot then
-                SlotsESP.currentPlot = plot
-                SlotsESP.folder:ClearAllChildren()
-                buildPlot(plot, 18)
-            end
-        end))
-        rebuild()
-    end
-
-    _G.SlotsESP_Stop = function()
-        SlotsESP.running = false
-        for _, c in ipairs(SlotsESP.conns) do pcall(function() c:Disconnect() end) end
-        SlotsESP.conns = {}
-        if SlotsESP.folder then SlotsESP.folder:Destroy() SlotsESP.folder = nil end
-        SlotsESP.currentPlot = nil
-    end
-
-    -- ---------------- BRAINROT ESP ----------------
-    local BrainrotESP = { running = false, conns = {}, cards = {}, screen = nil }
-    local BRAINROT_SHRINK = 0.72
-
-    local function getScreen()
-        if BrainrotESP.screen and BrainrotESP.screen.Parent then return BrainrotESP.screen end
-        BrainrotESP.screen = Instance.new("ScreenGui")
-        BrainrotESP.screen.Name = "SweetBrainrotESP"
-        BrainrotESP.screen.ResetOnSpawn = false
-        BrainrotESP.screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        BrainrotESP.screen.DisplayOrder = 95
-        pcall(function()
-            if gethui then BrainrotESP.screen.Parent = gethui()
-            else BrainrotESP.screen.Parent = game:GetService("CoreGui") end
-        end)
-        if not BrainrotESP.screen.Parent then
-            BrainrotESP.screen.Parent = LP:WaitForChild("PlayerGui")
-        end
-        return BrainrotESP.screen
-    end
-
-    local function makeCard(adornee, name, gen, key)
-        local scr = getScreen()
-        local bb = Instance.new("BillboardGui")
-        bb.Name = "BrainrotESP_" .. key
-        bb.Adornee = adornee
-        bb.AlwaysOnTop = true
-        bb.Size = UDim2.new(0, 160 * BRAINROT_SHRINK, 0, 46 * BRAINROT_SHRINK)
-        bb.StudsOffset = Vector3.new(0, 2.6, 0)
-        bb.LightInfluence = 0
-        bb.MaxDistance = 3000
-        bb.Parent = scr
-
-        local card = Instance.new("Frame", bb)
-        card.Name = "Card"
-        card.Size = UDim2.new(1, 0, 1, 0)
-        card.BackgroundColor3 = Theme.BgCard
-        card.BackgroundTransparency = 0.12
-        card.BorderSizePixel = 0
-        Instance.new("UICorner", card).CornerRadius = UDim.new(0, 7)
-        local st = Instance.new("UIStroke", card)
-        st.Color = Theme.Accent
-        st.Thickness = 1
-        st.Transparency = 0.35
-
-        local nameLbl = Instance.new("TextLabel", card)
-        nameLbl.Size = UDim2.new(1, -50, 0, 18)
-        nameLbl.Position = UDim2.new(0, 7, 0, 4)
-        nameLbl.BackgroundTransparency = 1
-        nameLbl.Text = name
-        nameLbl.TextColor3 = Theme.Text
-        nameLbl.Font = Enum.Font.GothamBold
-        nameLbl.TextScaled = true
-        nameLbl.TextXAlignment = Enum.TextXAlignment.Left
-        nameLbl.TextStrokeTransparency = 0
-        nameLbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-
-        local genLbl = Instance.new("TextLabel", card)
-        genLbl.Size = UDim2.new(1, -50, 0, 16)
-        genLbl.Position = UDim2.new(0, 7, 0, 22)
-        genLbl.BackgroundTransparency = 1
-        genLbl.Text = gen
-        genLbl.TextColor3 = Theme.AccentBright
-        genLbl.Font = Enum.Font.GothamBold
-        genLbl.TextScaled = true
-        genLbl.TextXAlignment = Enum.TextXAlignment.Left
-        genLbl.TextStrokeTransparency = 0
-        genLbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-
-        local holder = Instance.new("Frame", card)
-        holder.Size = UDim2.new(0, 36, 0, 36)
-        holder.Position = UDim2.new(1, -40, 0.5, -18)
-        holder.BackgroundColor3 = Theme.BgRow
-        holder.BackgroundTransparency = 0.2
-        holder.BorderSizePixel = 0
-        Instance.new("UICorner", holder).CornerRadius = UDim.new(0, 6)
-
-        local img = Instance.new("ImageLabel", holder)
-        img.Size = UDim2.new(1, -4, 1, -4)
-        img.Position = UDim2.new(0, 2, 0, 2)
-        img.BackgroundTransparency = 1
-        img.ScaleType = Enum.ScaleType.Fit
-        img.Image = ""
-
-        BrainrotESP.cards[key] = { billboard = bb, nameLbl = nameLbl, genLbl = genLbl, img = img }
-        return BrainrotESP.cards[key]
-    end
-
-    local function updateCard(key, name, gen, adornee)
-        local c = BrainrotESP.cards[key]
-        if not c then return end
-        if c.nameLbl.Text ~= name then c.nameLbl.Text = name end
-        if c.genLbl.Text ~= gen then c.genLbl.Text = gen end
-        if adornee and c.billboard.Adornee ~= adornee then c.billboard.Adornee = adornee end
-    end
-
-    local function destroyCard(key)
-        local c = BrainrotESP.cards[key]
-        if not c then return end
-        if c.billboard then pcall(function() c.billboard:Destroy() end) end
-        BrainrotESP.cards[key] = nil
-    end
-
-    local function destroyAllCards() for k in pairs(BrainrotESP.cards) do destroyCard(k) end end
-
-    local function scanPlot(plot)
-        local podiums = plot:FindFirstChild("AnimalPodiums")
-        if not podiums then return end
-        for _, pod in ipairs(podiums:GetChildren()) do
-            local base = pod:FindFirstChild("Base")
-            local spawn = base and base:FindFirstChild("Spawn")
-            local attach = spawn and spawn:FindFirstChild("PromptAttachment")
-            local key = plot.Name .. "_" .. pod.Name
-            local prompt, text = nil, ""
-            if attach then
-                for _, c in ipairs(attach:GetChildren()) do
-                    if c:IsA("ProximityPrompt") and c.Enabled then
-                        text = c.ObjectText or ""
-                        if text ~= "" then prompt = c break else prompt = nil end
-                    else
-                        prompt = nil
+            arg_1(arg_2, ...)
+            local v_9 = v_8.Character.PrimaryPart.Position
+            if v_10.aimBotEnemy then
+                for v_10, v_11 in ipairs(v_16.inWorkspace:GetChildren()) do
+                    if (v_5.isAlive(v_11) and v_11.PrimaryPart) then
+                        v_4.fire("serverHitbox", v_11, v_4, v_5, { RootPart_Position = v_9, Mouse_Position = v_11.PrimaryPart.Position })
                     end
                 end
             end
-            if prompt and text ~= "" then
-                local parent = attach.Parent
-                if parent and parent:IsA("BasePart") then
-                    local a, b = text:match("^(.-)%s*|%s*(.-)$")
-                    local name, gen
-                    if a and b then
-                        name = a:match("^%s*(.-)%s*$")
-                        gen = b:match("^%s*(.-)%s*$")
-                    else
-                        name = text
-                        gen = text
+            if v_10.aimBotPlayers then
+                for v_12, v_13 in ipairs(v_5.getNearestList(1200)) do
+                    v_4.fire("serverHitbox", v_13, v_4, v_5, { RootPart_Position = v_9, Mouse_Position = v_13.PrimaryPart.Position })
+                end
+            end
+            return nil
+        end
+        return arg_1(arg_2, ...)
+    end
+    return v_19
+end)
+
+-- Module 'm': Player Level & Currency Data Reader
+registerModule("m", function()
+    local v_1 = modules.f()
+    local v_2 = {}
+    v_2.getPlayerLevel = function()
+        return v_1.playerLevel.Value or 1
+    end
+    v_2.getData = function(arg_1)
+        local v1_1 = v_1.playerDataFolder:FindFirstChild(arg_1)
+        return (v1_1 and v1_1.Value) or 0
+    end
+    return v_2
+end)
+
+-- Module 'n' (LVM5 Chunk 39): Quest Registry & Quest NPC Handler
+registerModule("n", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.i()
+    local v_4 = modules.h()
+    local v_5 = modules.m()
+    local v_6 = v_1.insert
+    local v_7 = v_1.wait
+    local v_8 = v_1.localPlayer
+    local v_9 = v_2.npcStorage
+    local v_10 = v_2.questLocation
+    local v_11 = v_2.enemyLocation
+    local v_12 = v_2.questFolder
+    local v_13 = v_2.questNpcs
+    local v_14 = {}
+    v_14.questsList = {}
+    v_14.npcByEnemy = {}
+    v_14.enemyList = {}
+    v_14.updateQuestsList = function(arg_1)
+        table.clear(arg_1.questsList)
+        table.clear(arg_1.npcByEnemy)
+        table.clear(arg_1.enemyList)
+        for v_2, v_3 in pairs(v_2.questSettings) do
+            if v_10:FindFirstChild(v_2) then
+                v_6(arg_1.questsList, { enemyPos = (v_11:FindFirstChild(v_3.Target) and v_11[v_3.Target].CFrame), questPos = v_10[v_2].CFrame, specialQuest = v_3.Special_Quest, raidBoss = v_3.Raid_Boss, level = v_3.LevelNeed, enemy = v_3.Target, npcName = v_2 })
+            end
+        end
+        table.sort(arg_1.questsList, function(p2_1, p2_2)
+            return (p2_1.level > p2_2.level)
+        end)
+        for v_4, v_5 in ipairs(arg_1.questsList) do
+            if (not arg_1.npcByEnemy[v_5.enemy]) then
+                v_6(arg_1.enemyList, v_5.enemy)
+            end
+            arg_1.npcByEnemy[v_5.enemy] = v_5.npcName
+        end
+    end
+    v_14.getActive = function(arg_1)
+        for v_2, v_3 in ipairs(v_12:GetChildren()) do
+            if (v_3.Target.Value ~= "None") then
+                return v_3
+            end
+        end
+        return false
+    end
+    v_14.verify = function(arg_1, arg_2)
+        for v_3, v_4 in ipairs(v_12:GetChildren()) do
+            if ((v_4.Target.Value ~= "None") and (v_4.QuestGiver.Value == arg_2)) then
+                return true
+            end
+        end
+        return false
+    end
+    v_14.take = function(arg_1, arg_2, arg_3, arg_4)
+        assert(arg_2, "missing quest name")
+        local v_5 = (v_13:FindFirstChild(arg_2) or v_9:FindFirstChild(arg_2))
+        if (not v_5) then
+            return false
+        end
+        if (v_5.Parent ~= v_13) then
+            v_5.Parent = v_13
+        end
+        if (v_8:DistanceFromCharacter(v_5:GetPivot().Position) > 5) then
+            local v_6 = v_10:FindFirstChild(arg_2)
+            local v_7 = (arg_3 or ((v_6 and v_6.CFrame) or v_5:GetPivot()))
+            if ((not v_7) or (v_8:DistanceFromCharacter(v_7.Position) < 5)) then
+                return false
+            end
+            return (v_3.goTo(v_7) ~= false)
+        end
+        local v_8 = v_5:FindFirstChild("QuestPrompt", true)
+        if (not v_8) then
+            return false
+        end
+        if (not pcall(fireproximityprompt, v_8)) then
+            warn("this executor may not support 'fireproximityprompt'")
+            return false
+        end
+        v_7((arg_4 or 0.1))
+        return true
+    end
+    v_14.clear = function(arg_1, arg_2)
+        for v_3, v_4 in ipairs(v_12:GetChildren()) do
+            if ((v_4.QuestGiver.Value ~= arg_2) and (v_4.Target.Value ~= "None")) then
+                v_4.fire("quest", "Abandon_Quest", { QuestSlot = v_4.Name })
+            end
+        end
+    end
+    local v_15 = v_5.getPlayerLevel()
+    local v_16 = nil
+    v_14.getCurrent = function(arg_1)
+        local v_2 = v_5.getPlayerLevel()
+        if ((v_2 == v_15) and v_16) then
+            return v_16
+        end
+        for v_3, v_4 in ipairs(arg_1.questsList) do
+            if ((v_4.level <= v_2) and ((not v_4.raidBoss) and (not v_4.specialQuest))) then
+                v_15 = v_2
+                v_16 = v_4
+                return v_4
+            end
+        end
+    end
+    return v_14
+end)
+
+-- Module 'o' (LVM5 Chunk 40): Raid Boss Spawns & Crafting Materials Data
+registerModule("o", function()
+    local v_1 = modules.b().newCFrame
+    return { spawnBoss = { ["Lord Sus"] = { quest = "Floppa Quest 32", summonPos = v_1(6644, -95, 4811), material = "Sussy Orb", amount = 1, island = "ForgottenIsland", summon = "Summon3" }, ["Evil Noob"] = { quest = "Floppa Quest 29", summonPos = v_1(-2356, -81, 3180), material = "Noob Head", amount = 1, island = "MoaiIsland", summon = "Summon2" }, ["Giant Pumpkin"] = { quest = "Floppa Quest 23", summonPos = v_1(-1180, -93, 1462), material = "Flame Orb", amount = 1, island = "PumpkinIsland", summon = "Summon1" } }, materials = { ["Cat Food"] = "Gorilla King", ["Flame Orb"] = "Scary Skull", ["Money Bag"] = "MrBeast", ["Sussy Orb"] = "Red Sus", ["Nugget Man"] = "Giant Pumpkin", ["Noob Head"] = "Moai", ["Meme Cube"] = "Meme Beast", Ball = "Baller" }, awakenPos = v_1(146, -37, -670) }
+end)
+
+-- Module 'p' (LVM5 Chunk 41): Farming Routines (Materials, Enemies, Floppa Sword, Level)
+registerModule("p", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.l()
+    local v_4 = modules.i()
+    local v_5 = modules.n()
+    local v_6 = v_1.newCFrame
+    local v_7 = v_2.enemyLocation
+    local v_8 = v_2.island
+    return function(arg_1)
+        arg_1.farmMaterial = function(p2_1, p2_2)
+            local v2_3 = p2_1.materials[p2_2]
+            if (not v2_3) then
+                return false
+            end
+            if p2_1.spawnBoss[v2_3] then
+                return p2_1:farmRaidBoss(v2_3, true)
+            end
+            return p2_1:farmEnemy(v2_3, true)
+        end
+        arg_1.farmEnemy = function(p2_1, p2_2, p2_3)
+            if (not p2_2) then
+                return false
+            end
+            local v2_4 = v_5.npcByEnemy[p2_2]
+            if (v2_4 and (p2_3 and (not v_5:verify(v2_4)))) then
+                v_5:clear(v2_4)
+                if v_5:take(v2_4) then
+                    return true
+                end
+            end
+            if v_3.killEnemy(p2_2) then
+                return true
+            end
+            local v2_5 = v_7:FindFirstChild(p2_2)
+            if v2_5 then
+                return (v_4.goTo(v2_5.CFrame) ~= false)
+            end
+            return false
+        end
+        arg_1.getFloppaSword = function(p2_1)
+            if (not v_5:verify("Cool Floppa Quest")) then
+                v_5:clear("Cool Floppa Quest")
+                return v_5:take("Cool Floppa Quest", v_6(758, -31, -424))
+            end
+            local v2_2 = v_6(794, -31, -440)
+            if (v_1.localPlayer:DistanceFromCharacter(v2_2.Position) >= 5) then
+                return (v_4.goTo(v2_2) ~= false)
+            end
+            local v2_3 = v_8:FindFirstChild("FloppaIsland")
+            local v2_4 = (v2_3 and v2_3:FindFirstChild("Lava Floppa"))
+            local v2_5 = (v2_4 and v2_4:FindFirstChild("ClickPart"))
+            local v2_6 = (v2_5 and v2_5:FindFirstChild("ProximityPrompt"))
+            if (not v2_6) then
+                return false
+            end
+            fireproximityprompt(v2_6)
+            return true
+        end
+        arg_1.farmLevel = function(p2_1)
+            local v2_2 = v_5:getCurrent()
+            if (not v2_2) then
+                return false
+            end
+            if (not v_5:verify(v2_2.npcName)) then
+                v_5:clear(v2_2.npcName)
+                return v_5:take(v2_2.npcName)
+            end
+            return p2_1:farmEnemy(v2_2.enemy)
+        end
+    end
+end)
+
+-- Module 'q' (LVM5 Chunk 48): Island Teleport Locations
+registerModule("q", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.i()
+    local v_4 = v_1.localPlayer
+    local v_5 = v_2.monsters
+    local v_6 = v_2.raids
+    local v_7 = {}
+    v_7.getRaidEnemy = function()
+        for v_1, v_2 in ipairs(v_5.inWorkspace:GetChildren()) do
+            if (v_2:GetAttribute("Raid_Enemy") and v_3.isAlive(v_2)) then
+                return v_2
+            end
+        end
+    end
+    v_7.getRaidMap = function()
+        for v_1, v_2 in ipairs(v_6:GetChildren()) do
+            if v_2.Joiners:FindFirstChild(v_4.Name) then
+                return v_2
+            end
+        end
+    end
+    return v_7
+end)
+
+-- Module 'r': Level Requirements & Boss Level Thresholds
+registerModule("r", function()
+    return {
+        level = {
+            codes = 25,
+            bossQuest = 300,
+            memeBeast = 400,
+            raceV2Orb = 500,
+            raid = 1000,
+            gamepasses = 2000
+        },
+        bossLevel = {
+            ["Lord Sus"] = 1550,
+            ["Evil Noob"] = 1400,
+            ["Giant Pumpkin"] = 1100
+        },
+        maxQuest = 2
+    }
+end)
+
+-- Module 's' (LVM5 Chunk 49): Raid & Meme Beast Farming Routines
+registerModule("s", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.l()
+    local v_4 = modules.h()
+    local v_5 = modules.i()
+    local v_6 = modules.q()
+    local v_7 = modules.m()
+    local v_8 = modules.r()
+    local v_9 = v_1.wait
+    local v_10 = v_1.newCFrame
+    local v_11 = v_2.region
+    return function(arg_1)
+        arg_1.farmRaid = function(p2_1)
+            if (v_7.getPlayerLevel() < v_8.level.raid) then
+                return false
+            end
+            local v2_2 = v_6.getRaidMap()
+            if v2_2 then
+                local v2_3 = v2_2:GetAttribute("Starting")
+                if ((type(v2_3) == "number") and (v2_3 ~= 0)) then
+                    v_4.fire("startRaid", "Start")
+                    v_9(1)
+                    return true
+                end
+                local v2_4 = v_6.getRaidEnemy()
+                if v2_4 then
+                    return v_3.killEnemy(v2_4, true)
+                end
+                local v2_5 = v2_2:FindFirstChild("Spawn_Location")
+                if v2_5 then
+                    return (v_5.goTo(v2_5.CFrame) ~= false)
+                end
+            else
+                local v2_6 = v_11:FindFirstChild("RaidArea")
+                if v2_6 then
+                    return (v_5.goTo(v_10(v2_6.Position)) ~= false)
+                end
+            end
+            return false
+        end
+        arg_1.killMemeBeast = function(p2_1)
+            local v2_2 = v_5.getEnemy("Meme Beast")
+            if v2_2 then
+                if (v_5.goTo(v2_2:GetPivot()) == false) then
+                    return false
+                end
+                v_3.equipWeapon()
+                v_3.infiniteDamage(v2_2)
+                v_3.playerClick()
+                v_3.useSkills()
+                return true
+            end
+            return false
+        end
+    end
+end)
+
+-- Module 't' (LVM5 Chunk 50): Race V2 Orb & Baller Boss Unlock Routines
+registerModule("t", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.l()
+    local v_4 = modules.i()
+    local v_5 = modules.n()
+    local v_6 = modules.j()
+    local v_7 = modules.m()
+    local v_8 = modules.r()
+    local v_9 = v_1.localPlayer
+    local v_10 = v_2.island
+    local v_11 = v_7.getPlayerLevel
+    local v_12 = function(arg_1)
+        if (v_9:DistanceFromCharacter(arg_1.summonPos.Position) >= 5) then
+            return (v_4.goTo(arg_1.summonPos) ~= false)
+        end
+        local v_2 = v_10:FindFirstChild(arg_1.island)
+        local v_3 = (v_2 and v_2:FindFirstChild(arg_1.summon))
+        local v_4 = (v_3 and v_3:FindFirstChild("Summon"))
+        local v_5 = (v_4 and v_4:FindFirstChild("SummonPrompt"))
+        if (not v_5) then
+            return false
+        end
+        fireproximityprompt(v_5)
+        return true
+    end
+    return function(arg_1)
+        arg_1.farmRaidBoss = function(p2_1, p2_2, p2_3)
+            local v2_4 = p2_1.spawnBoss[p2_2]
+            if ((not v2_4) or (not v_4.isAlive(v_9.Character))) then
+                return false
+            end
+            local v2_5 = v_4.getEnemy(p2_2)
+            if v2_5 then
+                if ((not v_5:verify(v2_4.quest)) and (v_11() >= v_8.bossLevel[p2_2])) then
+                    v_5:clear(v2_4.quest)
+                    if v_5:take(v2_4.quest, nil, 1) then
+                        return true
                     end
-                    if name == "" then name = pod.Name end
-                    if BrainrotESP.cards[key] then updateCard(key, name, gen, parent)
-                    else makeCard(parent, name, gen, key) end
                 end
-            elseif BrainrotESP.cards[key] then
-                destroyCard(key)
+                return v_3.killEnemy(v2_5)
+            end
+            if (v_6:getMaterial(v2_4.material) >= v2_4.amount) then
+                return v_12(v2_4)
+            end
+            if p2_3 then
+                return p2_1:farmMaterial(v2_4.material)
+            end
+            return false
+        end
+        arg_1.killQuest = function(p2_1, p2_2)
+            if ((not v_8.bossLevel[p2_2]) or (v_11() < v_8.bossLevel[p2_2])) then
+                return false
+            end
+            return p2_1:farmRaidBoss(p2_2)
+        end
+    end
+end)
+
+-- Module 'u' (LVM5 Chunk 53): Abilities & Fighting Styles Shop Data
+registerModule("u", function()
+    return { sections = { { name = "Weapons", items = { { name = "Katana", description = "$5.000 Money", remote = { "Weapon_Seller", "Doge" } }, { name = "Hanger", description = "$25.000 Money", remote = { "Weapon_Seller", "Hanger" } }, { name = "Flame Katana", description = "1x Cheems Cola and $50.000", remote = { "Weapon_Seller", "Cheems" } }, { name = "Banana", description = "1x Cat Food and $350.000", remote = { "Weapon_Seller", "Smiling Cat" } }, { name = "Bonk", description = "5x Money Bags and $1.000.000", remote = { "Weapon_Seller", "Meme Man" } }, { name = "Pumpkin", description = "1x Nugget Man and $3.500.000", remote = { "Weapon_Seller", "Gravestone" } }, { name = "Popcat", description = "10.000 Pops Clicker", remote = { "Weapon_Seller", "Ohio Popcat" } } } }, { name = "Ability", items = { { name = "Flash Step", description = "$100.000 Money", remote = { "Ability_Teacher", "Giga Chad" } }, { name = "Instinct", description = "$2.500.000 Money", remote = { "Ability_Teacher", "Nugget Man" } }, { name = "Aura", description = "1x Meme Cube and $10.000.000", remote = { "Ability_Teacher", "Aura Master" } } } }, { name = "Fighting Style", items = { { name = "Combat", description = "$0 Money", remote = { "FightingStyle_Teacher", "Maxwell" } }, { name = "Baller", description = "10x Balls and $10.000.000", remote = { "FightingStyle_Teacher", "Baller" } } } } }, itemPrices = { ["Quest Scroll"] = { Money = 1000000 }, Aura = { Material = { ["Meme Cube"] = 1 }, Money = 10000000 }, Instinct = { Money = 2500000 }, FlashStep = { Money = 100000 }, Katana = { Money = 5000 }, Hanger = { Money = 25000 }, ["Flame Katana"] = { Material = { ["Cheems Cola"] = 1 }, Money = 50000 }, Banana = { Material = { ["Cat Food"] = 1 }, Money = 350000 }, Bonk = { Material = { ["Money Bag"] = 5 }, Money = 1000000 }, Pumpkin = { Material = { ["Nugget Man"] = 1 }, Money = 3500000 }, Baller = { Material = { Ball = 10 }, Money = 10000000 }, Popcat = { Pop = 10000 } }, actionPrices = { rerollRace = { Gem = 250 }, rerollAura = { Gem = 10 } } }
+end)
+
+-- Module 'v' (LVM5 Chunk 54): Weapon Unlocking & Quest Limit Upgrade Routines
+registerModule("v", function()
+    local v_1 = modules.b()
+    local v_2 = modules.o()
+    local v_3 = modules.h()
+    local v_4 = modules.i()
+    local v_5 = modules.n()
+    local v_6 = modules.j()
+    local v_7 = modules.m()
+    local v_8 = modules.u()
+    local v_9 = modules.r()
+    local v_10 = v_1.localPlayer
+    local v_11 = v_1.wait
+    local v_12 = v_2.awakenPos
+    local v_13 = v_7.getData
+    local v_14 = 0
+    local v_15 = {}
+    local v_16 = 0
+    local v_17 = function(arg_1)
+        local v_2 = v_10.Character
+        return ((v_2 and v_2:FindFirstChild(arg_1)) or v_10.Backpack:FindFirstChild(arg_1))
+    end
+    local v_18 = function(arg_1)
+        return ((v_17(arg_1) ~= nil) or (v_6:getMaterial(arg_1) >= 1))
+    end
+    local v_19 = function(arg_1, arg_2)
+        local v_3 = v_10.Character
+        if ((not v_4.isAlive(v_3)) or (os.clock() < (v_15[arg_1] or 0))) then
+            return false
+        end
+        local v_4 = v_17(arg_1)
+        if ((v_4.goTo(v_12) == false) or (v_10.Character ~= v_3)) then
+            return false
+        end
+        v_15[arg_1] = (os.clock() + 3)
+        if v_4 then
+            if (v_4.Parent ~= v_3) then
+                v_3.Humanoid:EquipTool(v_4)
+            end
+            v_3.fire("modules", arg_2, { Action = "Use", Tool = v_4 })
+        else
+            v_3.invoke("updateInventory", "Item", { Action = "Unstore", SelectedItem = arg_1 })
+        end
+        v_11(1)
+        return true
+    end
+    return function(arg_1)
+        arg_1.farmRaceOrb = function(p2_1)
+            if v_5:verify("Dancing Banana Quest") then
+                return p2_1:farmEnemy("Sogga")
+            end
+            v_5:clear("Dancing Banana Quest")
+            return v_5:take("Dancing Banana Quest", v_1.newCFrame(-2620, -80, -2001))
+        end
+        arg_1.evolveRaceV2 = function(p2_1, p2_2)
+            if (p2_2 < v_9.level.raceV2Orb) then
+                return false
+            end
+            local v2_3 = v_13("Race")
+            if (v2_3 ~= "Human") then
+                if v_6:verifyAbility((v2_3 .. "Awaken")) then
+                    return false
+                end
+                if v_18("Awakening Orb") then
+                    return v_19("Awakening Orb", "Awakening_Orb")
+                end
+                return p2_1:farmRaceOrb()
+            end
+            if ((v_13("Gem") >= v_8.actionPrices.rerollRace.Gem) and (os.clock() >= v_16)) then
+                v_16 = (os.clock() + 3)
+                v_3.fire("modules", "Reroll_Race", "Watermelon Man")
+                v_11(1)
+                return true
+            end
+            return false
+        end
+        arg_1.upgradeQuestLimit = function(p2_1)
+            if (not v_4.isAlive(v_10.Character)) then
+                return false
+            end
+            if (v_13("MaxQuest") >= v_9.maxQuest) then
+                return false
+            end
+            if v_18("Quest Scroll") then
+                return v_19("Quest Scroll", "Quest_Scroll")
+            end
+            if ((v_13("Money") < v_8.itemPrices["Quest Scroll"].Money) or (os.clock() < v_14)) then
+                return false
+            end
+            if (v_4.goTo(v_12) == false) then
+                return false
+            end
+            v_14 = (os.clock() + 3)
+            v_3.fire("modules", "Upgrade_Quest", "Popcat")
+            v_11(1)
+            return true
+        end
+    end
+end)
+
+-- Module 'w': Game Settings Reader (Max Level, Ignored Spawns, Tool Types)
+registerModule("w", function()
+    local v_1 = modules.f()
+    local v_2 = v_1.gameSetting.Setting
+    return {
+        maxLevel = v_2.MaxLevel,
+        ignoredSpawns = v_2.IgnoreSpawnPoints,
+        toolTypes = { "Fight", "Power", "Weapon" }
+    }
+end)
+
+-- Module 'x': Abilities & Fighting Styles Alias
+registerModule("x", function()
+    return modules.u()
+end)
+
+-- Module 'y': Gamepass Names & Costs
+registerModule("y", function()
+    local v_1 = modules.f()
+    return {
+        names = { "DoubleGem", "DoubleMoney", "DoubleExp", "Lucky" },
+        prices = v_1.gameSetting.Setting.Gamepasses_Cost,
+        ids = {}
+    }
+end)
+
+-- Module 'z' (LVM5 Chunk 56): Auto Buy Abilities, Weapons, Baller & Race V2
+registerModule("z", function()
+    local v_1 = modules.b()
+    local v_2 = modules.h()
+    local v_3 = modules.x()
+    local v_4 = modules.y()
+    local v_5 = modules.j()
+    local v_6 = modules.m()
+    local v_7 = v_1.wait
+    local v_8 = v_6.getData
+    local v_9 = {}
+    local v_10 = { Instinct = { "Ability_Teacher", "Nugget Man" }, FlashStep = { "Ability_Teacher", "Giga Chad" }, Aura = { "Ability_Teacher", "Aura Master" } }
+    v_9.specialChecks = { Material = function(arg_1)
+        for v_2, v_3 in pairs(arg_1) do
+            if (v_5:getMaterial(v_2) < v_3) then
+                return true
+            end
+        end
+        return false
+    end }
+    v_9.canBuy = function(arg_1, arg_2)
+        local v_3 = v_3.itemPrices[arg_2]
+        if (type(v_3) ~= "table") then
+            return false
+        end
+        for v_4, v_5 in pairs(v_3) do
+            local v_6 = arg_1.specialChecks[v_4]
+            if v_6 then
+                if v_6(v_5) then
+                    return false
+                end
+            else
+                if (v_8(v_4) < v_5) then
+                    return false
+                end
+            end
+        end
+        return true
+    end
+    v_9.getMissingMaterials = function(arg_1, arg_2)
+        local v_3 = {}
+        local v_4 = v_3.itemPrices[arg_2]
+        for v_5, v_6 in pairs(((v_4 and v_4.Material) or {})) do
+            local v_7 = v_5:getMaterial(v_5)
+            if (v_7 < v_6) then
+                v_3[v_5] = (v_6 - v_7)
+            end
+        end
+        return v_3
+    end
+    v_9.buyAllAbilities = function(arg_1)
+        for v_2, v_3 in pairs(v_10) do
+            if ((not v_5:verifyAbility(v_2)) and arg_1:canBuy(v_2)) then
+                v_2.fire("modules", unpack(v_3))
+                v_7(1)
             end
         end
     end
-
-    local function scanAll()
-        local plots = workspace:FindFirstChild("Plots")
-        if not plots then return end
-        local seen = {}
-        for _, plot in ipairs(plots:GetChildren()) do
-            local podiums = plot:FindFirstChild("AnimalPodiums")
-            if podiums then
-                for _, pod in ipairs(podiums:GetChildren()) do
-                    seen[plot.Name .. "_" .. pod.Name] = true
+    v_9.buyMissingWeapon = function(arg_1)
+        local v_2 = v_5:getUnlocked()
+        for v_3, v_4 in ipairs(v_3.sections[1].items) do
+            if ((not v_2[v_4.name]) and arg_1:canBuy(v_4.name)) then
+                v_2.fire("modules", unpack(v_4.remote))
+                v_7(1)
+                return true
+            end
+        end
+        return false
+    end
+    v_9.buyBaller = function(arg_1)
+        if v_5:verifyFightStyle("Baller") then
+            return true
+        end
+        if (not arg_1:canBuy("Baller")) then
+            return false
+        end
+        v_2.fire("modules", "FightingStyle_Teacher", "Baller")
+        v_7(1)
+        return (v_5:verifyFightStyle("Baller") == true)
+    end
+    v_9.buyGamepasses = function(arg_1)
+        for v_2, v_3 in ipairs(v_4.names) do
+            if (not v_5:verifyGamepass(v_3)) then
+                local v_4 = v_4.prices[v_3]
+                local v_5 = v_4.ids[v_3]
+                if ((type(v_4) ~= "number") or ((not v_5) or (v_8("Gem") < v_4))) then
+                    return false
+                end
+                v_2.fire("buyProduct", { Action = "Buy_Gamepass", GamepassId = v_5 })
+                v_7(1)
+                if (not v_5:verifyGamepass(v_3)) then
+                    return false
                 end
             end
-            scanPlot(plot)
         end
-        for k in pairs(BrainrotESP.cards) do
-            if not seen[k] then destroyCard(k) end
-        end
+        return true
     end
+    return v_9
+end)
 
-    _G.BrainrotESP_Start = function()
-        if BrainrotESP.running then return end
-        BrainrotESP.running = true
-        local plots = workspace:FindFirstChild("Plots")
-        if plots then
-            scanAll()
-            table.insert(BrainrotESP.conns, plots.DescendantAdded:Connect(function(d)
-                if not BrainrotESP.running then return end
-                if d:IsA("ProximityPrompt") then
-                    task.defer(function()
-                        local model = d:FindFirstAncestorWhichIsA("Model")
-                        if model then scanPlot(model) end
-                    end)
-                end
-            end))
-            table.insert(BrainrotESP.conns, plots.DescendantRemoving:Connect(function(d)
-                if not BrainrotESP.running then return end
-                if d:IsA("ProximityPrompt") then task.defer(scanAll) end
-            end))
-            table.insert(BrainrotESP.conns, plots.ChildAdded:Connect(function()
-                if not BrainrotESP.running then return end
-                task.defer(scanAll)
-            end))
-        end
-        table.insert(BrainrotESP.conns, task.spawn(function()
-            while BrainrotESP.running do
-                task.wait(1.5)
-                if BrainrotESP.running then scanAll() end
+-- Module 'A' (LVM5 Chunk 61): Gamepasses & Fight Style Purchase Routines
+registerModule("A", function()
+    local v_1 = modules.b()
+    local v_2 = modules.w()
+    local v_3 = modules.z()
+    local v_4 = modules.j()
+    local v_5 = modules.m()
+    local v_6 = modules.r()
+    local v_7 = v_1.environment
+    local v_8 = v_5.getPlayerLevel
+    return function(arg_1)
+        arg_1.oneClick = function(p2_1)
+            local v2_2 = (v_7.oneClickSettings or {})
+            local v2_3 = v_4:getUnlocked()
+            local v2_4 = v_8()
+            if (v2_2.awakenV2 and p2_1:evolveRaceV2(v2_4)) then
+                return true
             end
-        end))
+            if (v2_2.questLimit and p2_1:unlockQuestLimit()) then
+                return true
+            end
+            if ((not v2_3.Floppa) and p2_1:getFloppaSword()) then
+                return true
+            end
+            if ((v2_4 >= v_6.level.memeBeast) and p2_1:killMemeBeast()) then
+                return true
+            end
+            if (v2_4 >= v_6.level.bossQuest) then
+                for v2_5, v2_6 in ipairs({ "Lord Sus", "Evil Noob", "Giant Pumpkin" }) do
+                    if p2_1:killQuest(v2_6) then
+                        return true
+                    end
+                end
+            end
+            if (v2_2.getGamepasses and ((v2_4 >= v_6.level.gamepasses) and (not v_3:buyGamepasses()))) then
+                if p2_1:farmRaid() then
+                    return true
+                end
+            end
+            if (v2_4 < v_2.maxLevel) then
+                return p2_1:farmLevel()
+            end
+            return p2_1:oneClickEndGame(v2_3, v2_2)
+        end
+        arg_1.oneClickEndGame = function(p2_1, p2_2, p2_3)
+            if p2_1:unlockBaller() then
+                return true
+            end
+            if (((not p2_2.Pumpkin) or (not p2_2["Pumpkin Head"])) and p2_1:farmRaidBoss("Giant Pumpkin", true)) then
+                return true
+            end
+            if (((not p2_2["Yellow Blade"]) or (not p2_2["Noob Friend"])) and p2_1:farmRaidBoss("Evil Noob", true)) then
+                return true
+            end
+            if (((not p2_2["Purple Katana"]) or (not p2_2["Sus Pals"])) and p2_1:farmRaidBoss("Lord Sus", true)) then
+                return true
+            end
+            if (((not p2_2.Card) or (not p2_2["Popcat Pet"])) and p2_1:farmRaid()) then
+                return true
+            end
+            if (((not p2_2.Bonk) or (not p2_2.MrBeast)) and p2_1:farmEnemy("MrBeast")) then
+                return true
+            end
+            if (((not p2_2["Pixel Sword"]) or (not p2_2.Obamid)) and p2_1:farmEnemy("Obamid")) then
+                return true
+            end
+            if (((not p2_2["Giant Banana"]) or (not p2_2.Banana)) and p2_1:farmEnemy("Gorilla King")) then
+                return true
+            end
+            if ((not p2_2["Moai Face"]) and p2_1:farmEnemy("Moai")) then
+                return true
+            end
+            if ((not p2_2["Pink Hammer"]) and p2_1:farmEnemy("Pink Absorber")) then
+                return true
+            end
+            local v2_4 = p2_3.endGame
+            if (v2_4 == "Farm Raid") then
+                return p2_1:farmRaid()
+            end
+            local v2_5 = (((v2_4 == "Farm Evil Noob") and "Evil Noob") or "Lord Sus")
+            if p2_1:farmRaidBoss(v2_5, true) then
+                return true
+            end
+            return p2_1:farmRaid()
+        end
     end
+end)
 
-    _G.BrainrotESP_Stop = function()
-        BrainrotESP.running = false
-        for _, c in ipairs(BrainrotESP.conns) do
-            pcall(function()
-                if typeof(c) == "RBXScriptConnection" then c:Disconnect()
-                elseif typeof(c) == "thread" then task.cancel(c) end
+-- Module 'B' (LVM5 Chunk 72): One-Click Progression & End-Game Automation
+registerModule("B", function()
+    local v_1 = modules.x()
+    local v_2 = modules.z()
+    local v_3 = modules.j()
+    local v_4 = modules.m()
+    local v_5 = modules.r()
+    local v_6 = v_4.getData
+    local v_7 = v_4.getPlayerLevel
+    return function(arg_1)
+        arg_1.unlockBaller = function(p2_1)
+            if v_3:verifyFightStyle("Baller") then
+                return false
+            end
+            local v2_2 = v_1.itemPrices.Baller
+            local v2_3 = next(v_2:getMissingMaterials("Baller"))
+            if v2_3 then
+                return p2_1:farmMaterial(v2_3)
+            end
+            if (v_6("Money") >= v2_2.Money) then
+                return v_2:buyBaller()
+            end
+            return false
+        end
+        arg_1.unlockWeapons = function(p2_1)
+            local v2_2 = v_3:getUnlocked()
+            for v2_3, v2_4 in ipairs(v_1.sections[1].items) do
+                if (not v2_2[v2_4.name]) then
+                    if v_2:canBuy(v2_4.name) then
+                        return v_2:buyMissingWeapon()
+                    end
+                    local v2_5 = v_1.itemPrices[v2_4.name]
+                    local v2_6 = v_2:getMissingMaterials(v2_4.name)
+                    if next(v2_6) then
+                        local v2_7 = nil
+                        for v2_8 in pairs(v2_6) do
+                            if p2_1.materials[v2_8] then
+                                v2_7 = v2_8
+                                break
+                            end
+                        end
+                        if (v2_7 and p2_1:farmMaterial(v2_7)) then
+                            return true
+                        end
+                    else
+                        if (v_6("Money") < (v2_5.Money or 0)) then
+                            return false
+                        end
+                    end
+                end
+            end
+            return false
+        end
+        arg_1.unlockQuestLimit = function(p2_1)
+            if (v_6("MaxQuest") >= v_5.maxQuest) then
+                return false
+            end
+            return p2_1:upgradeQuestLimit()
+        end
+        arg_1.unlockGamepasses = function(p2_1)
+            if (v_7() < v_5.level.gamepasses) then
+                return false
+            end
+            if v_2:buyGamepasses() then
+                return false
+            end
+            return p2_1:farmRaid()
+        end
+    end
+end)
+
+-- Module 'C': Combined Farming Controller Aggregator
+registerModule("C", function()
+    local v_1 = modules.o()
+    local v_2 = {
+        spawnBoss = v_1.spawnBoss,
+        materials = v_1.materials
+    }
+    modules.p()(v_2)
+    modules.s()(v_2)
+    modules.t()(v_2)
+    modules.v()(v_2)
+    modules.A()(v_2)
+    modules.B()(v_2)
+    return v_2
+end)
+
+-- Module 'D': Priority Task: One Click
+registerModule("D", function()
+    local v_1 = modules.C()
+    return {
+        flag = "oneClick",
+        run = function()
+            return v_1:oneClick()
+        end
+    }
+end)
+
+-- Module 'E': Priority Task: Floppa Sword
+registerModule("E", function()
+    local v_1 = modules.C()
+    local v_2 = modules.j()
+    return {
+        flag = "floppaSword",
+        run = function()
+            if not v_2:verifySword("Floppa") then
+                return v_1:getFloppaSword()
+            end
+        end
+    }
+end)
+
+-- Module 'F': Priority Task: Meme Beast
+registerModule("F", function()
+    local v_1 = modules.C()
+    return {
+        flag = "memeBeast",
+        run = function()
+            return v_1:killMemeBeast()
+        end
+    }
+end)
+
+-- Module 'G': Priority Task: Lord Sus Raid Boss
+registerModule("G", function()
+    local v_1 = modules.C()
+    return {
+        flag = "lordSus",
+        run = function()
+            return v_1:farmRaidBoss("Lord Sus", true)
+        end
+    }
+end)
+
+-- Module 'H': Priority Task: Evil Noob Raid Boss
+registerModule("H", function()
+    local v_1 = modules.C()
+    return {
+        flag = "evilNoob",
+        run = function()
+            return v_1:farmRaidBoss("Evil Noob", true)
+        end
+    }
+end)
+
+-- Module 'I': Priority Task: Giant Pumpkin Raid Boss
+registerModule("I", function()
+    local v_1 = modules.C()
+    return {
+        flag = "giantPumpkin",
+        run = function()
+            return v_1:farmRaidBoss("Giant Pumpkin", true)
+        end
+    }
+end)
+
+-- Module 'J': Priority Task: Race V2 Orb
+registerModule("J", function()
+    local v_1 = modules.C()
+    local v_2 = modules.m()
+    local v_3 = modules.r()
+    local v_4 = v_2.getPlayerLevel
+    return {
+        flag = "raceV2Orb",
+        run = function()
+            if v_4() >= v_3.level.raceV2Orb then
+                return v_1:farmRaceOrb()
+            end
+        end
+    }
+end)
+
+-- Module 'K': Priority Task: Unlock Baller
+registerModule("K", function()
+    local v_1 = modules.C()
+    return {
+        flag = "unlockBaller",
+        run = function()
+            return v_1:unlockBaller()
+        end
+    }
+end)
+
+-- Module 'L': Priority Task: Unlock Weapons
+registerModule("L", function()
+    local v_1 = modules.C()
+    return {
+        flag = "unlockWeapons",
+        run = function()
+            return v_1:unlockWeapons()
+        end
+    }
+end)
+
+-- Module 'M': Priority Task: Unlock Quest Limit
+registerModule("M", function()
+    local v_1 = modules.C()
+    return {
+        flag = "unlockQuestLimit",
+        run = function()
+            return v_1:unlockQuestLimit()
+        end
+    }
+end)
+
+-- Module 'N': Priority Task: Unlock Gamepasses
+registerModule("N", function()
+    local v_1 = modules.C()
+    return {
+        flag = "unlockGamepasses",
+        run = function()
+            return v_1:unlockGamepasses()
+        end
+    }
+end)
+
+-- Module 'O': Priority Task: Level Farm
+registerModule("O", function()
+    local v_1 = modules.C()
+    return {
+        flag = "levelFarm",
+        run = function()
+            return v_1:farmLevel()
+        end
+    }
+end)
+
+-- Module 'P': Priority Task: Raid Farm
+registerModule("P", function()
+    local v_1 = modules.C()
+    local v_2 = modules.m()
+    local v_3 = modules.r()
+    local v_4 = v_2.getPlayerLevel
+    return {
+        flag = "raidFarm",
+        run = function()
+            if v_4() >= v_3.level.raid then
+                return v_1:farmRaid()
+            end
+        end
+    }
+end)
+
+-- Module 'Q': Priority Task: Farm Selected Enemy
+registerModule("Q", function()
+    local v_1 = modules.b()
+    local v_2 = modules.C()
+    local v_3 = v_1.environment
+    return {
+        flag = "farmSelectedEnemy",
+        run = function()
+            return v_2:farmEnemy(v_3.selectedEnemy, v_3.takeSelectedQuest)
+        end
+    }
+end)
+
+-- Module 'R': Priority Task: Nearest Enemy Farm
+registerModule("R", function()
+    local v_1 = modules.l()
+    local v_2 = modules.i()
+    return {
+        flag = "nearestFarm",
+        run = function()
+            return v_1.killEnemy(v_2.getEnemy())
+        end
+    }
+end)
+
+-- Module 'S': Ordered Farming Priority List
+registerModule("S", function()
+    return {
+        modules.D(),
+        modules.E(),
+        modules.F(),
+        modules.G(),
+        modules.H(),
+        modules.I(),
+        modules.J(),
+        modules.K(),
+        modules.L(),
+        modules.M(),
+        modules.N(),
+        modules.O(),
+        modules.P(),
+        modules.Q(),
+        modules.R()
+    }
+end)
+
+-- Module 'T' (LVM5 Chunk 82): Anti-AFK & No-Stun Character Hooks
+registerModule("T", function()
+    local v_1 = modules.b()
+    local v_2 = modules.e()
+    return function()
+        if v_1.environment.loadedAntiAfk then
+            return
+        end
+        v_1.environment.loadedAntiAfk = true
+        v_1.spawn(function()
+            while v_1.wait(600) do
+                if v_2.antiAfk then
+                    v_1.virtualUser:CaptureController()
+                    v_1.virtualUser:ClickButton2(Vector2.new())
+                end
+            end
+        end)
+    end
+end)
+
+-- Module 'U' (LVM5 Chunk 85): Remote Hook (AimBot) & Task Priority Loop
+registerModule("U", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.w()
+    local v_4 = modules.y()
+    local v_5 = "local environment = ...\n\nlocal oldNamecall\noldNamecall = hookmetamethod(game, \"__namecall\", function(self, ...)\n\tif getnamecallmethod():lower() == \"fireserver\" and self.Name == \"Server_Skills\" then\n\t\tlocal latestAttack = environment.latestAttack\n\t\tif latestAttack and latestAttack.aimBot then\n\t\t\treturn latestAttack.aimBot(oldNamecall, self, ...)\n\t\tend\n\tend\n\treturn oldNamecall(self, ...)\nend)\n"
+    local v_6 = v_1.localPlayer
+    local v_7 = v_1.runService
+    local v_8 = v_1.environment
+    local v_9 = v_1.spawn
+    return function()
+        v_9(function()
+            for v2_1, v2_2 in ipairs(require(v_2.gameModules.Gamepass_Assets)) do
+                v_4.ids[v2_2.Asset_Name] = v2_2.GamepassId
+            end
+        end)
+        v_9(function()
+            if v_8.loadedAnonymousName then
+                return
+            end
+            v_8.loadedAnonymousName = true
+            local v2_1 = v_6.PlayerGui.MainGui.PlayerName
+            local v2_2 = function()
+                local v3_1 = v_2.playerLevel.Value
+                local v3_2 = (v3_1 >= v_3.maxLevel)
+                v2_1.Text = ("%s • Lv. %i%s"):format("Anonymous", v3_1, ((v3_2 and " (Max)") or ""))
+            end
+            v2_1:GetPropertyChangedSignal("Text"):Connect(v2_2)
+            v2_2()
+        end)
+        v_9(function()
+            if v_8.loadedAimBot then
+                return
+            end
+            xpcall(function()
+                local v3_1, v3_2 = loadstring(v_5, "=AimBotHook")
+                assert(v3_1, v3_2)
+                v3_1(v_8)
+                v_8.loadedAimBot = true
+            end, function(...)
+                print("!ERROR! Erro ao carregar o hook do AimBot: ", ...)
+            end)
+        end)
+        v_9(function()
+            if v_8.loadedNearestPlayer then
+                return
+            end
+            v_8.loadedNearestPlayer = true
+            v_7.Stepped:Connect(function()
+                local v3_1 = 1000
+                local v3_2 = false
+                if v_8.aimBotPlayers then
+                    for v3_3, v3_4 in ipairs(v_2.characters:GetChildren()) do
+                        local v3_5 = v3_4.PrimaryPart
+                        if ((v3_4 ~= v_6.Character) and v3_5) then
+                            local v3_6 = v_6:DistanceFromCharacter(v3_5.Position)
+                            if (v3_6 < v3_1) then
+                                v3_1 = v3_6
+                                v3_2 = v3_5
+                            end
+                        end
+                    end
+                end
+                v_8.nearestPlayer = v3_2
+            end)
+        end)
+        v_9(function()
+            if v_8.loadedNoStun then
+                return
+            end
+            v_8.loadedNoStun = true
+            local v2_1 = function(p3_1)
+                local v3_2 = p3_1:WaitForChild("Stun")
+                v3_2:GetPropertyChangedSignal("Value"):Connect(function()
+                    if v_8.noStun then
+                        v3_2.Value = 0
+                    end
+                end)
+            end
+            v_6.CharacterAdded:Connect(v2_1)
+            if v_6.Character then
+                v2_1(v_6.Character)
+            end
+        end)
+    end
+end)
+
+-- Module 'V' (LVM5 Chunk 89): Localization / Language Code Resolver
+registerModule("V", function()
+    local v_1 = modules.c()
+    return { window = { title = "redz Hub : Meme Sea", subtitle = "by redz9999", scriptFolder = "redzHub-MemeSea.json" }, minimizeLogo = "rbxassetid://15298567397", discord = { title = "redz Hub | Community", description = "Join our discord community to receive information about the next update", logo = "rbxassetid://17382040552", invite = v_1 }, tabs = { discord = { title = "Discord", icon = "Info" }, mainFarm = { title = "Farm", icon = "Home" }, items = { title = "Items", icon = "Swords" }, powers = { title = "Powers", icon = "Apple" }, stats = { title = "Stats", icon = "Signal" }, teleport = { title = "Teleport", icon = "Locate" }, shop = { title = "Shop", icon = "ShoppingCart" }, pvp = { title = "PvP", icon = "User" }, oneClick = { title = "One-Click", icon = "mouse-pointer-click" }, misc = { title = "Misc", icon = "Settings" } } }
+end)
+
+-- Module 'W' (LVM5 Chunk 90): Translations: English (en)
+registerModule("W", function()
+    return { Discord = "Discord", Farm = "Farm", Items = "Items", Powers = "Powers", Stats = "Stats", Teleport = "Teleport", Shop = "Shop", PvP = "PvP", ["One-Click"] = "One-Click", Misc = "Misc", ["Farm Tool"] = "Farm Tool", ["UI Scale"] = "UI Scale", Small = "Small", Medium = "Medium", Large = "Large", Fight = "Fight", Power = "Power", Weapon = "Weapon", ["Auto Farm Level"] = "Auto Farm Level", ["MaxLevel: %i"] = "MaxLevel: %i", ["Auto Farm Nearest"] = "Auto Farm Nearest", Enemies = "Enemies", ["Select Enemie"] = "Select Enemie", ["Auto Farm Selected"] = "Auto Farm Selected", ["Take Quest [ Enemie Selected ]"] = "Take Quest [ Enemie Selected ]", ["Sea Event"] = "Sea Event", ["Auto Meme Beast [ Spawns every 30 Minutes ]"] = "Auto Meme Beast [ Spawns every 30 Minutes ]", ["Drops: Portal ( <25% ), Meme Cube ( <50% )"] = "Drops: Portal ( <25% ), Meme Cube ( <50% )", Raid = "Raid", ["Auto Farm Raid"] = "Auto Farm Raid", ["Req: Level %i"] = "Req: Level %i", Skills = "Skills", ["Select Skills"] = "Select Skills", ["Auto Use Skills"] = "Auto Use Skills", Bosses = "Bosses", ["Auto Giant Pumpkin"] = "Auto Giant Pumpkin", ["Drops: Pumpkin Head ( <10% ), Nugget Man ( <25% )"] = "Drops: Pumpkin Head ( <10% ), Nugget Man ( <25% )", ["Auto Evil Noob"] = "Auto Evil Noob", ["Drops: Yellow Blade ( <5% ), Noob Friend ( <10% )"] = "Drops: Yellow Blade ( <5% ), Noob Friend ( <10% )", ["Auto Lord Sus"] = "Auto Lord Sus", ["Drops: Purple Katana ( <5% ), Sus Pals ( <10% )"] = "Drops: Purple Katana ( <5% ), Sus Pals ( <10% )", Race = "Race", ["Auto Awakening Orb"] = "Auto Awakening Orb", Floppa = "Floppa", ["Auto Floppa [ Exclusive Weapon ]"] = "Auto Floppa [ Exclusive Weapon ]", Popcat = "Popcat", ["Clicks per Second"] = "Clicks per Second", ["Auto Popcat"] = "Auto Popcat", Unlock = "Unlock", ["Auto Baller"] = "Auto Baller", ["Farms 10 balls and buys Baller"] = "Farms 10 balls and buys Baller", ["Auto Weapons"] = "Auto Weapons", ["Farms the materials and unlocks the Weapons section"] = "Farms the materials and unlocks the Weapons section", ["Auto Quest Limit"] = "Auto Quest Limit", ["Uses the Quest Scroll (or buys it)"] = "Uses the Quest Scroll (or buys it)", ["Auto Gamepasses"] = "Auto Gamepasses", ["From level %i: farms gems and buys all gamepasses"] = "From level %i: farms gems and buys all gamepasses", Drops = "Drops", ["Collect all drops"] = "Collect all drops", ["Drop all powers"] = "Drop all powers", Store = "Store", ["Auto Store Powers"] = "Auto Store Powers", Unstore = "Unstore", ["Select Power"] = "Select Power", ["Unstore Amount"] = "Unstore Amount", ["Number: 1-99"] = "Number: 1-99", ["Unstore Power"] = "Unstore Power", ["Power Gacha"] = "Power Gacha", ["Gacha Type"] = "Gacha Type", Money = "Money", Gem = "Gem", ["Gacha Amount"] = "Gacha Amount", ["Roll Powers"] = "Roll Powers", ["Auto Reroll Power"] = "Auto Reroll Power", ["Aura Color"] = "Aura Color", ["Auto Reroll Aura"] = "Auto Reroll Aura", Others = "Others", ["Remove Gacha Animation"] = "Remove Gacha Animation", ["Destroy stored Powers"] = "Destroy stored Powers", ["Points Amount"] = "Points Amount", ["Auto Stats"] = "Auto Stats", ["Select Stats"] = "Select Stats", Health = "Health", Melee = "Melee", Locations = "Locations", Islands = "Islands", Quests = "Quests", ["Bounty/Fame"] = "Bounty/Fame", ["Teleport to random player"] = "Teleport to random player", AimBot = "AimBot", ["AimBot Players"] = "AimBot Players", ["AimBot Monsters"] = "AimBot Monsters", Esp = "Esp", ["Esp Players"] = "Esp Players", ["Esp Islands"] = "Esp Islands", ["Safe Zone"] = "Safe Zone", ["PvP On"] = "PvP On", ["PvP Off"] = "PvP Off", ["Auto Buy"] = "Auto Buy", ["Auto Buy Abilities"] = "Auto Buy Abilities", ["Aura, Instinct & Flash Step"] = "Aura, Instinct & Flash Step", Weapons = "Weapons", Ability = "Ability", ["Fighting Style"] = "Fighting Style", ["Buy %s"] = "Buy %s", ["Start One Click [ BETA ]"] = "Start One Click [ BETA ]", Settings = "Settings", ["Buy all gamepass"] = "Buy all gamepass", ["farm gems and buy all gamepass"] = "farm gems and buy all gamepass", ["Awaken Race V2"] = "Awaken Race V2", ["get race V2 if you don't have"] = "get race V2 if you don't have", ["Upgrade quest limit"] = "Upgrade quest limit", ["buy quest scroll and use"] = "buy quest scroll and use", ["Get all aura Colors"] = "Get all aura Colors", ["get all aura colors after purchasing the aura"] = "get all aura colors after purchasing the aura", ["End-Game"] = "End-Game", ["Farm Lord Sus"] = "Farm Lord Sus", ["Farm Evil Noob"] = "Farm Evil Noob", ["Farm Raid"] = "Farm Raid", ["Redeem All Codes"] = "Redeem All Codes", ["Job id"] = "Job id", ["Input Job Id"] = "Input Job Id", ["Join From Clipboard"] = "Join From Clipboard", ["Farm Distance"] = "Farm Distance", ["Auto Aura"] = "Auto Aura", ["Auto Attack"] = "Auto Attack", ["Bring Mobs"] = "Bring Mobs", ["Anti AFK"] = "Anti AFK", ["Auto Equip"] = "Auto Equip", ["Sword & accessory"] = "Sword & accessory", Team = "Team", ["Join Cheems Team"] = "Join Cheems Team", ["Join Floppa Team"] = "Join Floppa Team", ["Remove Notifications"] = "Remove Notifications", ["No Stun"] = "No Stun", ["Inf sky jump"] = "Inf sky jump", Language = "Language", ["Language changes apply on next run."] = "Language changes apply on next run.", auto = "auto", ["Infinite Damage"] = "Infinite Damage", ["Works with: Popcat, Baller, Paw Power, Snow Power, Sand Power, Water Power."] = "Works with: Popcat, Baller, Paw Power, Snow Power, Sand Power, Water Power." }
+end)
+
+-- Module 'X' (LVM5 Chunk 91): Translations: Portuguese (pt)
+registerModule("X", function()
+    return { Discord = "Discord", Farm = "Farm", Items = "Itens", Powers = "Poderes", Stats = "Atributos", Teleport = "Teleporte", Shop = "Loja", PvP = "PvP", ["One-Click"] = "Um clique", Misc = "Diversos", ["Farm Tool"] = "Ferramenta de farm", ["UI Scale"] = "Escala da interface", Small = "Pequena", Medium = "Média", Large = "Grande", Fight = "Luta", Power = "Poder", Weapon = "Arma", ["Auto Farm Level"] = "Farm automático de nível", ["MaxLevel: %i"] = "Nível máximo: %i", ["Auto Farm Nearest"] = "Farm do inimigo mais próximo", Enemies = "Inimigos", ["Select Enemie"] = "Selecionar inimigo", ["Auto Farm Selected"] = "Farm do inimigo selecionado", ["Take Quest [ Enemie Selected ]"] = "Aceitar missão [inimigo selecionado]", ["Sea Event"] = "Evento do mar", ["Auto Meme Beast [ Spawns every 30 Minutes ]"] = "Meme Beast automático [aparece a cada 30 minutos]", ["Drops: Portal ( <25% ), Meme Cube ( <50% )"] = "Drops: Portal (<25%), Meme Cube (<50%)", Raid = "Raid", ["Auto Farm Raid"] = "Farm automático de raid", ["Req: Level %i"] = "Requer nível %i", Skills = "Habilidades", ["Select Skills"] = "Selecionar habilidades", ["Auto Use Skills"] = "Usar habilidades automaticamente", Bosses = "Chefes", ["Auto Giant Pumpkin"] = "Giant Pumpkin automático", ["Drops: Pumpkin Head ( <10% ), Nugget Man ( <25% )"] = "Drops: Pumpkin Head (<10%), Nugget Man (<25%)", ["Auto Evil Noob"] = "Evil Noob automático", ["Drops: Yellow Blade ( <5% ), Noob Friend ( <10% )"] = "Drops: Yellow Blade (<5%), Noob Friend (<10%)", ["Auto Lord Sus"] = "Lord Sus automático", ["Drops: Purple Katana ( <5% ), Sus Pals ( <10% )"] = "Drops: Purple Katana (<5%), Sus Pals (<10%)", Race = "Raça", ["Auto Awakening Orb"] = "Orbe do despertar automático", Floppa = "Floppa", ["Auto Floppa [ Exclusive Weapon ]"] = "Floppa automático [arma exclusiva]", Popcat = "Popcat", ["Clicks per Second"] = "Cliques por segundo", ["Auto Popcat"] = "Popcat automático", Unlock = "Desbloquear", ["Auto Baller"] = "Baller automático", ["Farms 10 balls and buys Baller"] = "Coleta 10 bolas e compra Baller", ["Auto Weapons"] = "Armas automáticas", ["Farms the materials and unlocks the Weapons section"] = "Coleta materiais e desbloqueia as armas", ["Auto Quest Limit"] = "Limite de missões automático", ["Uses the Quest Scroll (or buys it)"] = "Usa o Quest Scroll (ou compra)", ["Auto Gamepasses"] = "Gamepasses automáticos", ["From level %i: farms gems and buys all gamepasses"] = "A partir do nível %i: coleta gemas e compra todos os gamepasses", Drops = "Drops", ["Collect all drops"] = "Coletar todos os drops", ["Drop all powers"] = "Soltar todos os poderes", Store = "Armazenar", ["Auto Store Powers"] = "Armazenar poderes automaticamente", Unstore = "Retirar do armazenamento", ["Select Power"] = "Selecionar poder", ["Unstore Amount"] = "Quantidade para retirar", ["Number: 1-99"] = "Número: 1-99", ["Unstore Power"] = "Retirar poder", ["Power Gacha"] = "Gacha de poderes", ["Gacha Type"] = "Tipo de gacha", Money = "Dinheiro", Gem = "Gemas", ["Gacha Amount"] = "Quantidade de gachas", ["Roll Powers"] = "Girar poderes", ["Auto Reroll Power"] = "Girar poderes automaticamente", ["Aura Color"] = "Cor da aura", ["Auto Reroll Aura"] = "Girar aura automaticamente", Others = "Outros", ["Remove Gacha Animation"] = "Remover animação do gacha", ["Destroy stored Powers"] = "Destruir poderes com estoque cheio", ["Points Amount"] = "Quantidade de pontos", ["Auto Stats"] = "Atributos automáticos", ["Select Stats"] = "Selecionar atributos", Health = "Vida", Melee = "Corpo a corpo", Locations = "Locais", Islands = "Ilhas", Quests = "Missões", ["Bounty/Fame"] = "Recompensa/Fama", ["Teleport to random player"] = "Teleportar para um jogador aleatório", AimBot = "AimBot", ["AimBot Players"] = "AimBot em jogadores", ["AimBot Monsters"] = "AimBot em monstros", Esp = "ESP", ["Esp Players"] = "ESP de jogadores", ["Esp Islands"] = "ESP de ilhas", ["Safe Zone"] = "Zona segura", ["PvP On"] = "PvP ativo", ["PvP Off"] = "PvP desativado", ["Auto Buy"] = "Compra automática", ["Auto Buy Abilities"] = "Comprar habilidades automaticamente", ["Aura, Instinct & Flash Step"] = "Aura, Instinct e Flash Step", Weapons = "Armas", Ability = "Habilidades", ["Fighting Style"] = "Estilo de luta", ["Buy %s"] = "Comprar %s", ["Start One Click [ BETA ]"] = "Iniciar um clique [BETA]", Settings = "Configurações", ["Buy all gamepass"] = "Comprar todos os gamepasses", ["farm gems and buy all gamepass"] = "Coleta gemas e compra todos os gamepasses", ["Awaken Race V2"] = "Despertar raça V2", ["get race V2 if you don't have"] = "Obtém a raça V2 se ainda não tiver", ["Upgrade quest limit"] = "Aumentar limite de missões", ["buy quest scroll and use"] = "Compra e usa o Quest Scroll", ["Get all aura Colors"] = "Obter todas as cores de aura", ["get all aura colors after purchasing the aura"] = "Obtém todas as cores após comprar a aura", ["End-Game"] = "Objetivo final", ["Farm Lord Sus"] = "Farm de Lord Sus", ["Farm Evil Noob"] = "Farm de Evil Noob", ["Farm Raid"] = "Farm de raid", ["Redeem All Codes"] = "Resgatar todos os códigos", ["Job id"] = "ID do servidor", ["Input Job Id"] = "Inserir ID do servidor", ["Join From Clipboard"] = "Entrar usando área de transferência", ["Farm Distance"] = "Distância de farm", ["Auto Aura"] = "Aura automática", ["Auto Attack"] = "Ataque automático", ["Bring Mobs"] = "Agrupar inimigos", ["Anti AFK"] = "Anti AFK", ["Auto Equip"] = "Equipar automaticamente", ["Sword & accessory"] = "Espada e acessório", Team = "Time", ["Join Cheems Team"] = "Entrar no time Cheems", ["Join Floppa Team"] = "Entrar no time Floppa", ["Remove Notifications"] = "Remover notificações", ["No Stun"] = "Sem atordoamento", ["Inf sky jump"] = "Saltos aéreos infinitos", Language = "Idioma", ["Language changes apply on next run."] = "A mudança de idioma vale na próxima execução.", auto = "Automático", ["Infinite Damage"] = "Dano infinito", ["Works with: Popcat, Baller, Paw Power, Snow Power, Sand Power, Water Power."] = "Funciona com: Popcat, Baller, Paw Power, Snow Power, Sand Power, Water Power." }
+end)
+
+-- Module 'Y' (LVM5 Chunk 92): Translations: Spanish (es)
+registerModule("Y", function()
+    return { Discord = "Discord", Farm = "Farmeo", Items = "Objetos", Powers = "Poderes", Stats = "Estadísticas", Teleport = "Teletransporte", Shop = "Tienda", PvP = "PvP", ["One-Click"] = "Un clic", Misc = "Varios", ["Farm Tool"] = "Herramienta de farmeo", ["UI Scale"] = "Escala de interfaz", Small = "Pequeña", Medium = "Mediana", Large = "Grande", Fight = "Lucha", Power = "Poder", Weapon = "Arma", ["Auto Farm Level"] = "Subir nivel automáticamente", ["MaxLevel: %i"] = "Nivel máximo: %i", ["Auto Farm Nearest"] = "Farmear enemigo más cercano", Enemies = "Enemigos", ["Select Enemie"] = "Seleccionar enemigo", ["Auto Farm Selected"] = "Farmear enemigo seleccionado", ["Take Quest [ Enemie Selected ]"] = "Aceptar misión [enemigo seleccionado]", ["Sea Event"] = "Evento del mar", ["Auto Meme Beast [ Spawns every 30 Minutes ]"] = "Meme Beast automático [aparece cada 30 minutos]", ["Drops: Portal ( <25% ), Meme Cube ( <50% )"] = "Botín: Portal (<25%), Meme Cube (<50%)", Raid = "Incursión", ["Auto Farm Raid"] = "Farmear incursiones", ["Req: Level %i"] = "Requiere nivel %i", Skills = "Habilidades", ["Select Skills"] = "Seleccionar habilidades", ["Auto Use Skills"] = "Usar habilidades automáticamente", Bosses = "Jefes", ["Auto Giant Pumpkin"] = "Giant Pumpkin automático", ["Drops: Pumpkin Head ( <10% ), Nugget Man ( <25% )"] = "Botín: Pumpkin Head (<10%), Nugget Man (<25%)", ["Auto Evil Noob"] = "Evil Noob automático", ["Drops: Yellow Blade ( <5% ), Noob Friend ( <10% )"] = "Botín: Yellow Blade (<5%), Noob Friend (<10%)", ["Auto Lord Sus"] = "Lord Sus automático", ["Drops: Purple Katana ( <5% ), Sus Pals ( <10% )"] = "Botín: Purple Katana (<5%), Sus Pals (<10%)", Race = "Raza", ["Auto Awakening Orb"] = "Orbe de despertar automático", Floppa = "Floppa", ["Auto Floppa [ Exclusive Weapon ]"] = "Floppa automático [arma exclusiva]", Popcat = "Popcat", ["Clicks per Second"] = "Clics por segundo", ["Auto Popcat"] = "Popcat automático", Unlock = "Desbloquear", ["Auto Baller"] = "Baller automático", ["Farms 10 balls and buys Baller"] = "Consigue 10 bolas y compra Baller", ["Auto Weapons"] = "Armas automáticas", ["Farms the materials and unlocks the Weapons section"] = "Consigue materiales y desbloquea las armas", ["Auto Quest Limit"] = "Límite de misiones automático", ["Uses the Quest Scroll (or buys it)"] = "Usa el Quest Scroll (o lo compra)", ["Auto Gamepasses"] = "Pases automáticos", ["From level %i: farms gems and buys all gamepasses"] = "Desde el nivel %i: consigue gemas y compra todos los pases", Drops = "Botín", ["Collect all drops"] = "Recoger todo el botín", ["Drop all powers"] = "Soltar todos los poderes", Store = "Guardar", ["Auto Store Powers"] = "Guardar poderes automáticamente", Unstore = "Retirar del almacén", ["Select Power"] = "Seleccionar poder", ["Unstore Amount"] = "Cantidad a retirar", ["Number: 1-99"] = "Número: 1-99", ["Unstore Power"] = "Retirar poder", ["Power Gacha"] = "Gacha de poderes", ["Gacha Type"] = "Tipo de gacha", Money = "Dinero", Gem = "Gemas", ["Gacha Amount"] = "Cantidad de gachas", ["Roll Powers"] = "Girar poderes", ["Auto Reroll Power"] = "Girar poderes automáticamente", ["Aura Color"] = "Color del aura", ["Auto Reroll Aura"] = "Girar aura automáticamente", Others = "Otros", ["Remove Gacha Animation"] = "Quitar animación del gacha", ["Destroy stored Powers"] = "Destruir poderes con almacén lleno", ["Points Amount"] = "Cantidad de puntos", ["Auto Stats"] = "Estadísticas automáticas", ["Select Stats"] = "Seleccionar estadísticas", Health = "Salud", Melee = "Cuerpo a cuerpo", Locations = "Lugares", Islands = "Islas", Quests = "Misiones", ["Bounty/Fame"] = "Recompensa/Fama", ["Teleport to random player"] = "Teletransportarse a un jugador aleatorio", AimBot = "AimBot", ["AimBot Players"] = "AimBot para jugadores", ["AimBot Monsters"] = "AimBot para monstruos", Esp = "ESP", ["Esp Players"] = "ESP de jugadores", ["Esp Islands"] = "ESP de islas", ["Safe Zone"] = "Zona segura", ["PvP On"] = "PvP activo", ["PvP Off"] = "PvP desactivado", ["Auto Buy"] = "Compra automática", ["Auto Buy Abilities"] = "Comprar habilidades automáticamente", ["Aura, Instinct & Flash Step"] = "Aura, Instinct y Flash Step", Weapons = "Armas", Ability = "Habilidades", ["Fighting Style"] = "Estilo de lucha", ["Buy %s"] = "Comprar %s", ["Start One Click [ BETA ]"] = "Iniciar un clic [BETA]", Settings = "Ajustes", ["Buy all gamepass"] = "Comprar todos los pases", ["farm gems and buy all gamepass"] = "Consigue gemas y compra todos los pases", ["Awaken Race V2"] = "Despertar raza V2", ["get race V2 if you don't have"] = "Obtiene la raza V2 si aún no la tienes", ["Upgrade quest limit"] = "Aumentar límite de misiones", ["buy quest scroll and use"] = "Compra y usa el Quest Scroll", ["Get all aura Colors"] = "Obtener todos los colores de aura", ["get all aura colors after purchasing the aura"] = "Obtiene todos los colores tras comprar el aura", ["End-Game"] = "Objetivo final", ["Farm Lord Sus"] = "Farmear Lord Sus", ["Farm Evil Noob"] = "Farmear Evil Noob", ["Farm Raid"] = "Farmear incursiones", ["Redeem All Codes"] = "Canjear todos los códigos", ["Job id"] = "ID del servidor", ["Input Job Id"] = "Introducir ID del servidor", ["Join From Clipboard"] = "Entrar desde el portapapeles", ["Farm Distance"] = "Distancia de farmeo", ["Auto Aura"] = "Aura automática", ["Auto Attack"] = "Ataque automático", ["Bring Mobs"] = "Agrupar enemigos", ["Anti AFK"] = "Anti AFK", ["Auto Equip"] = "Equipar automáticamente", ["Sword & accessory"] = "Espada y accesorio", Team = "Equipo", ["Join Cheems Team"] = "Unirse al equipo Cheems", ["Join Floppa Team"] = "Unirse al equipo Floppa", ["Remove Notifications"] = "Quitar notificaciones", ["No Stun"] = "Sin aturdimiento", ["Inf sky jump"] = "Saltos aéreos infinitos", Language = "Idioma", ["Language changes apply on next run."] = "El cambio de idioma se aplica en la próxima ejecución.", auto = "Automático", ["Infinite Damage"] = "Daño infinito", ["Works with: Popcat, Baller, Paw Power, Snow Power, Sand Power, Water Power."] = "Funciona con: Popcat, Baller, Paw Power, Snow Power, Sand Power, Water Power." }
+end)
+
+-- Module 'Z' (LVM5 Chunk 93): Translations: French (fr)
+registerModule("Z", function()
+    return { Discord = "Discord", Farm = "Farm", Items = "Objets", Powers = "Pouvoirs", Stats = "Statistiques", Teleport = "Téléportation", Shop = "Boutique", PvP = "JcJ", ["One-Click"] = "Un clic", Misc = "Divers", ["Farm Tool"] = "Outil de farm", ["UI Scale"] = "Échelle de l'interface", Small = "Petite", Medium = "Moyenne", Large = "Grande", Fight = "Combat", Power = "Pouvoir", Weapon = "Arme", ["Auto Farm Level"] = "Monter de niveau automatiquement", ["MaxLevel: %i"] = "Niveau maximum : %i", ["Auto Farm Nearest"] = "Farmer l'ennemi le plus proche", Enemies = "Ennemis", ["Select Enemie"] = "Choisir un ennemi", ["Auto Farm Selected"] = "Farmer l'ennemi choisi", ["Take Quest [ Enemie Selected ]"] = "Accepter la quête [ennemi choisi]", ["Sea Event"] = "Événement marin", ["Auto Meme Beast [ Spawns every 30 Minutes ]"] = "Meme Beast automatique [toutes les 30 minutes]", ["Drops: Portal ( <25% ), Meme Cube ( <50% )"] = "Butin : Portal (<25 %), Meme Cube (<50 %)", Raid = "Raid", ["Auto Farm Raid"] = "Farmer les raids", ["Req: Level %i"] = "Niveau requis : %i", Skills = "Compétences", ["Select Skills"] = "Choisir les compétences", ["Auto Use Skills"] = "Utiliser les compétences automatiquement", Bosses = "Boss", ["Auto Giant Pumpkin"] = "Giant Pumpkin automatique", ["Drops: Pumpkin Head ( <10% ), Nugget Man ( <25% )"] = "Butin : Pumpkin Head (<10 %), Nugget Man (<25 %)", ["Auto Evil Noob"] = "Evil Noob automatique", ["Drops: Yellow Blade ( <5% ), Noob Friend ( <10% )"] = "Butin : Yellow Blade (<5 %), Noob Friend (<10 %)", ["Auto Lord Sus"] = "Lord Sus automatique", ["Drops: Purple Katana ( <5% ), Sus Pals ( <10% )"] = "Butin : Purple Katana (<5 %), Sus Pals (<10 %)", Race = "Race", ["Auto Awakening Orb"] = "Orbe d'éveil automatique", Floppa = "Floppa", ["Auto Floppa [ Exclusive Weapon ]"] = "Floppa automatique [arme exclusive]", Popcat = "Popcat", ["Clicks per Second"] = "Clics par seconde", ["Auto Popcat"] = "Popcat automatique", Unlock = "Débloquer", ["Auto Baller"] = "Baller automatique", ["Farms 10 balls and buys Baller"] = "Récolte 10 balles et achète Baller", ["Auto Weapons"] = "Armes automatiques", ["Farms the materials and unlocks the Weapons section"] = "Récolte les matériaux et débloque les armes", ["Auto Quest Limit"] = "Limite de quêtes automatique", ["Uses the Quest Scroll (or buys it)"] = "Utilise le Quest Scroll (ou l'achète)", ["Auto Gamepasses"] = "Passes automatiques", ["From level %i: farms gems and buys all gamepasses"] = "Dès le niveau %i : récolte des gemmes et achète tous les passes", Drops = "Butin", ["Collect all drops"] = "Ramasser tout le butin", ["Drop all powers"] = "Jeter tous les pouvoirs", Store = "Stocker", ["Auto Store Powers"] = "Stocker les pouvoirs automatiquement", Unstore = "Retirer du stockage", ["Select Power"] = "Choisir un pouvoir", ["Unstore Amount"] = "Quantité à retirer", ["Number: 1-99"] = "Nombre : 1-99", ["Unstore Power"] = "Retirer le pouvoir", ["Power Gacha"] = "Gacha de pouvoirs", ["Gacha Type"] = "Type de gacha", Money = "Argent", Gem = "Gemmes", ["Gacha Amount"] = "Nombre de gachas", ["Roll Powers"] = "Tirer des pouvoirs", ["Auto Reroll Power"] = "Tirer des pouvoirs automatiquement", ["Aura Color"] = "Couleur de l'aura", ["Auto Reroll Aura"] = "Changer l'aura automatiquement", Others = "Autres", ["Remove Gacha Animation"] = "Supprimer l'animation du gacha", ["Destroy stored Powers"] = "Détruire les pouvoirs quand le stockage est plein", ["Points Amount"] = "Nombre de points", ["Auto Stats"] = "Statistiques automatiques", ["Select Stats"] = "Choisir les statistiques", Health = "Santé", Melee = "Corps à corps", Locations = "Lieux", Islands = "Îles", Quests = "Quêtes", ["Bounty/Fame"] = "Prime/Renommée", ["Teleport to random player"] = "Se téléporter vers un joueur aléatoire", AimBot = "AimBot", ["AimBot Players"] = "AimBot sur les joueurs", ["AimBot Monsters"] = "AimBot sur les monstres", Esp = "ESP", ["Esp Players"] = "ESP des joueurs", ["Esp Islands"] = "ESP des îles", ["Safe Zone"] = "Zone sûre", ["PvP On"] = "JcJ actif", ["PvP Off"] = "JcJ désactivé", ["Auto Buy"] = "Achat automatique", ["Auto Buy Abilities"] = "Acheter les compétences automatiquement", ["Aura, Instinct & Flash Step"] = "Aura, Instinct et Flash Step", Weapons = "Armes", Ability = "Compétences", ["Fighting Style"] = "Style de combat", ["Buy %s"] = "Acheter %s", ["Start One Click [ BETA ]"] = "Démarrer un clic [BÊTA]", Settings = "Paramètres", ["Buy all gamepass"] = "Acheter tous les passes", ["farm gems and buy all gamepass"] = "Récolte des gemmes et achète tous les passes", ["Awaken Race V2"] = "Éveiller la race V2", ["get race V2 if you don't have"] = "Obtient la race V2 si nécessaire", ["Upgrade quest limit"] = "Augmenter la limite de quêtes", ["buy quest scroll and use"] = "Achète et utilise le Quest Scroll", ["Get all aura Colors"] = "Obtenir toutes les couleurs d'aura", ["get all aura colors after purchasing the aura"] = "Obtient toutes les couleurs après l'achat de l'aura", ["End-Game"] = "Objectif final", ["Farm Lord Sus"] = "Farmer Lord Sus", ["Farm Evil Noob"] = "Farmer Evil Noob", ["Farm Raid"] = "Farmer les raids", ["Redeem All Codes"] = "Utiliser tous les codes", ["Job id"] = "ID du serveur", ["Input Job Id"] = "Saisir l'ID du serveur", ["Join From Clipboard"] = "Rejoindre depuis le presse-papiers", ["Farm Distance"] = "Distance de farm", ["Auto Aura"] = "Aura automatique", ["Auto Attack"] = "Attaque automatique", ["Bring Mobs"] = "Regrouper les ennemis", ["Anti AFK"] = "Anti AFK", ["Auto Equip"] = "Équiper automatiquement", ["Sword & accessory"] = "Épée et accessoire", Team = "Équipe", ["Join Cheems Team"] = "Rejoindre l'équipe Cheems", ["Join Floppa Team"] = "Rejoindre l'équipe Floppa", ["Remove Notifications"] = "Supprimer les notifications", ["No Stun"] = "Sans étourdissement", ["Inf sky jump"] = "Sauts aériens infinis", Language = "Langue", ["Language changes apply on next run."] = "Le changement de langue s'applique au prochain lancement.", auto = "Automatique", ["Infinite Damage"] = "Dégâts infinis", ["Works with: Popcat, Baller, Paw Power, Snow Power, Sand Power, Water Power."] = "Fonctionne avec : Popcat, Baller, Paw Power, Snow Power, Sand Power, Water Power." }
+end)
+
+-- Module '_' (LVM5 Chunk 94): Translator & String Formatter
+registerModule("_", function()
+    local v_1 = modules.b()
+    local v_2 = modules.e()
+    local v_3 = { en = modules.W(), pt = modules.X(), es = modules.Y(), fr = modules.Z() }
+    local v_4 = {}
+    local v_5 = v_3.en
+    v_4.load = function(arg_1)
+        local v_2 = (arg_1 or v_2.language)
+        if ((not v_2) or (v_2 == "auto")) then
+            v_2 = v_1.localPlayer.LocaleId
+            if ((not v_2) or (v_2 == "")) then
+                v_2 = v_1.localizationService.RobloxLocaleId
+            end
+        end
+        local v_3 = (((type(v_2) == "string") and v_2:lower():match("^%a%a")) or "en")
+        v_4.language = ((v_3[v_3] and v_3) or "en")
+        v_5 = v_3[v_4.language]
+    end
+    v_4.get = function(arg_1)
+        local v_2 = (arg_1 and (v_5[arg_1] or v_3.en[arg_1]))
+        if (type(v_2) == "string") then
+            return v_2, nil
+        end
+        if (type(v_2) == "table") then
+            return (v_2[1] or arg_1), v_2[2]
+        end
+        if ((type(arg_1) == "string") and (arg_1:sub(1, 4) == "Buy ")) then
+            return (v_5["Buy %s"] or "Buy %s"):format(arg_1:sub(5)), nil
+        end
+        return arg_1, nil
+    end
+    v_4.format = function(arg_1, ...)
+        return string.format(v_4.get(arg_1), ...)
+    end
+    return v_4
+end)
+
+-- Module 'aa' (LVM5 Chunk 98): UI Library Wrapper (Window, Tabs, Controls & Flag Persistence)
+registerModule("aa", function()
+    local v_1 = modules.b()
+    local v_2 = modules._()
+    local v_3 = v_1.environment
+    local v_4 = {}
+    local v_5 = function(arg_1)
+        if (type(arg_1) == "number") then
+            return arg_1
+        end
+        if (type(arg_1) == "string") then
+            return tonumber(arg_1)
+        end
+        return nil
+    end
+    local v_6 = function(arg_1)
+        if (typeof(arg_1) == "Instance") then
+            return arg_1.Name
+        end
+        return tostring(arg_1)
+    end
+    local v_7 = function(arg_1)
+        local v_2, v_3 = v_2.get(arg_1[1])
+        return v_2, (v_3 or v_2.get(arg_1.description))
+    end
+    local v_8 = function(arg_1, arg_2)
+        local v_3 = arg_2
+        if (type(arg_1) == "function") then
+            v_3 = (v_3 or arg_1)
+        end
+        local v_4 = nil
+        if ((type(arg_1) == "table") and ((arg_1[1] ~= nil) and (arg_1[2] ~= nil))) then
+            v_4 = arg_1
+        end
+        return v_3, v_4
+    end
+    local v_9 = function(arg_1)
+        if (not arg_1) then
+            return nil
+        end
+        local v_2 = arg_1[1][arg_1[2]]
+        if ((type(v_2) == "table") and (next(v_2) == nil)) then
+            return nil
+        end
+        return v_2
+    end
+    local v_10 = function(arg_1, arg_2)
+        local v_3 = v_9(arg_1)
+        if (v_3 ~= nil) then
+            return v_3
+        end
+        if (arg_1 and (arg_2 ~= nil)) then
+            arg_1[1][arg_1[2]] = arg_2
+        end
+        return arg_2
+    end
+    local v_11 = {}
+    v_11.__index = v_11
+    local v_12 = function(arg_1)
+        return setmetatable({}, { __index = function(p2_1, p2_2)
+            local v2_3 = arg_1[p2_2]
+            if (type(v2_3) == "function") then
+                return function(p3_1, ...)
+                return v2_3(arg_1, ...)
+            end
+            end
+            return v2_3
+        end, __newindex = function(p2_1, p2_2, p2_3)
+            if (p2_2 == "OnChanging") then
+                arg_1:SetTextFilter(function(p3_1)
+                local v3_2 = p2_3(p3_1)
+                if (v3_2 == nil) then
+                    return nil
+                end
+                return tostring(v3_2)
+            end)
+            else
+                arg_1[p2_2] = p2_3
+            end
+        end })
+    end
+    v_11.addToggle = function(arg_1, arg_2)
+        local v_3, v_4 = v_7(arg_2)
+        local v_5 = arg_2[2]
+        if (type(v_5) == "string") then
+            v_4, v_5 = (v_4 or v_2.get(v_5)), nil
+        end
+        local v_6, v_7 = v_8(arg_2[3], arg_2.callback)
+        local v_8 = (v_10(v_7, (v_5 or false)) == true)
+        arg_1.raw:AddToggle({ Name = v_3, Description = v_4, Default = v_8, Flag = (arg_2.flag or arg_2[4]), Callback = function(p2_1)
+            if (p2_1 == nil) then
+                return
+            end
+            if v_7 then
+                v_7[1][v_7[2]] = p2_1
+            end
+            if v_6 then
+                v_6(p2_1)
+            end
+        end })
+    end
+    v_11.addDropdown = function(arg_1, arg_2)
+        local v_3, v_4 = v_7(arg_2)
+        local v_5 = (arg_2.multiSelect == true)
+        local v_6, v_7 = v_8(arg_2[4], arg_2.callback)
+        local v_8 = {}
+        local v_9 = {}
+        for v_10, v_11 in ipairs((arg_2[2] or {})) do
+            local v_12 = v_2.get(v_6(v_11))
+            v_8[((#v_8) + 1)] = v_12
+            v_9[v_12] = v_11
+        end
+        local v_13 = nil
+        if v_5 then
+            local v_14 = v_9(v_7)
+            if (v_14 == nil) then
+                v_14 = {}
+                for v_15, v_16 in ipairs(v_8) do
+                    v_14[v_6(v_9[v_16])] = false
+                end
+                for v_17, v_18 in ipairs((arg_2[3] or {})) do
+                    v_14[v_6(v_18)] = true
+                end
+                if v_7 then
+                    v_7[1][v_7[2]] = v_14
+                end
+            end
+            v_13 = {}
+            for v_19, v_20 in ipairs(v_8) do
+                if v_14[v_6(v_9[v_20])] then
+                    v_13[((#v_13) + 1)] = v_20
+                end
+            end
+        else
+            local v_21 = v_10(v_7, arg_2[3])
+            if ((v_21 ~= nil) and ((type(v_21) ~= "table") and (v_21 ~= ""))) then
+                v_13 = v_2.get(v_6(v_21))
+            end
+        end
+        local v_22 = function(p2_1)
+            if v_5 then
+                if (type(p2_1) ~= "table") then
+                    return
+                end
+                local v2_2 = p2_1
+                local v2_3 = {}
+                local v2_4 = {}
+                for v2_5, v2_6 in ipairs(v_8) do
+                    v2_3[v_6(v_9[v2_6])] = false
+                end
+                for v2_7, v2_8 in ipairs(v2_2) do
+                    if (v_9[v2_8] ~= nil) then
+                        v2_3[v_6(v_9[v2_8])] = true
+                        v2_4[((#v2_4) + 1)] = v_9[v2_8]
+                    end
+                end
+                if v_7 then
+                    v_7[1][v_7[2]] = v2_3
+                end
+                if v_6 then
+                    v_6(v2_4)
+                end
+                return
+            end
+            local v2_9 = (((type(p2_1) == "table") and p2_1[1]) or p2_1)
+            local v2_10 = v_9[v2_9]
+            if (v2_10 == nil) then
+                return
+            end
+            if v_7 then
+                v_7[1][v_7[2]] = v2_10
+            end
+            if v_6 then
+                v_6(v2_10)
+            end
+        end
+        arg_1.raw:AddDropdown({ Name = v_3, Description = v_4, Options = v_8, Default = v_13, MultiSelect = v_5, Flag = (arg_2.flag or arg_2[5]), Callback = v_22 })
+    end
+    v_11.addSlider = function(arg_1, arg_2)
+        local v_3, v_4 = v_7(arg_2)
+        local v_5, v_6 = arg_2[2], arg_2[3]
+        local v_7, v_8 = v_8(arg_2[6], arg_2.callback)
+        local v_9 = (v_5(v_10(v_8, arg_2[5])) or v_5)
+        arg_1.raw:AddSlider({ Name = v_3, Description = v_4, Min = v_5, Max = v_6, Increment = (arg_2[4] or 1), Default = math.clamp(v_9, v_5, v_6), Flag = (arg_2.flag or arg_2[7]), Callback = function(p2_1)
+            if (p2_1 == nil) then
+                return
+            end
+            if v_8 then
+                v_8[1][v_8[2]] = p2_1
+            end
+            if v_7 then
+                v_7(p2_1)
+            end
+        end })
+    end
+    v_11.addButton = function(arg_1, arg_2)
+        local v_3, v_4 = v_7(arg_2)
+        arg_1.raw:AddButton({ Name = v_3, Description = (v_4 or v_2.get(arg_2[3])), Debounce = arg_2.debounce, Callback = (arg_2[2] or (arg_2.callback or function()
+        end)) })
+    end
+    v_11.addTextBox = function(arg_1, arg_2)
+        local v_3, v_4 = v_7(arg_2)
+        local v_5, v_6 = v_8(arg_2[4], arg_2.callback)
+        local v_7 = v_10(v_6, (v_5(arg_2[2]) or arg_2[2]))
+        local v_8 = arg_1.raw:AddTextBox({ Name = v_3, Description = v_4, Default = (((v_7 ~= nil) and tostring(v_7)) or nil), ClearOnFocus = (arg_2[3] == true), Placeholder = v_2.get((arg_2[5] or arg_2.placeholder)), Flag = arg_2.flag, Callback = function(p2_1)
+            if (p2_1 == nil) then
+                return
+            end
+            if v_6 then
+                v_6[1][v_6[2]] = (v_5(p2_1) or p2_1)
+            end
+            if v_5 then
+                v_5(p2_1)
+            end
+        end })
+        return v_12(v_8)
+    end
+    v_11.addSection = function(arg_1, arg_2)
+        return arg_1.raw:AddSection(v_2.get(arg_2))
+    end
+    v_11.addDiscordInvite = function(arg_1, arg_2)
+        return arg_1.raw:AddDiscordInvite({ Title = (arg_2.title or arg_2.name), Description = arg_2.description, Banner = (arg_2.banner or arg_2.logo), Logo = arg_2.logo, Invite = arg_2.invite, Members = arg_2.members, Online = arg_2.online })
+    end
+    v_11.select = function(arg_1)
+        arg_1.raw:Select()
+    end
+    v_4.makeWindow = function(arg_1, arg_2)
+        return arg_1:MakeWindow({ Title = arg_2.title, SubTitle = arg_2.subtitle, ScriptFolder = arg_2.scriptFolder })
+    end
+    v_4.makeTab = function(arg_1, arg_2)
+        local v_3 = v_2.get(arg_2.title)
+        return setmetatable({ raw = arg_1:MakeTab({ Title = v_3, Icon = arg_2.icon }) }, v_11)
+    end
+    v_4.addMinimizeButton = function(arg_1, arg_2)
+        local v_3 = arg_1:NewMinimizer({ KeyCode = Enum.KeyCode.LeftControl })
+        local v_4 = v_3:CreateMobileMinimizer((arg_2.button or {}))
+        if arg_2.corner then
+            local v_5 = Instance.new("UICorner")
+            for v_6, v_7 in pairs(arg_2.corner) do
+                v_5[v_6] = v_7
+            end
+            v_5.Parent = v_4
+        end
+        return v_3
+    end
+    v_4.toggle = function(arg_1, arg_2, arg_3, arg_4)
+        arg_2.flag = (arg_2.flag or arg_3)
+        arg_2.callback = (arg_4 or function(p2_1)
+            v_3[arg_2.flag] = p2_1
+        end)
+        arg_1:addToggle(arg_2)
+    end
+    v_4.section = function(arg_1, arg_2)
+        arg_1:addSection(arg_2)
+    end
+    return v_4
+end)
+
+-- Module 'ab': UI Tab: Main Farming & Sea Events (Chunks 114 & 115)
+registerModule("ab", function()
+    local v_1 = modules._()
+    local v_2 = modules.b()
+    local v_3 = modules.e()
+    local v_4 = modules.a()
+    local v_5 = modules.w()
+    local v_6 = modules.r()
+    local v_7 = modules.n()
+    local v_8 = v_2.environment
+    return function(tab, addToggle, addSection)
+        local uiScales = { Large = 1, Medium = 0.75, Small = 0.6 }
+        local allSkills = { "Z", "X", "C", "V", "F" }
+        local defaultSkills = { "Z", "X" }
+        local function onScaleChanged(scaleName)
+            v_4.library:SetUIScale(uiScales[scaleName] or 1)
+        end
+        tab:addDropdown({ "Farm Tool", v_5.toolTypes, v_3.toolFarm, { v_3, "toolFarm" }, "toolFarm" })
+        tab:addDropdown({ "UI Scale", { "Small", "Medium", "Large" }, "Large", onScaleChanged, "uiScale" })
+        addToggle(tab, { "Infinite Damage", "Works with: Popcat, Baller, Paw Power, Snow Power, Sand Power, Water Power." }, "infiniteDamage")
+        addSection(tab, "Farm")
+        addToggle(tab, { "Auto Farm Level", v_1.format("MaxLevel: %i", v_5.maxLevel) }, "levelFarm")
+        addToggle(tab, { "Auto Farm Nearest" }, "nearestFarm")
+        addSection(tab, "Enemies")
+        tab:addDropdown({ "Select Enemie", v_7.enemyList, v_7.enemyList[1], { v_8, "selectedEnemy" }, "selectedEnemy" })
+        addToggle(tab, { "Auto Farm Selected" }, "farmSelectedEnemy")
+        addToggle(tab, { "Take Quest [ Enemie Selected ]", true }, "takeSelectedQuest")
+        addSection(tab, "Sea Event")
+        addToggle(tab, { "Auto Meme Beast [ Spawns every 30 Minutes ]", "Drops: Portal ( <25% ), Meme Cube ( <50% )" }, "memeBeast")
+        addSection(tab, "Raid")
+        addToggle(tab, { "Auto Farm Raid", v_1.format("Req: Level %i", v_6.level.raid) }, "raidFarm")
+        addSection(tab, "Skills")
+        tab:addDropdown({ "Select Skills", allSkills, defaultSkills, { v_3, "skillsSelected" }, "skillsSelected", multiSelect = true })
+        addToggle(tab, { "Auto Use Skills" }, "autoSkill")
+    end
+end)
+
+-- Module 'ac' (LVM5 Chunk 118): UI Tab: Bosses, Weapons, Race V2 & Popcat Clicker
+registerModule("ac", function()
+    local v_1 = modules._()
+    local v_2 = modules.b()
+    local v_3 = modules.f()
+    local v_4 = modules.i()
+    local v_5 = modules.r()
+    local v_6 = modules.e()
+    local v_7 = v_2.environment
+    local v_8 = v_2.runService
+    local v_9 = v_2.newCFrame
+    return function(arg_1, arg_2, arg_3)
+        if v_7.popcatConnection then
+            v_7.popcatConnection:Disconnect()
+        end
+        local v_4 = nil
+        local v_5 = 0
+        local v_6 = function(p2_1)
+            v_5 = (v_5 + 1)
+            local v2_2 = v_5
+            v_7.clickPopcat = p2_1
+            if v_4 then
+                v_4:Disconnect()
+                v_4 = nil
+            end
+            v_7.popcatConnection = nil
+            if (not p2_1) then
+                return
+            end
+            local v2_3 = v_3.island.FloppaIsland.Popcat_Clickable.Part.ClickDetector
+            if (v_4.goTo(v_9(400, -37, -588)) == false) then
+                v_7.clickPopcat = false
+                return
+            end
+            if ((v2_2 ~= v_5) or (not v_7.clickPopcat)) then
+                return
+            end
+            local v2_4 = 0
+            v_4 = v_8.Heartbeat:Connect(function(p3_1)
+                if ((not v_7.clickPopcat) or (not v2_3.Parent)) then
+                    v_4:Disconnect()
+                    v_4 = nil
+                    v_7.popcatConnection = nil
+                    return
+                end
+                local v3_2 = math.floor(math.clamp((tonumber(v_6.popcatClicksPerSecond) or 10), 1, 100))
+                v2_4 = math.min((v2_4 + p3_1), 1)
+                local v3_3 = math.floor(((v2_4 * v3_2) + 1e-09))
+                v2_4 = math.max(0, (v2_4 - (v3_3 / v3_2)))
+                for v3_4 = 1, v3_3 do
+                    fireclickdetector(v2_3)
+                end
+            end)
+            v_7.popcatConnection = v_4
+        end
+        arg_3(arg_1, "Bosses")
+        arg_2(arg_1, { "Auto Giant Pumpkin", "Drops: Pumpkin Head ( <10% ), Nugget Man ( <25% )" }, "giantPumpkin")
+        arg_2(arg_1, { "Auto Evil Noob", "Drops: Yellow Blade ( <5% ), Noob Friend ( <10% )" }, "evilNoob")
+        arg_2(arg_1, { "Auto Lord Sus", "Drops: Purple Katana ( <5% ), Sus Pals ( <10% )" }, "lordSus")
+        arg_3(arg_1, "Race")
+        arg_2(arg_1, { "Auto Awakening Orb", v_1.format("Req: Level %i", v_5.level.raceV2Orb) }, "raceV2Orb")
+        arg_3(arg_1, "Floppa")
+        arg_2(arg_1, { "Auto Floppa [ Exclusive Weapon ]" }, "floppaSword")
+        arg_3(arg_1, "Popcat")
+        arg_1:addSlider({ "Clicks per Second", 1, 100, 1, v_6.popcatClicksPerSecond, { v_6, "popcatClicksPerSecond" }, "popcatClicksPerSecond" })
+        arg_2(arg_1, { "Auto Popcat" }, "clickPopcat", v_6)
+        arg_3(arg_1, "Unlock")
+        arg_2(arg_1, { "Auto Baller", "Farms 10 balls and buys Baller" }, "unlockBaller")
+        arg_2(arg_1, { "Auto Weapons", "Farms the materials and unlocks the Weapons section" }, "unlockWeapons")
+        arg_2(arg_1, { "Auto Quest Limit", "Uses the Quest Scroll (or buys it)" }, "unlockQuestLimit")
+        arg_2(arg_1, { "Auto Gamepasses", v_1.format("From level %i: farms gems and buys all gamepasses", v_5.level.gamepasses) }, "unlockGamepasses")
+    end
+end)
+
+-- Module 'ad' (LVM5 Chunk 122): Aura & Instinct Reroll / Team Join / Codes Helper
+registerModule("ad", function()
+    local v_1 = modules.f()
+    local v_2 = modules.h()
+    local v_3 = modules.j()
+    local v_4 = modules.m()
+    local v_5 = modules.u()
+    local v_6 = {}
+    v_6.redeemCodes = function()
+        return pcall(function()
+            for v2_1, v2_2 in pairs(require(v_1.gameModules.CodeList)) do
+                if ((type(v2_1) == "string") and ((type(v2_2) == "table") and v2_2.Status)) then
+                    v_2.invoke("code", v2_1)
+                end
+            end
+        end)
+    end
+    v_6.randomAura = function()
+        if (v_4.getData("Gem") >= v_5.actionPrices.rerollAura.Gem) then
+            if v_3:canRerollAura() then
+                v_2.fire("modules", "Reroll_Color", "Halfed Sorcerer")
+            else
+                return true
+            end
+        end
+    end
+    v_6.joinTeam = { cheems = function()
+        v_2.fire("modules", "Change_Team", "Cheems Recruiter")
+    end, floppa = function()
+        v_2.fire("modules", "Change_Team", "Floppa Recruiter")
+    end }
+    return v_6
+end)
+
+-- Module 'ae' (LVM5 Chunk 124): Power Gacha Roll Controller
+registerModule("ae", function()
+    local v_1 = modules.b()
+    local v_2 = modules.h()
+    local v_3 = {}
+    local v_4 = false
+    v_3.normalizeAmount = function(arg_1)
+        local v_2 = tonumber(arg_1)
+        if ((not v_2) or (v_2 ~= v_2)) then
+            return 1
+        end
+        return math.floor(math.clamp(v_2, 1, 500))
+    end
+    v_3.roll = function(arg_1, arg_2, arg_3)
+        if v_4 then
+            return false
+        end
+        v_4 = true
+        local v_4 = v_3.normalizeAmount(arg_1)
+        local v_5 = v_4
+        local v_6 = false
+        local v_7 = (((arg_2 == "Gem") and "Doge Gacha") or "Floppa Gacha")
+        for v_8 = 1, v_4 do
+            v_1.spawn(function()
+            if ((not arg_3) or arg_3()) then
+                local v2_1, v2_2 = pcall(v_2.fire, "modules", "Random_Power", { Type = "Once", NPCName = v_7, GachaType = (((arg_2 == "Gem") and "Gem") or "Money") })
+                if (not v2_1) then
+                    if (not v_6) then
+                        warn(("Gacha: " .. tostring(v2_2)))
+                    end
+                    v_6 = true
+                end
+            end
+            v_5 = (v_5 - 1)
+        end)
+        end
+        while (v_5 > 0) do
+            v_1.wait()
+        end
+        v_4 = false
+        return (not v_6)
+    end
+    return v_3
+end)
+
+-- Module 'af': UI Tab: Powers, Store/Unstore, Gacha & Aura Reroll (Chunks 125, 126, 127, 128, 130)
+registerModule("af", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.e()
+    local v_4 = modules.h()
+    local v_5 = modules.j()
+    local v_6 = modules.ad()
+    local v_7 = modules.ae()
+    local v_8 = v_1.environment
+    local v_9 = v_1.wait
+    local v_10 = v_1.spawn
+    local v_11 = v_1.localPlayer
+    local v_12 = v_2.itemFolder
+    return function(tab)
+        local v1_1 = { "Money", "Gem" }
+        local function v1_2(tool)
+            return tool:IsA("Tool") and (tool.ToolTip == "Power" and tool:GetAttribute("Using") == nil)
+        end
+        local v1_3 = false
+        local autoRerollPowerFn = function(p2_1)
+            v_8.autoRerollPower = p2_1
+            if ((not p2_1) or v1_3) then
+                return
+            end
+            v1_3 = true
+            while v_8.autoRerollPower do
+                local v2_2 = v_7.roll(v_3.gachaAmount, v_3.rerollPowerMethod, function()
+                return v_8.autoRerollPower
+            end)
+                if (not v2_2) then
+                    v_1.wait(0.5)
+                end
+                v_9(0.1)
+            end
+            v1_3 = false
+        end
+        local function rollPowersOnce()
+            v_7.roll(v_3.gachaAmount, v_3.rerollPowerMethod)
+        end
+        local autoStorePowersFn = function(p2_1)
+            v_8.autoStorePowers = p2_1
+            while v_8.autoStorePowers do
+                v_9(0.1)
+                for v2_2, v2_3 in ipairs(v_11.Backpack:GetChildren()) do
+                    if v1_2(v2_3) then
+                        if v_5:canStorePower(v2_3.Name) then
+                            v2_3.Parent = v_11.Character
+                            v_4.fire("modules", "Eatable_Power", { Action = "Store", Tool = v2_3 })
+                        else
+                            if v_3.destroyMaxCap then
+                                v2_3:Destroy()
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        local collectAllDropsFn = function()
+            for v2_1, v2_2 in ipairs(workspace.Dropped_Items:GetChildren()) do
+                if (v2_2:FindFirstChild("Handle") and v2_2.Handle:FindFirstChild("TouchInterest")) then
+                    firetouchinterest(v2_2.Handle, v_11.Character.PrimaryPart, 0)
+                end
+            end
+        end
+        local function dropAllPowersFn()
+            for _, tool in ipairs(v_11.Backpack:GetChildren()) do
+                if v1_2(tool) then
+                    tool.Parent = v_11.Character
+                    v_4.fire("modules", "Eatable_Power", { Action = "Drop", Tool = tool })
+                end
+            end
+        end
+        local function clampUnstoreAmount(val)
+            local num = tonumber(val)
+            return (num and math.clamp(num, 1, 99)) or 1
+        end
+        local function setUnstorePower(item)
+            v_3.unstorePower = item and item.Name
+        end
+        local function unstorePowerFn()
+            for _ = 1, (v_3.unstoreAmount or 1), 1 do
+                v_10(function()
+                    v_4.invoke("updateInventory", "Power", { Action = "Unstore", SelectedItem = v_3.unstorePower })
+                end)
+            end
+        end
+        local function autoRerollAuraFn(state)
+            v_8.autoRerollAura = state
+            while v_8.autoRerollAura do
+                v_9()
+                if v_6.randomAura() then
+                    break
+                end
+            end
+        end
+        local function toggleGachaAnimation(hide)
+            v_11.PlayerGui.GachaGui.GachaFrame.Visible = not hide
+        end
+        tab:addSection("Drops")
+        tab:addButton({ "Collect all drops", collectAllDropsFn })
+        tab:addButton({ "Drop all powers", dropAllPowersFn })
+        tab:addSection("Store")
+        tab:addToggle({ "Auto Store Powers", false, autoStorePowersFn, "autoStore" })
+        tab:addSection("Unstore")
+        tab:addDropdown({ "Select Power", v_12.Power:GetChildren(), "", setUnstorePower, "unstorePower" })
+        tab:addTextBox({ "Unstore Amount", "1", false, { v_3, "unstoreAmount" }, "Number: 1-99" }).OnChanging = clampUnstoreAmount
+        tab:addButton({ "Unstore Power", unstorePowerFn })
+        tab:addSection("Power Gacha")
+        tab:addDropdown({ "Gacha Type", v1_1, "Money", { v_3, "rerollPowerMethod" }, "rerollPowerMethod" })
+        tab:addTextBox({
+            "Gacha Amount",
+            tostring(v_3.gachaAmount),
+            false,
+            function(val)
+                v_3.gachaAmount = v_7.normalizeAmount(val)
+            end,
+            "1-500",
+            flag = "gachaAmount"
+        }).OnChanging = v_7.normalizeAmount
+        tab:addButton({ "Roll Powers", rollPowersOnce })
+        tab:addToggle({ "Auto Reroll Power", false, autoRerollPowerFn, "autoRerollPower" })
+        tab:addSection("Aura Color")
+        tab:addToggle({ "Auto Reroll Aura", false, autoRerollAuraFn, "autoRerollAura" })
+        tab:addSection("Others")
+        tab:addToggle({ "Remove Gacha Animation", false, toggleGachaAnimation, "gachaAnimation" })
+        tab:addToggle({ "Destroy stored Powers", false, { v_3, "destroyMaxCap" }, "destroyStored" })
+    end
+end)
+
+-- Module 'ag' (LVM5 Chunk 133): UI Tab: Stats & Auto-Upgrade Points
+registerModule("ag", function()
+    local v_1 = modules.b()
+    local v_2 = modules.e()
+    local v_3 = modules.h()
+    local v_4 = modules.w()
+    local v_5 = modules.m()
+    local v_6 = v_1.environment
+    local v_7 = v_1.wait
+    local v_8 = v_5.getData
+    return function(arg_1)
+        local v_2 = {}
+        local v_3 = { "Power", "Health", "Weapon", "Melee" }
+        local v_4 = { Power = "MemePowerLevel", Health = "DefenseLevel", Weapon = "SwordLevel", Melee = "MeleeLevel" }
+        local v_5 = function(p2_1)
+            v_6.autoStats = p2_1
+            while v_6.autoStats do
+                v_7()
+                local v2_2 = v_8("SkillPoint")
+                if (v2_2 >= 1) then
+                    for v2_3, v2_4 in pairs(v_2) do
+                        local v2_5 = v_4[v2_3]
+                        local v2_6 = (v_4.maxLevel - v_8(v2_5))
+                        if (v2_4 and (v2_6 > 0)) then
+                            local v2_7 = math.clamp(math.min((v_2.statsPoints or 3), v2_2), 1, v2_6)
+                            v_3.invoke("statsFunction", { Target = v2_5, Action = "UpgradeStats", Amount = v2_7 })
+                        end
+                    end
+                end
+            end
+        end
+        arg_1:addSlider({ "Points Amount", 1, 100, 1, v_2.statsPoints, { v_2, "statsPoints" }, "statsPoints" })
+        arg_1:addToggle({ "Auto Stats", false, v_5, "autoStats" })
+        arg_1:addSection("Select Stats")
+        for v_6, v_7 in ipairs(v_3) do
+            arg_1:addToggle({ v_7, false, { v_2, v_7 }, ("select" .. v_7) })
+        end
+    end
+end)
+
+-- Module 'ah' (LVM5 Chunk 134): UI Tab: Teleport (Islands & Quests)
+registerModule("ah", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.w()
+    local v_4 = modules.i()
+    local v_5 = v_1.insert
+    return function(arg_1)
+        local v_2 = {}
+        for v_3, v_4 in ipairs(v_2.location:WaitForChild("SpawnLocations"):GetChildren()) do
+            if (not table.find(v_3.ignoredSpawns, v_4.Name)) then
+                v_5(v_2, v_4)
+            end
+        end
+        local v_5 = function(p2_1)
+            if (typeof(p2_1) ~= "Instance") then
+                return
+            end
+            local v2_2 = ((p2_1:IsA("BasePart") and p2_1.CFrame) or p2_1:GetPivot())
+            return v_4.goTo(v2_2)
+        end
+        arg_1:addSection("Locations")
+        arg_1:addDropdown({ "Islands", v_2, {}, v_5 })
+        arg_1:addDropdown({ "Quests", v_2.questLocation:GetChildren(), {}, v_5 })
+    end
+end)
+
+-- Module 'ai': UI Tab: Abilities & Fighting Styles Shop (Chunks 135 & 136)
+registerModule("ai", function()
+    local v_1 = modules.b()
+    local v_2 = modules.h()
+    local v_3 = modules.x()
+    local v_4 = modules.z()
+    local v_5 = v_1.environment
+    local v_6 = v_1.wait
+    return function(tab)
+        local function autoBuyAbilitiesFn(state)
+            v_5.autoBuyAbility = state
+            while v_5.autoBuyAbility do
+                v_6()
+                v_4:buyAllAbilities()
+            end
+        end
+        tab:addSection("Auto Buy")
+        tab:addToggle({ "Auto Buy Abilities", false, autoBuyAbilitiesFn, "autoBuyAbility", description = "Aura, Instinct & Flash Step" })
+        for _, section in ipairs(v_3.sections) do
+            tab:addSection(section.name)
+            for _, item in ipairs(section.items) do
+                local remoteArgs = item.remote
+                tab:addButton({
+                    "Buy " .. item.name,
+                    function()
+                        v_2.fire("modules", unpack(remoteArgs))
+                    end,
+                    description = item.description
+                })
+            end
+        end
+    end
+end)
+
+-- Module 'aj' (LVM5 Chunk 138): UI Tab: Shop (Weapons, Fight Styles & Gamepasses)
+registerModule("aj", function()
+    local v_1 = modules.b()
+    local v_2 = modules.i()
+    local v_3 = {}
+    v_3.isInSafeZone = function(arg_1)
+        local v_2 = (arg_1 and arg_1.Character)
+        return ((v_2 ~= nil) and (v_2:GetAttribute("Safezone") == true))
+    end
+    v_3.isRaiding = function(arg_1)
+        return ((arg_1 ~= nil) and (arg_1:GetAttribute("Raiding") == true))
+    end
+    v_3.isPvpOn = function(arg_1)
+        local v_2 = (arg_1 and arg_1.Character)
+        if ((not v_2.isAlive(v_2)) or (v_3.isInSafeZone(arg_1) or v_3.isRaiding(arg_1))) then
+            return false
+        end
+        local v_3 = v_2:GetAttribute("PvpDisabled")
+        if (v_3 == true) then
+            return false
+        end
+        if ((type(v_3) == "number") and ((tick() - v_3) < 600)) then
+            return false
+        end
+        return true
+    end
+    v_3.getTeamColor = function(arg_1)
+        if (arg_1 and (arg_1.Team and (not arg_1.Neutral))) then
+            return arg_1.TeamColor.Color
+        end
+        return Color3.fromRGB(220, 220, 220)
+    end
+    v_3.isOpponent = function(arg_1)
+        local v_2 = v_1.localPlayer
+        if ((not arg_1) or (arg_1 == v_2)) then
+            return false
+        end
+        if (arg_1.Neutral or (v_2.Neutral or ((not arg_1.Team) or (not v_2.Team)))) then
+            return true
+        end
+        return ((arg_1.Team.Name == "Floppa") or (arg_1.Team ~= v_2.Team))
+    end
+    v_3.canAttack = function(arg_1)
+        return (v_3.isOpponent(arg_1) and v_3.isPvpOn(arg_1))
+    end
+    return v_3
+end)
+
+-- Module 'ak' (LVM5 Chunk 139): Player ESP & Hitbox Visualizer
+registerModule("ak", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.e()
+    local v_4 = modules.l()
+    local v_5 = modules.aj()
+    local v_6 = v_1.players
+    local v_7 = v_1.localPlayer
+    local v_8 = v_1.environment
+    local v_9 = v_1.wait
+    local v_10 = v_1.huge
+    local v_11 = v_1.newCFrame
+    local v_12 = v_1.newVector3
+    local v_13 = v_2.characters
+    local v_14 = function()
+        local v_1 = v_10
+        local v_2 = nil
+        for v_3, v_4 in ipairs(v_6:GetPlayers()) do
+            local v_5 = v_4.Character
+            if (v_5.canAttack(v_4) and (v_5.Parent == v_13)) then
+                local v_6 = v_4:FindFirstChild("PlayerData")
+                local v_7 = (v_6 and v_6:FindFirstChild("Level"))
+                local v_8 = (v_7 and v_7.Value)
+                if (v_8 and (v_8 < v_1)) then
+                    v_1 = v_8
+                    v_2 = v_5
+                end
+            end
+        end
+        return v_2
+    end
+    local v_15 = function(arg_1)
+        local v_2 = (arg_1 and v_6:GetPlayerFromCharacter(arg_1))
+        return (v_5.canAttack(v_2) and (arg_1.Parent == v_13))
+    end
+    return function()
+        local v_1 = {}
+        v_1.goToRandom = function(p2_1)
+            v_8.randomBounty = p2_1
+            local v2_2 = v_14()
+            while v_8.randomBounty do
+                v_9()
+                if v_15(v2_2) then
+                    local v2_3 = v2_2.PrimaryPart
+                    if (v2_3 and (v_7:DistanceFromCharacter(v2_3.Position) >= 350)) then
+                        characterSystem.goTo((v2_3.CFrame * v_11(0, 0, 30)))
+                    end
+                else
+                    v2_2 = v_14()
+                end
+            end
+        end
+        v_1.autoBounty = function(p2_1)
+            v_8.autoBounty = p2_1
+            local v2_2 = v_14()
+            while v_8.autoBounty do
+                v_9()
+                if v_15(v2_2) then
+                    local v2_3 = v2_2.PrimaryPart
+                    if v2_3 then
+                        if v2_2:FindFirstChild("Reverse_Mark") then
+                            characterSystem.goTo((v2_3.CFrame + v_12(0, 400, 0)))
+                        else
+                            characterSystem.goTo((v2_3.CFrame * v_3.farmCFrame))
+                            v_4.playerClick()
+                            v_4.useSkills()
+                            v_4.equipWeapon()
+                        end
+                    end
+                else
+                    v2_2 = v_14()
+                end
+            end
+        end
+        return v_1
+    end
+end)
+
+-- Module 'al' (LVM5 Chunk 141): UI Tab: PvP / Players & AimBot Settings
+registerModule("al", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.w()
+    local v_4 = modules.aj()
+    local v_5 = modules._()
+    local v_6 = v_1.players
+    local v_7 = v_1.localPlayer
+    local v_8 = v_1.coreGui
+    local v_9 = v_1.runService
+    local v_10 = v_1.environment
+    local v_11 = v_1.wait
+    local v_12 = v_1.newVector3
+    local v_13 = function(arg_1)
+        return tostring(arg_1):gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;")
+    end
+    return function()
+        for v_1, v_2 in pairs((v_10.espConnections or {})) do
+            v_2:Disconnect()
+        end
+        local v_3 = {}
+        v_10.espConnections = v_3
+        local v_4 = Instance.new("Folder")
+        v_4.Name = "rz_Esp"
+        local v_5 = v_8:FindFirstChild(v_4.Name)
+        if v_5 then
+            v_5:Destroy()
+        end
+        local v_6 = function(p2_1)
+            local v2_2 = Instance.new("Folder")
+            v2_2.Name = p2_1
+            v2_2.Parent = v_4
+            return v2_2
+        end
+        local v_7 = { players = v_6("Players"), islands = v_6("Islands") }
+        v_4.Parent = v_8
+        local v_8 = {}
+        local v_9 = function(p2_1, p2_2, p2_3, p2_4)
+            if ((not p2_2.Parent) or v_8[p2_2]) then
+                return
+            end
+            local v2_5 = ((p2_2:IsA("Model") and p2_2.PrimaryPart) or p2_2)
+            if (not v2_5) then
+                return
+            end
+            v_8[p2_2] = true
+            local v2_6 = Instance.new("BoxHandleAdornment")
+            v2_6.Adornee = v2_5
+            v2_6.Size = v_12(1, 0, 1)
+            v2_6.Name = p2_2.Name
+            v2_6.AlwaysOnTop = true
+            v2_6.ZIndex = 10
+            v2_6.Transparency = 0
+            local v2_7 = Instance.new("BillboardGui")
+            v2_7.Adornee = v2_5
+            v2_7.Size = UDim2.new(0, 100, 0, 150)
+            v2_7.StudsOffset = v_12(0, 1, 0)
+            v2_7.AlwaysOnTop = true
+            local v2_8 = Instance.new("TextLabel")
+            v2_8.BackgroundTransparency = 1
+            v2_8.Position = UDim2.new(0, 0, 0, -50)
+            v2_8.Size = UDim2.new(0, 100, 0, 100)
+            v2_8.TextSize = 10
+            v2_8.TextColor3 = (p2_3 or Color3.new(1, 1, 1))
+            v2_8.TextStrokeTransparency = 0
+            v2_8.TextYAlignment = Enum.TextYAlignment.Bottom
+            v2_8.Text = "..."
+            v2_8.ZIndex = 15
+            v2_8.RichText = true
+            v2_8.Parent = v2_7
+            v2_7.Parent = v2_6
+            v2_6.Parent = p2_1
+            local v2_9 = ("esp" .. p2_1.Name)
+            local v2_10 = nil
+            v2_10 = v_9.Stepped:Connect(function()
+                if ((not v_10[v2_9]) or ((not p2_2.Parent) or ((not v2_5.Parent) or (not v2_6.Parent)))) then
+                    v_8[p2_2] = nil
+                    v_3[p2_2] = nil
+                    v2_10:Disconnect()
+                    v2_6:Destroy()
+                    return
+                end
+                local v3_1 = math.floor(v_7:DistanceFromCharacter(v2_5.Position))
+                local v3_2 = p2_2:FindFirstChild("Humanoid")
+                if v3_2 then
+                    local v3_3 = ("[ %i/%i ] "):format(math.floor(v3_2.Health), math.floor(v3_2.MaxHealth))
+                    local v3_4 = v_13(p2_2.Name)
+                    local v3_5 = ""
+                    if p2_4 then
+                        local v3_6 = v_4.getTeamColor(p2_4)
+                        v3_4 = ("<font color='#%s'>%s</font>"):format(v3_6:ToHex(), v3_4)
+                        local v3_7 = v_4.isPvpOn(p2_4)
+                        local v3_8 = v_5.get(((v3_7 and "PvP On") or "PvP Off"))
+                        if v_4.isInSafeZone(p2_4) then
+                            v3_8 = (v3_8 .. (" · " .. v_5.get("Safe Zone")))
+                        end
+                        v3_5 = ("\n<font color='%s'>%s</font>"):format(((v3_7 and "#19F019") or "#F0A019"), v_13(v3_8))
+                    end
+                    v2_8.Text = (v3_4 .. ("<font color='rgb(160, 160, 160)'> [ " .. (v3_1 .. ("m ]</font>\n" .. ("<font color='rgb(25, 240, 25)'>" .. (v3_3 .. ("</font>" .. v3_5)))))))
+                else
+                    v2_8.Text = ("%s [ %i ]"):format(p2_2.Name, v3_1)
+                end
+            end)
+            v_3[p2_2] = v2_10
+        end
+        local v_10 = {}
+        v_10.players = function(p2_1)
+            v_10.espPlayers = p2_1
+            while v_10.espPlayers do
+                for v2_2, v2_3 in ipairs(v_6:GetPlayers()) do
+                    if ((v2_3 ~= v_7) and v2_3.Character) then
+                        v_9(v_7.players, v2_3.Character, Color3.fromRGB(220, 220, 220), v2_3)
+                    end
+                end
+                v_11(0.5)
+            end
+        end
+        v_10.islands = function(p2_1)
+            v_10.espIslands = p2_1
+            if (not p2_1) then
+                return
+            end
+            for v2_2, v2_3 in ipairs(v_2.location:WaitForChild("SpawnLocations"):GetChildren()) do
+                if (not table.find(v_3.ignoredSpawns, v2_3.Name)) then
+                    v_9(v_7.islands, v2_3, Color3.fromRGB(0, 255, 255))
+                end
+            end
+        end
+        return v_10
+    end
+end)
+
+-- Module 'am' (LVM5 Chunk 143): UI Tab: Discord Invite & Credits
+registerModule("am", function()
+    local v_1 = modules.b().environment
+    local v_2 = modules.ak()
+    local v_3 = modules.al()
+    return function(arg_1)
+        local v_2 = v_2()
+        local v_3 = v_3()
+        arg_1:addSection("Bounty/Fame")
+        arg_1:addToggle({ "Teleport to random player", false, v_2.goToRandom })
+        arg_1:addSection("AimBot")
+        arg_1:addToggle({ "AimBot Players", false, { v_1, "aimBotPlayers" }, "aimBotPlayers" })
+        arg_1:addToggle({ "AimBot Monsters", false, { v_1, "aimBotEnemy" }, "aimBotEnemy" })
+        arg_1:addSection("Esp")
+        arg_1:addToggle({ "Esp Players", false, v_3.players })
+        arg_1:addToggle({ "Esp Islands", false, v_3.islands })
+    end
+end)
+
+-- Module 'an': UI Tab: One-Click Automation (Chunks 144, 145, 146)
+registerModule("an", function()
+    local v_1 = modules.b()
+    local v_2 = modules.z()
+    local v_3 = modules.j()
+    local v_4 = modules.ad()
+    local v_5 = modules.m()
+    local v_6 = modules.r()
+    local v_7 = v_1.environment
+    local v_8 = v_1.wait
+    local v_9 = v_1.spawn
+    local v_10 = v_5.getPlayerLevel
+    return function(tab)
+        local endGameOptions = { "Farm Lord Sus", "Farm Evil Noob", "Farm Raid" }
+        local oneClickToggles = {
+            { "Buy all gamepass", "farm gems and buy all gamepass", "getGamepasses", true },
+            { "Awaken Race V2", "get race V2 if you don't have", "awakenV2", true },
+            { "Upgrade quest limit", "buy quest scroll and use", "questLimit", true },
+            { "Get all aura Colors", "get all aura colors after purchasing the aura", "allAuraColors", true }
+        }
+        local startOneClickFn = function(p2_1)
+            v_7.oneClick = p2_1
+            v_7.oneClickRunId = ((v_7.oneClickRunId or 0) + 1)
+            local v2_2 = v_7.oneClickRunId
+            if (not p2_1) then
+                return
+            end
+            local v2_3 = function()
+                return (v_7.oneClick and (v_7.oneClickRunId == v2_2))
+            end
+            v_9(function()
+                local v3_1 = false
+                local v3_2 = nil
+                while v2_3() do
+                    v_8(0.2)
+                    if (not v2_3()) then
+                        break
+                    end
+                    local v3_3, v3_4 = pcall(function()
+                    local v4_1 = v_7.oneClickSettings
+                    v_3:equipAccessory()
+                    v_3:equipSword()
+                    v_2:buyMissingWeapon()
+                    if (not v2_3()) then
+                        return
+                    end
+                    if (not v_7.autoBuyAbility) then
+                        v_2:buyAllAbilities()
+                    end
+                    if (not v2_3()) then
+                        return
+                    end
+                    if ((not v3_1) and (v_10() >= v_6.level.codes)) then
+                        v3_1 = (v_4.redeemCodes() == true)
+                    end
+                    if (not v2_3()) then
+                        return
+                    end
+                    v_2:buyBaller()
+                    if (not v2_3()) then
+                        return
+                    end
+                    if (v4_1.allAuraColors and v_3:verifyAbility("Aura")) then
+                        v_4.randomAura()
+                    end
+                end)
+                    if ((not v3_3) and (v3_4 ~= v3_2)) then
+                        warn(("[One Click] " .. tostring(v3_4)))
+                    end
+                    v3_2 = (((not v3_3) and v3_4) or nil)
+                end
             end)
         end
-        BrainrotESP.conns = {}
-        destroyAllCards()
+        tab:addToggle({ "Start One Click [ BETA ]", false, startOneClickFn, "oneClick" })
+        tab:addSection("Settings")
+        for _, toggleInfo in ipairs(oneClickToggles) do
+            tab:addToggle({
+                toggleInfo[1],
+                toggleInfo[4],
+                { v_7.oneClickSettings, toggleInfo[3] },
+                toggleInfo[3],
+                description = toggleInfo[2]
+            })
+        end
+        tab:addDropdown({ "End-Game", endGameOptions, "Farm Lord Sus", { v_7.oneClickSettings, "endGame" }, "endGame" })
     end
+end)
 
-    -- ---------------- AUTO KICK ----------------
-    local AutoKick = {
-        running = false,
-        patterns = { "you stole", "you have stolen", "stole from", "you were kicked" },
-        watched = {},
-        conns = {},
+-- Module 'ao': Owner UserId Verification
+registerModule("ao", function()
+    local v_1 = modules.b()
+    return {
+        isOwner = (v_1.localPlayer.UserId == 2764978820)
     }
-    local function matchesKick(text)
-        if type(text) ~= "string" then return false, nil end
-        local low = text:lower()
-        for _, p in ipairs(AutoKick.patterns) do
-            if low:find(p, 1, true) then return true, p end
+end)
+
+-- Module 'ap': UI Tab: Misc Settings, Codes, Team & Movement (Chunks 149 & 150)
+registerModule("ap", function()
+    local v_1 = modules.b()
+    local v_2 = modules.f()
+    local v_3 = modules.e()
+    local v_4 = modules.ao()
+    local v_5 = modules.ad()
+    local v_6 = modules.j()
+    local v_7 = modules.i()
+    local v_8 = v_1.environment
+    local v_9 = v_1.localPlayer
+    local v_10 = v_1.wait
+    local v_11 = v_1.teleportService
+    local v_12 = v_1.huge
+    local v_13 = v_1.newCFrame
+    local v_14 = v_1.newCFrameAngles
+    return function(tab)
+        local defaultMaxJump = 15
+        local function toggleNotifications(hide)
+            v_9.PlayerGui.AnnounceGui.Enabled = not hide
         end
-        return false, nil
-    end
-    local function doKick(reason)
-        if pcall(function() game:Shutdown() end) then return end
-        pcall(function() LP:Kick("AutoKick: " .. tostring(reason or "steal detected")) end)
-    end
-    local function watchLabel(lbl)
-        if AutoKick.watched[lbl] then return end
-        AutoKick.watched[lbl] = true
-        local function check()
-            if not AutoKick.running then return end
-            local hit, reason = matchesKick(lbl.Text)
-            if hit then doKick(reason) end
+        local function updateFarmDistance(dist)
+            v_3.farmDistance = dist or 8
+            v_3.farmCFrame = v_13(0, v_3.farmDistance, 0) * v_14(math.rad(-90), 0, 0)
         end
-        check()
-        table.insert(AutoKick.conns, lbl:GetPropertyChangedSignal("Text"):Connect(check))
-        table.insert(AutoKick.conns, lbl.AncestryChanged:Connect(function()
-            if not lbl:IsDescendantOf(game) then AutoKick.watched[lbl] = nil end
-        end))
-    end
-    local function watchGui(gui)
-        for _, d in ipairs(gui:GetDescendants()) do
-            if d:IsA("TextLabel") or d:IsA("TextButton") or d:IsA("TextBox") then watchLabel(d) end
+        local function toggleInfJump(enabled)
+            local movementEnv = getsenv(v_9.Character.Abilities.Movement)
+            local maxJumpVal = (enabled and v_12) or defaultMaxJump
+            setupvalue(movementEnv.JumpActive, 5, maxJumpVal)
+            setupvalue(movementEnv.JumpActive, 6, maxJumpVal)
+            require(v_2.gameModules.Setting).Setting.MaxJump = maxJumpVal
         end
-        table.insert(AutoKick.conns, gui.DescendantAdded:Connect(function(d)
-            if d:IsA("TextLabel") or d:IsA("TextButton") or d:IsA("TextBox") then watchLabel(d) end
-        end))
-    end
-    _G.AutoKick_Start = function()
-        if AutoKick.running then return end
-        AutoKick.running = true
-        local pg = LP:FindFirstChild("PlayerGui")
-        if pg then
-            for _, c in ipairs(pg:GetChildren()) do
-                if c:IsA("ScreenGui") or c:IsA("LayerCollector") then watchGui(c) end
+        local function toggleAutoEquip(enabled)
+            v_8.autoEquip = enabled
+            while v_8.autoEquip do
+                v_6:equipAccessory()
+                v_6:equipSword()
+                v_10(1)
             end
-            table.insert(AutoKick.conns, pg.ChildAdded:Connect(function(c)
-                if c:IsA("ScreenGui") or c:IsA("LayerCollector") then watchGui(c) end
-            end))
         end
-    end
-    _G.AutoKick_Stop = function()
-        AutoKick.running = false
-        for _, c in ipairs(AutoKick.conns) do pcall(function() c:Disconnect() end) end
-        AutoKick.conns = {}
-        AutoKick.watched = {}
-    end
-
-    print("[sweet merge] SlotsESP / BrainrotESP / AutoKick loaded")
-end
-
--- ============================================================
--- BUILD UI
--- ============================================================
-local _, Holder1 = createPanel("Sweet Gear & Safety", "GearSafety", 270)
-
-createToggle(Holder1, "Infinite Jump", CONFIG.InfiniteJump, function(v)
-    CONFIG.InfiniteJump = v
-    if v then InfiniteJump.Enable() else InfiniteJump.Disable() end
-    saveConfig()
-end)
-createToggle(Holder1, "Anti Ragdoll", CONFIG.AntiRagdoll, function(v)
-    CONFIG.AntiRagdoll = v
-    if v then AntiRagdoll.Enable() else AntiRagdoll.Disable() end
-    saveConfig()
-end)
-createToggle(Holder1, "X-Ray", CONFIG.XRay, function(v)
-    CONFIG.XRay = v
-    if v then XRay.Enable() else XRay.Disable() end
-    saveConfig()
-end)
-createToggle(Holder1, "Slots ESP", CONFIG.SlotsESP, function(v)
-    CONFIG.SlotsESP = v
-    if v then _G.SlotsESP_Start() else _G.SlotsESP_Stop() end
-    saveConfig()
-end)
-createToggle(Holder1, "Brainrot ESP", CONFIG.BrainrotESP, function(v)
-    CONFIG.BrainrotESP = v
-    if v then _G.BrainrotESP_Start() else _G.BrainrotESP_Stop() end
-    saveConfig()
-end)
-createToggle(Holder1, "Next Base", CONFIG.NextBase, function(v)
-    CONFIG.NextBase = v
-    if v then NextBase_Start() else NextBase_Stop() end
-    saveConfig()
-end)
-createToggle(Holder1, "Auto Equip Slot", CONFIG.AutoEquipOnSlot, function(v)
-    CONFIG.AutoEquipOnSlot = v
-    if v then AutoEquipSlot.Start() else AutoEquipSlot.Stop() end
-    saveConfig()
-end)
-createToggle(Holder1, "Aimbot", CONFIG.Aimbot, function(v)
-    CONFIG.Aimbot = v
-    if v then Aimbot.Start() else Aimbot.Stop() end
-    saveConfig()
-end)
-createToggle(Holder1, "Auto Kick", CONFIG.AutoKick, function(v)
-    CONFIG.AutoKick = v
-    if v then _G.AutoKick_Start() else _G.AutoKick_Stop() end
-    saveConfig()
-end)
-createToggle(Holder1, "Steal Boost", CONFIG.StealBoost, function(v)
-    CONFIG.StealBoost = v
-    if v then StealBoost.Start() else StealBoost.Stop() end
-    saveConfig()
-end)
-
-local Sep = Instance.new("Frame", Holder1)
-Sep.Size = UDim2.new(1,0,0,1)
-Sep.BackgroundColor3 = Theme.Accent
-Sep.BackgroundTransparency = 0.8
-Sep.BorderSizePixel = 0
-
-local BottomRow = Instance.new("Frame", Holder1)
-BottomRow.Size = UDim2.new(1,0,0,34)
-BottomRow.BackgroundTransparency = 1
-
-local ResetBtn = createButton(BottomRow, "Instant Reset",
-    Theme.ResetAccent, Theme.ResetBg, Theme.ResetBgHov,
-    function() InstaReset.Run() end)
-ResetBtn.Size = UDim2.new(0.5,-3,1,0)
-ResetBtn.Position = UDim2.new(0,0,0,0)
-
-local DropBtn = createButton(BottomRow, "🎃 Drop",
-    Theme.DropAccent, Theme.DropBg, Theme.DropBgHov,
-    function() DropBrainrot.Run() end)
-DropBtn.Size = UDim2.new(0.5,-3,1,0)
-DropBtn.Position = UDim2.new(0.5,3,0,0)
-
-local BindsBtn = createButton(Holder1, "🕸 Binds",
-    Theme.BindsAccent, Theme.BindsBg, Theme.BindsBgHov,
-    function()
-        if _G.BindsWindow then _G.BindsWindow.Visible = not _G.BindsWindow.Visible end
-    end)
-
--- ============================================================
--- JOB ID PANEL + EMPTY SERVER FINDER
--- ============================================================
-local JobIdPanel, Holder2 = createPanel("Sweet Job ID", "JobId", 270)
-
-local JobIdRow = Instance.new("Frame", Holder2)
-JobIdRow.Size = UDim2.new(1,0,0,36)
-JobIdRow.BackgroundColor3 = Theme.BgCard
-JobIdRow.BorderSizePixel = 0
-corner(JobIdRow, 9)
-mkStroke(JobIdRow, Theme.StrokeSoft, 1, 0.55)
-
-local JobIdText = Instance.new("TextLabel", JobIdRow)
-JobIdText.Size = UDim2.new(1,-16,1,0)
-JobIdText.Position = UDim2.fromOffset(8,0)
-JobIdText.BackgroundTransparency = 1
-JobIdText.Font = Enum.Font.GothamBold
-JobIdText.TextSize = 11
-JobIdText.TextColor3 = Theme.Text
-JobIdText.TextXAlignment = Enum.TextXAlignment.Center
-JobIdText.TextTruncate = Enum.TextTruncate.AtEnd
-JobIdText.Text = CONFIG.ShowJobId and JobIdSaver.GetJobId() or string.rep("•",36)
-
-local JobBtnRow = Instance.new("Frame", Holder2)
-JobBtnRow.Size = UDim2.new(1,0,0,34)
-JobBtnRow.BackgroundTransparency = 1
-
-local CopyBtn = createButton(JobBtnRow, "Copy",
-    Theme.AccentBright, Theme.BtnBg, Theme.BtnBgHover,
-    function()
-        local id, ok = JobIdSaver.Copy()
-        CopyBtn.Text = ok and "Copied!" or "Failed"
-        JobIdText.Text = id
-        task.delay(1.2, function()
-            if CopyBtn and CopyBtn.Parent then CopyBtn.Text = "Copy" end
-        end)
-    end)
-CopyBtn.Size = UDim2.new(0.5,-3,1,0)
-CopyBtn.Position = UDim2.new(0,0,0,0)
-
-local ShowBtn = createButton(JobBtnRow, CONFIG.ShowJobId and "Hide" or "Show",
-    Theme.AccentBright, Theme.BtnBg, Theme.BtnBgHover,
-    function()
-        CONFIG.ShowJobId = not CONFIG.ShowJobId
-        JobIdText.Text = CONFIG.ShowJobId and JobIdSaver.GetJobId() or string.rep("•",36)
-        ShowBtn.Text   = CONFIG.ShowJobId and "Hide" or "Show"
-        saveConfig()
-    end)
-ShowBtn.Size = UDim2.new(0.5,-3,1,0)
-ShowBtn.Position = UDim2.new(0.5,3,0,0)
-
-local EmptyFinderStage = "closed"
-local EmptyFinderServer = nil
-local EmptyFinderBusy = false
-local EMPTY_OPEN_HEIGHT = 100
-local EmptyFinder_Open
-local EmptyFinder_Close
-
-local EmptyFinderBtn = createButton(Holder2, "Empty Server Finder",
-    Theme.AccentBright, Theme.BtnBg, Theme.BtnBgHover,
-    function()
-        if EmptyFinderStage == "closed" then
-            EmptyFinder_Open()
-        else
-            EmptyFinder_Close()
+        local function sanitizeJobId(str)
+            return (str:gsub("`", ""))
         end
-    end)
-
-local EmptyFinderInline = Instance.new("Frame", Holder2)
-EmptyFinderInline.Name = "EmptyServerFinderInline"
-EmptyFinderInline.Size = UDim2.new(1, 0, 0, 0)
-EmptyFinderInline.BackgroundColor3 = Theme.BgCard
-EmptyFinderInline.BackgroundTransparency = 0
-EmptyFinderInline.BorderSizePixel = 0
-EmptyFinderInline.ClipsDescendants = true
-EmptyFinderInline.Visible = true
-EmptyFinderInline.ZIndex = 10
-corner(EmptyFinderInline, 10)
-mkStroke(EmptyFinderInline, Theme.StrokeSoft, 1, 0.5)
-
-local EmptyFinderTitle = Instance.new("TextLabel", EmptyFinderInline)
-EmptyFinderTitle.Position = UDim2.fromOffset(10, 9)
-EmptyFinderTitle.Size = UDim2.new(1, -20, 0, 20)
-EmptyFinderTitle.BackgroundTransparency = 1
-EmptyFinderTitle.Font = Enum.Font.GothamBlack
-EmptyFinderTitle.TextSize = 12
-EmptyFinderTitle.TextColor3 = Theme.Text
-EmptyFinderTitle.TextXAlignment = Enum.TextXAlignment.Center
-EmptyFinderTitle.Text = "ARE YOU SURE?"
-EmptyFinderTitle.ZIndex = 11
-
-local EmptyFinderSub = Instance.new("TextLabel", EmptyFinderInline)
-EmptyFinderSub.Position = UDim2.fromOffset(10, 30)
-EmptyFinderSub.Size = UDim2.new(1, -20, 0, 20)
-EmptyFinderSub.BackgroundTransparency = 1
-EmptyFinderSub.Font = Enum.Font.GothamBold
-EmptyFinderSub.TextSize = 10
-EmptyFinderSub.TextColor3 = Theme.TextDim
-EmptyFinderSub.TextXAlignment = Enum.TextXAlignment.Center
-EmptyFinderSub.TextWrapped = true
-EmptyFinderSub.Text = "YOU HAVE TO BE 0 REBIRTH"
-EmptyFinderSub.ZIndex = 11
-
-local EmptyFinderAction = Instance.new("TextButton", EmptyFinderInline)
-EmptyFinderAction.Position = UDim2.fromOffset(10, 58)
-EmptyFinderAction.Size = UDim2.new(0.5, -15, 0, 32)
-EmptyFinderAction.BackgroundColor3 = Theme.TrackOn
-EmptyFinderAction.TextColor3 = Color3.fromRGB(245, 242, 255)
-EmptyFinderAction.Font = Enum.Font.GothamBlack
-EmptyFinderAction.TextSize = 11
-EmptyFinderAction.Text = "YES"
-EmptyFinderAction.AutoButtonColor = false
-EmptyFinderAction.ZIndex = 11
-corner(EmptyFinderAction, 9)
-
-local EmptyFinderCancel = Instance.new("TextButton", EmptyFinderInline)
-EmptyFinderCancel.Position = UDim2.new(0.5, 5, 0, 58)
-EmptyFinderCancel.Size = UDim2.new(0.5, -15, 0, 32)
-EmptyFinderCancel.BackgroundColor3 = Theme.BgRow
-EmptyFinderCancel.TextColor3 = Theme.TextDim
-EmptyFinderCancel.Font = Enum.Font.GothamBlack
-EmptyFinderCancel.TextSize = 11
-EmptyFinderCancel.Text = "NO"
-EmptyFinderCancel.AutoButtonColor = false
-EmptyFinderCancel.ZIndex = 11
-corner(EmptyFinderCancel, 9)
-
-local function EmptyFinder_Set(message, actionText, cancelText)
-    local lines = string.split(message, "\n")
-    EmptyFinderTitle.Text = lines[1] or "ARE YOU SURE?"
-    EmptyFinderSub.Text = lines[3] or lines[2] or ""
-    EmptyFinderAction.Text = actionText
-    EmptyFinderCancel.Text = cancelText or "NO"
-    EmptyFinderAction.Visible = true
-    EmptyFinderCancel.Visible = true
-    EmptyFinderAction.Active = actionText ~= "SEARCHING..." and actionText ~= "TELEPORTING..."
-    EmptyFinderCancel.Active = true
-    if actionText == "SEARCHING..." or actionText == "TELEPORTING..." then
-        EmptyFinderAction.Size = UDim2.new(1, -20, 0, 32)
-        EmptyFinderAction.Position = UDim2.fromOffset(10, 58)
-        EmptyFinderCancel.Visible = false
-    else
-        EmptyFinderAction.Size = UDim2.new(0.5, -15, 0, 32)
-        EmptyFinderAction.Position = UDim2.fromOffset(10, 58)
-        EmptyFinderCancel.Position = UDim2.new(0.5, 5, 0, 58)
-        EmptyFinderCancel.Size = UDim2.new(0.5, -15, 0, 32)
-    end
-end
-
-EmptyFinder_Open = function()
-    EmptyFinderStage = "rebirth"
-    EmptyFinderServer = nil
-    EmptyFinderBusy = false
-    EmptyFinder_Set("ARE YOU SURE?\n\nYOU HAVE TO BE 0 REBIRTH", "YES", "NO")
-    tween(EmptyFinderInline, 0.18, { Size = UDim2.new(1, 0, 0, EMPTY_OPEN_HEIGHT) }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-end
-
-function EmptyFinder_Show(stage)
-    EmptyFinderStage = stage
-    EmptyFinderServer = nil
-    EmptyFinderBusy = false
-    if stage == "rebirth" then
-        EmptyFinder_Set("ARE YOU SURE?\n\nYOU HAVE TO BE 0 REBIRTH", "YES", "NO")
-    elseif stage == "warning" then
-        EmptyFinder_Set("ARE YOU SURE?\n\nYOU MIGHT BE OVER 100 PING OR HIGHER", "TELEPORT ME", "NO")
-    elseif stage == "searching" then
-        EmptyFinder_Set("SEARCHING...\n\nFINDING A LOW-POPULATION SERVER", "SEARCHING...", "CANCEL")
-        EmptyFinderAction.Active = false
-    end
-end
-
-EmptyFinder_Close = function()
-    EmptyFinderStage = "closed"
-    EmptyFinderServer = nil
-    EmptyFinderBusy = false
-    tween(EmptyFinderInline, 0.16, { Size = UDim2.new(1, 0, 0, 0) }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-end
-
-EmptyFinderCancel.Activated:Connect(function() EmptyFinder_Close() end)
-EmptyFinderAction.Activated:Connect(function()
-    if EmptyFinderBusy then return end
-    if EmptyFinderStage == "rebirth" then
-        EmptyFinderStage = "warning"
-        EmptyFinder_Set("ARE YOU SURE?\n\nYOU MIGHT BE OVER 100 PING OR HIGHER", "TELEPORT ME", "NO")
-        return
-    end
-    if EmptyFinderStage ~= "warning" then return end
-    EmptyFinderBusy = true
-    EmptyFinder_Show("searching")
-    task.spawn(function()
-        local server, ping = EmptyServer_findBestServer()
-        if not EmptyFinderInline.Parent or EmptyFinderStage ~= "searching" then return end
-        if server then
-            EmptyFinderServer = server
-            EmptyFinder_Set(string.format("SERVER FOUND\n\n%d PLAYER(S) • EST. %.0fMS", server.playing, ping), "TELEPORTING...", "CANCEL")
-            EmptyFinderAction.Active = false
-            task.wait(0.25)
-            if EmptyFinderServer and EmptyFinderStage == "searching" then
-                TeleportService:TeleportToPlaceInstance(EMPTY_SERVER_PLACE_ID, EmptyFinderServer.id, Players.LocalPlayer)
+        local function teleportToJobId(jobId)
+            if v_7.standUp() then
+                v_11:TeleportToPlaceInstance(game.PlaceId, jobId, v_9)
             end
-        else
-            EmptyFinderBusy = false
-            EmptyFinderStage = "warning"
-            EmptyFinder_Set("NO SUITABLE SERVER\n\nTRY AGAIN?", "TELEPORT ME", "NO")
         end
-    end)
-end)
-
--- ============================================================
--- BINDS WINDOW
--- ============================================================
-local BindsWindow = Instance.new("Frame", Gui)
-BindsWindow.Name = "BindsWindow"
-BindsWindow.AnchorPoint = Vector2.new(0.5,0.5)
-BindsWindow.Position = UDim2.new(0.5,0,0.5,0)
-BindsWindow.Size = UDim2.new(0,320,0,360)
-BindsWindow.BackgroundColor3 = Theme.Bg
-BindsWindow.BorderSizePixel = 0
-BindsWindow.Visible = false
-BindsWindow.ZIndex = 200
-corner(BindsWindow, 14)
-mkStroke(BindsWindow, Theme.Accent, 1.2, 0.4)
-
-local BH = Instance.new("Frame", BindsWindow)
-BH.Size = UDim2.new(1,0,0,46)
-BH.BackgroundColor3 = Theme.BgCard
-BH.BorderSizePixel = 0
-corner(BH, 14)
-local BHFill = Instance.new("Frame", BindsWindow)
-BHFill.Position = UDim2.new(0,0,0,26) BHFill.Size = UDim2.new(1,0,0,20)
-BHFill.BackgroundColor3 = Theme.BgCard BHFill.BorderSizePixel = 0 BHFill.ZIndex = 2
-
-local BHAccent = Instance.new("Frame", BindsWindow)
-BHAccent.Position = UDim2.new(0,0,0,10) BHAccent.Size = UDim2.new(0,3,0,26)
-BHAccent.BackgroundColor3 = Theme.Accent BHAccent.BorderSizePixel = 0
-corner(BHAccent, 3) BHAccent.ZIndex = 3
-
-local BHLabel = Instance.new("TextLabel", BindsWindow)
-BHLabel.Position = UDim2.new(0,16,0,12) BHLabel.Size = UDim2.new(1,-60,0,24)
-BHLabel.BackgroundTransparency = 1 BHLabel.Font = Enum.Font.GothamBlack
-BHLabel.TextSize = 15 BHLabel.TextColor3 = Theme.Text
-BHLabel.TextXAlignment = Enum.TextXAlignment.Left BHLabel.Text = "🕸 BINDS"
-BHLabel.ZIndex = 4
-
-local BHClose = Instance.new("TextButton", BindsWindow)
-BHClose.AnchorPoint = Vector2.new(1,0.5) BHClose.Position = UDim2.new(1,-12,0,23)
-BHClose.Size = UDim2.fromOffset(24,24) BHClose.BackgroundColor3 = Theme.BgRow
-BHClose.Text = "×" BHClose.Font = Enum.Font.GothamBold
-BHClose.TextSize = 16 BHClose.TextColor3 = Theme.TextDim
-BHClose.AutoButtonColor = false BHClose.ZIndex = 5
-corner(BHClose, 7)
-mkStroke(BHClose, Theme.StrokeSoft, 1, 0.65)
-BHClose.MouseEnter:Connect(function() tween(BHClose,0.12,{BackgroundColor3=Theme.ResetBg,TextColor3=Theme.ResetAccent}) end)
-BHClose.MouseLeave:Connect(function() tween(BHClose,0.12,{BackgroundColor3=Theme.BgRow,TextColor3=Theme.TextDim}) end)
-BHClose.MouseButton1Click:Connect(function() BindsWindow.Visible=false end)
-
-local BHDiv = Instance.new("Frame", BindsWindow)
-BHDiv.Position = UDim2.new(0,0,0,46) BHDiv.Size = UDim2.new(1,0,0,1)
-BHDiv.BackgroundColor3 = Theme.Accent BHDiv.BackgroundTransparency = 0.7
-BHDiv.BorderSizePixel = 0 BHDiv.ZIndex = 3
-
-local BHolderOuter = Instance.new("Frame", BindsWindow)
-BHolderOuter.Position = UDim2.new(0,10,0,54)
-BHolderOuter.Size = UDim2.new(1,-20,1,-66)
-BHolderOuter.BackgroundTransparency = 1
-
-local BScroll = Instance.new("ScrollingFrame", BHolderOuter)
-BScroll.Size = UDim2.new(1,0,1,0)
-BScroll.BackgroundTransparency = 1
-BScroll.BorderSizePixel = 0
-BScroll.ScrollBarThickness = 3
-BScroll.ScrollBarImageColor3 = Theme.Accent
-BScroll.CanvasSize = UDim2.new(0,0,0,0)
-BScroll.Active = true
-local BLayout = Instance.new("UIListLayout", BScroll)
-BLayout.Padding = UDim.new(0,7) BLayout.SortOrder = Enum.SortOrder.LayoutOrder
-BLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    BScroll.CanvasSize = UDim2.new(0, 0, 0, BLayout.AbsoluteContentSize.Y)
-end)
-local BHolder = BScroll
-
-_G.BindsWindow = BindsWindow
-
-local function createBindRow(parent, text, currentBind, callback)
-    local Row = Instance.new("Frame", parent)
-    Row.Size = UDim2.new(1,-4,0,42) Row.BackgroundColor3 = Theme.BgRow
-    Row.BorderSizePixel = 0 corner(Row, 9)
-    mkStroke(Row, Theme.StrokeSoft, 1, 0.72)
-
-    local Label = Instance.new("TextLabel", Row)
-    Label.Position = UDim2.fromOffset(14,0) Label.Size = UDim2.new(1,-100,1,0)
-    Label.BackgroundTransparency = 1 Label.Font = Enum.Font.GothamBold
-    Label.TextSize = 14 Label.TextColor3 = Theme.Text
-    Label.TextXAlignment = Enum.TextXAlignment.Left Label.Text = text
-
-    local Btn = Instance.new("TextButton", Row)
-    Btn.AnchorPoint = Vector2.new(1,0.5) Btn.Position = UDim2.new(1,-10,0.5,0)
-    Btn.Size = UDim2.fromOffset(66,26) Btn.BackgroundColor3 = Theme.BtnBg
-    Btn.Text = currentBind Btn.AutoButtonColor = false
-    Btn.Font = Enum.Font.GothamBlack Btn.TextSize = 13 Btn.TextColor3 = Theme.AccentBright
-    corner(Btn, 8)
-    local btnStroke = mkStroke(Btn, Theme.AccentBright, 1, 0.55)
-
-    local listening = false
-    local inputConn
-
-    Btn.MouseButton1Click:Connect(function()
-        if listening then return end
-        listening = true
-        Btn.Text = "..."
-        Btn.TextColor3 = Theme.ResetAccent
-        tween(btnStroke, 0.15, {Color=Theme.ResetAccent, Transparency=0.15})
-        inputConn = UserInputService.InputBegan:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.Keyboard then
-                Btn.Text = input.KeyCode.Name
-                Btn.TextColor3 = Theme.AccentBright
-                tween(btnStroke, 0.15, {Color=Theme.AccentBright, Transparency=0.55})
-                listening = false
-                if callback then callback(input.KeyCode.Name) end
-                if inputConn then inputConn:Disconnect() end
+        local function joinFromClipboard()
+            local getClip = getclipboard or fromclipboard
+            if getClip then
+                teleportToJobId(sanitizeJobId(getClip()))
             end
-        end)
-    end)
-    Btn.MouseEnter:Connect(function() tween(Btn,0.12,{BackgroundColor3=Theme.BtnBgHover}) end)
-    Btn.MouseLeave:Connect(function() tween(Btn,0.12,{BackgroundColor3=Theme.BtnBg}) end)
-    Row.MouseEnter:Connect(function() tween(Row,0.12,{BackgroundColor3=Theme.BgRowHov}) end)
-    Row.MouseLeave:Connect(function() tween(Row,0.12,{BackgroundColor3=Theme.BgRow}) end)
-    return Btn
-end
-
-createBindRow(BHolder, "Carpet Speed",  CONFIG.Bind_CarpetSpeed,  function(k) CONFIG.Bind_CarpetSpeed  = k saveConfig() end)
-createBindRow(BHolder, "Instant Reset", CONFIG.Bind_InstantReset, function(k) CONFIG.Bind_InstantReset = k saveConfig() end)
-createBindRow(BHolder, "Drop",          CONFIG.Bind_Drop,         function(k) CONFIG.Bind_Drop         = k saveConfig() end)
-createBindRow(BHolder, "Aimbot",        CONFIG.Bind_Aimbot,       function(k) CONFIG.Bind_Aimbot       = k saveConfig() end)
-createBindRow(BHolder, "Auto Kick",     CONFIG.Bind_AutoKick,     function(k) CONFIG.Bind_AutoKick     = k saveConfig() end)
-createBindRow(BHolder, "Steal Boost",   CONFIG.Bind_StealBoost,   function(k) CONFIG.Bind_StealBoost   = k saveConfig() end)
-
-local bDragging, bStart, bStartPos
-BH.InputBegan:Connect(function(input)
-    if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-        bDragging=true bStart=input.Position bStartPos=BindsWindow.Position
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if bDragging and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
-        local delta=input.Position-bStart
-        local s = guiScale.Scale
-        BindsWindow.Position=UDim2.new(
-            bStartPos.X.Scale, bStartPos.X.Offset+delta.X / s,
-            bStartPos.Y.Scale, bStartPos.Y.Offset+delta.Y / s)
-    end
-end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-        if bDragging then
-            CONFIG.Positions.BindsWindow={X=BindsWindow.Position.X.Offset,Y=BindsWindow.Position.Y.Offset}
-            saveConfig()
         end
-        bDragging=false
-    end
-end)
-
--- ============================================================
--- KEYBINDS
--- ============================================================
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
-    local k = input.KeyCode.Name
-    if k == CONFIG.Bind_Aimbot then
-        CONFIG.Aimbot = not CONFIG.Aimbot
-        if CONFIG.Aimbot then Aimbot.Start() else Aimbot.Stop() end
-        saveConfig()
-        return
-    end
-    if k == CONFIG.Bind_CarpetSpeed then
-        local newState = not CONFIG.CarpetSpeed
-        CONFIG.CarpetSpeed = newState
-        if newState then
-            local ok = CarpetSpeed.Start()
-            if not ok then CONFIG.CarpetSpeed = false end
-        else
-            CarpetSpeed.Stop()
+        tab:addButton({ "Redeem All Codes", v_5.redeemCodes })
+        if v_4.isOwner then
+            tab:addSection("Job id")
+            tab:addTextBox({ "Input Job Id", "null", false, teleportToJobId, "Job ID" }).OnChanging = sanitizeJobId
+            tab:addButton({ "Join From Clipboard", joinFromClipboard })
         end
-        saveConfig()
-    elseif k == CONFIG.Bind_InstantReset then
-        InstaReset.Run()
-    elseif k == CONFIG.Bind_Drop then
-        DropBrainrot.Run()
-    elseif k == CONFIG.Bind_AutoKick then
-        CONFIG.AutoKick = not CONFIG.AutoKick
-        if CONFIG.AutoKick then _G.AutoKick_Start() else _G.AutoKick_Stop() end
-        saveConfig()
-    elseif k == CONFIG.Bind_StealBoost then
-        CONFIG.StealBoost = not CONFIG.StealBoost
-        if CONFIG.StealBoost then StealBoost.Start() else StealBoost.Stop() end
-        saveConfig()
+        tab:addSection("Settings")
+        tab:addDropdown({
+            "Language",
+            { "auto", "en", "pt", "es", "fr" },
+            v_3.language,
+            { v_3, "language" },
+            "language",
+            description = "Language changes apply on next run."
+        })
+        tab:addSlider({ "Farm Distance", 5, 15, 1, 8, updateFarmDistance, "farmDistance" })
+        tab:addToggle({ "Auto Aura", v_3.autoHaki, { v_3, "autoHaki" }, "autoHaki" })
+        tab:addToggle({ "Auto Attack", v_3.autoClick, { v_3, "autoClick" }, "autoClick" })
+        tab:addToggle({ "Bring Mobs", v_3.bringMobs, { v_3, "bringMobs" }, "bringMobs" })
+        tab:addToggle({ "Anti AFK", v_3.antiAfk, { v_3, "antiAfk" }, "antiAfk" })
+        tab:addToggle({ "Auto Equip", false, toggleAutoEquip, "autoEquip", description = "Sword & accessory" })
+        tab:addSection("Team")
+        tab:addButton({ "Join Cheems Team", v_5.joinTeam.cheems })
+        tab:addButton({ "Join Floppa Team", v_5.joinTeam.floppa })
+        tab:addSection("Others")
+        tab:addToggle({ "Remove Notifications", false, toggleNotifications, "removeNotifications" })
+        tab:addToggle({ "No Stun", true, { v_8, "noStun" }, "noStun" })
+        tab:addToggle({ "Inf sky jump", true, toggleInfJump, "infJump" })
     end
 end)
 
--- ============================================================
--- RESTORE STATES
--- ============================================================
-local function restoreStates()
-    if CONFIG.NextBase        then pcall(NextBase_Start)        end
-    if CONFIG.AntiRagdoll     then pcall(AntiRagdoll.Enable)    end
-    if CONFIG.InfiniteJump    then pcall(InfiniteJump.Enable)   end
-    if CONFIG.XRay            then pcall(XRay.Enable)           end
-    if CONFIG.AutoEquipOnSlot then pcall(AutoEquipSlot.Start)   end
-    if CONFIG.Aimbot          then pcall(Aimbot.Start)          end
-    if CONFIG.SlotsESP        then pcall(_G.SlotsESP_Start)     end
-    if CONFIG.BrainrotESP     then pcall(_G.BrainrotESP_Start)  end
-    if CONFIG.AutoKick        then pcall(_G.AutoKick_Start)     end
-    if CONFIG.StealBoost      then pcall(StealBoost.Start)      end
-    if CONFIG.CarpetSpeed then
-        task.wait(0.5)
-        local ok = CarpetSpeed.Start()
-        if not ok then CONFIG.CarpetSpeed = false saveConfig() end
-    end
-end
-
-task.spawn(function()
-    repeat task.wait(0.1) until game:IsLoaded()
-    if not LP.Character then
-        LP.CharacterAdded:Wait()
-    end
-    task.wait(1)
-    restoreStates()
-end)
-
-LP.CharacterAdded:Connect(function()
-    task.wait(1.5)
-    if CONFIG.InfiniteJump and InfiniteJump.enabled then
-        InfiniteJump.Disable()
-        InfiniteJump.Enable()
-    end
-    if CONFIG.AntiRagdoll and AntiRagdoll.enabled then
-        pcall(function() AntiRagdoll.Disable() end)
-        pcall(function() AntiRagdoll.Enable()  end)
-    end
-    if CONFIG.CarpetSpeed then
-        local ok = CarpetSpeed.Start()
-        if not ok then CONFIG.CarpetSpeed = false saveConfig() end
+-- Module 'aq' (LVM5 Chunk 152): Popcat Weapon Clicker Automation
+registerModule("aq", function()
+    local v_1 = modules.a()
+    local v_2 = modules.V()
+    local v_3 = modules._()
+    local v_4 = modules.aa()
+    return function()
+        local v_1 = v_1.library
+        v_3.load()
+        local v_2 = v_4.makeWindow(v_1, v_2.window)
+        local v_3 = { discord = v_4.makeTab(v_2, v_2.tabs.discord), mainFarm = v_4.makeTab(v_2, v_2.tabs.mainFarm), items = v_4.makeTab(v_2, v_2.tabs.items), powers = v_4.makeTab(v_2, v_2.tabs.powers), stats = v_4.makeTab(v_2, v_2.tabs.stats), teleport = v_4.makeTab(v_2, v_2.tabs.teleport), shop = v_4.makeTab(v_2, v_2.tabs.shop), pvp = v_4.makeTab(v_2, v_2.tabs.pvp), oneClick = v_4.makeTab(v_2, v_2.tabs.oneClick), misc = v_4.makeTab(v_2, v_2.tabs.misc) }
+        v_3.mainFarm:select()
+        v_4.addMinimizeButton(v_2, { button = { Image = v_2.minimizeLogo, BackgroundTransparency = 0 }, corner = { CornerRadius = UDim.new(0, 6) } })
+        v_3.discord:addDiscordInvite({ name = v_2.discord.title, description = v_2.discord.description, logo = v_2.discord.logo, invite = v_2.discord.invite })
+        local v_4 = v_4.toggle
+        local v_5 = v_4.section
+        modules.ab()(v_3.mainFarm, v_4, v_5)
+        modules.ac()(v_3.items, v_4, v_5)
+        modules.af()(v_3.powers)
+        modules.ag()(v_3.stats)
+        modules.ah()(v_3.teleport)
+        modules.ai()(v_3.shop)
+        modules.am()(v_3.pvp)
+        modules.an()(v_3.oneClick)
+        modules.ap()(v_3.misc)
     end
 end)
 
-game:BindToClose(function() saveConfig() end)
-
--- ============================================================
--- MOBILE POSITIONING
--- ============================================================
-if DEVICE == "iphone" then
-    if not CONFIG.Positions.GearSafety  then CONFIG.Positions.GearSafety  = { X = 8,  Y = 40  } end
-    if not CONFIG.Positions.JobId       then CONFIG.Positions.JobId       = { X = 8,  Y = 220 } end
-    if not CONFIG.Positions.BindsWindow then CONFIG.Positions.BindsWindow = { X = 20, Y = 320 } end
-elseif DEVICE == "ipad" then
-    if not CONFIG.Positions.GearSafety  then CONFIG.Positions.GearSafety  = { X = 40, Y = 80  } end
-    if not CONFIG.Positions.JobId       then CONFIG.Positions.JobId       = { X = 40, Y = 320 } end
-end
-
-pcall(function()
-    for _, parent in ipairs({ (gethui and gethui()) or game:GetService("CoreGui"), LP:FindFirstChild("PlayerGui") }) do
-        if parent then
-            local publicHud = parent:FindFirstChild("XiPublicHUD")
-            if publicHud and DEVICE ~= "desktop" then
-                local root = publicHud:FindFirstChildWhichIsA("Frame", true)
-                if root then
-                    if DEVICE == "iphone" then root.Position = UDim2.new(0.5, 0, 1, -150)
-                    else root.Position = UDim2.new(0.5, 0, 1, -110) end
-                end
-            end
-            local autoGui = parent:FindFirstChild("bRXgmsaEVfze")
-            if autoGui and DEVICE ~= "desktop" then
-                local hud = autoGui:FindFirstChild("CurrentTargetHUD")
-                if hud then
-                    if DEVICE == "iphone" then hud.Position = UDim2.new(0.5, 0, 1, -260)
-                    else hud.Position = UDim2.new(0.5, 0, 1, -240) end
+-- Module 'ar' (LVM5 Chunk 155): Main UI Window & Tabs Initializer
+registerModule("ar", function()
+    local v_1 = modules.b()
+    local v_2 = v_1.environment
+    local v_3 = v_1.spawn
+    local v_4 = v_1.wait
+    local v_5 = v_1.localPlayer
+    local v_6 = nil
+    local v_7 = nil
+    local v_8 = function()
+        if v_7 then
+            v_7:Destroy()
+            v_7 = nil
+        end
+    end
+    local v_9 = function(arg_1)
+        v_6 = ((arg_1 and (v_2[arg_1] and arg_1)) or nil)
+        local v_2 = v_5.Character
+        local v_3 = (v_2 and v_2:FindFirstChild("Humanoid"))
+        local v_4 = (v_2 and v_2:FindFirstChild("HumanoidRootPart"))
+        if ((not v_6) or ((not v_2.Parent) or ((not v_3) or ((v_3.Health <= 0) or (not v_4))))) then
+            v_8()
+            return
+        end
+        if (v_7 and (v_7.Parent ~= v_4)) then
+            v_8()
+        end
+        if (not v_7) then
+            v_7 = Instance.new("BodyVelocity")
+            v_7.Name = "MemeSea_FarmVelocity"
+            v_7.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            v_7.Velocity = Vector3.zero
+            v_7.Parent = v_4
+        end
+    end
+    local v_10 = {}
+    local v_11 = function(arg_1, arg_2)
+        if (v_10[arg_1] == arg_2) then
+            return
+        end
+        v_10[arg_1] = arg_2
+        warn(("[prioridade %s] %s"):format(arg_1, tostring(arg_2)))
+    end
+    local v_12 = function()
+        for v_1, v_2 in ipairs((v_2.priorities or {})) do
+            if v_2[v_2.flag] then
+                v_9(v_2.flag)
+                local v_3, v_4 = pcall(v_2.run)
+                if v_3 then
+                    v_10[v_2.flag] = nil
+                    if ((v_4 == true) and v_2[v_2.flag]) then
+                        return v_2.flag
+                    end
+                else
+                    v_11(v_2.flag, v_4)
                 end
             end
         end
     end
+    return function()
+        if v_2.loadedFarmLoop then
+            return
+        end
+        v_2.loadedFarmLoop = true
+        local v_1 = v_1.runService.Heartbeat:Connect(function()
+            v_9(v_6)
+        end)
+        v_3(function()
+            while v_4() do
+                v_9(v_12())
+            end
+            v_9(nil)
+            v_1:Disconnect()
+            v_2.loadedFarmLoop = false
+        end)
+    end
 end)
 
-print("[sweet tp hub] loaded — device:", DEVICE, "scale:", string.format("%.2f", guiScale.Scale))
-print("[sweet tp hub] discord.gg/sweettp — halloween edition 🎃")
-print("[sweet tp hub] toggles: SlotsESP, BrainrotESP, AutoKick, NextBase, XRay, CarpetSpeed, Aimbot, AutoEquipSlot, StealBoost")
-print("[sweet tp hub] auto grab: original block, untouched")
+-- Main Entrypoint (Chunk 2)
+local fetcher = ...
+if not (type(fetcher) == "table" and next(fetcher)) then
+    fetcher = loadstring(readfile("memeSea/http-fetcher.luau"))()
+end
+
+local sharedState = modules.a()
+sharedState.fetcher = fetcher
+
+modules.d()()
+local core = modules.b()
+local hubSettings = modules.e()
+modules.f()
+modules.g()()
+
+local combatController = modules.l()
+local questController = modules.n()
+local prioritiesList = modules.S()
+modules.T()()
+
+sharedState.library = fetcher.load("{Owner}Library/refs/heads/main/redz-V5-remake/main.luau")()
+
+local env = core.environment
+env.hubSettings = hubSettings
+env.latestAttack = combatController
+env.oneClickSettings = env.oneClickSettings or {}
+
+questController:updateQuestsList()
+modules.U()()
+modules.aq()()
+env.priorities = prioritiesList
+modules.ar()()
