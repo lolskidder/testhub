@@ -237,7 +237,7 @@ NeverLose.MainColor = Color3.fromRGB(8, 8, 13);
 NeverLose.RegisiteryColor = {};
 NeverLose.NameRegisitry = {};
 NeverLose.IsMosueOverOtherFrame = false;
-NeverLose.GlobalLogo = "rbxassetid://120358385035996";
+NeverLose.GlobalLogo = "rbxassetid://70895505430795";
 NeverLose.ImageColorMapping = "rbxassetid://4155801252";
 
 if getcustomasset then
@@ -7027,7 +7027,7 @@ return NeverLose;
 						imageLabel.Size = UDim2.new(0, 96, 0, 96)
 						imageLabel.Position = UDim2.new(0.5, 0, 0.5, -20)
 						imageLabel.BackgroundTransparency = 1
-						imageLabel.Image = "rbxassetid://124302285576089"
+						imageLabel.Image = "rbxassetid://70895505430795"
 						imageLabel.ScaleType = Enum.ScaleType.Fit
 						imageLabel.Parent = screenGui
 						local frame2 = Instance.new("Frame")
@@ -7231,13 +7231,61 @@ return NeverLose;
 				_G.NeverLose = lib
 
 				v16 = lib:CreateWindow({
-					Logo = "rbxassetid://124302285576089",
+					Logo = "rbxassetid://70895505430795",
 					Name = "WRAITH",
 					Content = "",
 					ConfigFolder = "WraithConfigs",
 					Size = lib.Scales.Large,
 					Keybind = "",
 				})
+
+
+				-- Floating logo button: click to hide/show the Wraith hub.
+				do
+					local parentOk, toggleParent = pcall(function()
+						return (gethui and gethui()) or game:GetService("CoreGui")
+					end)
+					if parentOk and toggleParent then
+						pcall(function()
+							local previous = toggleParent:FindFirstChild("WraithHubToggleButton")
+							if previous then previous:Destroy() end
+						end)
+						local toggleGui = Instance.new("ScreenGui")
+						toggleGui.Name = "WraithHubToggleButton"
+						toggleGui.IgnoreGuiInset = true
+						toggleGui.ResetOnSpawn = false
+						toggleGui.DisplayOrder = 999999
+						toggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+						toggleGui.Parent = toggleParent
+						local toggleButton = Instance.new("ImageButton")
+						toggleButton.Name = "HubLogoToggle"
+						toggleButton.AnchorPoint = Vector2.new(0, 0.5)
+						toggleButton.Position = UDim2.new(0, 16, 0.5, 0)
+						toggleButton.Size = UDim2.fromOffset(50, 50)
+						toggleButton.BackgroundColor3 = Color3.fromRGB(16, 16, 24)
+						toggleButton.BackgroundTransparency = 0.12
+						toggleButton.BorderSizePixel = 0
+						toggleButton.AutoButtonColor = true
+						toggleButton.Image = "rbxassetid://70895505430795"
+						toggleButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
+						toggleButton.ScaleType = Enum.ScaleType.Fit
+						toggleButton.ZIndex = 1000
+						toggleButton.Parent = toggleGui
+						local toggleCorner = Instance.new("UICorner")
+						toggleCorner.CornerRadius = UDim.new(0, 14)
+						toggleCorner.Parent = toggleButton
+						local toggleStroke = Instance.new("UIStroke")
+						toggleStroke.Color = Color3.fromRGB(126, 118, 190)
+						toggleStroke.Thickness = 1.5
+						toggleStroke.Transparency = 0.2
+						toggleStroke.Parent = toggleButton
+						toggleButton.Activated:Connect(function()
+							pcall(function()
+								v16.Signal:SetValue(not v16.Signal:GetValue())
+							end)
+						end)
+					end
+				end
 
 				wraithNotifDuration = wraithNotifDuration or 3
 				wraithNotifyEnabled = true
@@ -7311,7 +7359,7 @@ return NeverLose;
 						imageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
 						imageLabel.ImageTransparency = 0
 						imageLabel.ScaleType = Enum.ScaleType.Fit
-						imageLabel.Image = "rbxassetid://124302285576089"
+						imageLabel.Image = "rbxassetid://70895505430795"
 						imageLabel.Parent = frame2
 						local textLabel = Instance.new("TextLabel")
 						textLabel.BackgroundTransparency = 1
@@ -7500,7 +7548,7 @@ return NeverLose;
 
 				task.spawn(function()
 					task.wait(4)
-					local texture = "rbxassetid://124302285576089"
+					local texture = "rbxassetid://70895505430795"
 					local color = Color3.fromRGB(170, 170, 170)
 
 					local function fn53(arg)
@@ -25261,7 +25309,7 @@ end)
 				local color = Color3.fromRGB(168, 85, 247)
 				local flag14 = false
 				local flag15 = false
-				local image = "rbxassetid://124302285576089"
+				local image = "rbxassetid://70895505430795"
 				local billboardGui = nil
 				traceHitmarkerSize = 42
 				local v48 = nil
