@@ -6023,7 +6023,7 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
 			table.insert(State.Listeners, Paint)
 			Paint()
 			if Library.FetchCommunity then
-				local _, Code = ParseDiscordInvite(Library.DiscordInvite or "https://discord.gg/WXvrhu2z8X")
+				local _, Code = ParseDiscordInvite(Library.DiscordInvite or "https://discord.gg/aXWW8hytgX")
 				Library.FetchCommunity(Code)
 			end
 		end
@@ -7134,7 +7134,7 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
     
         pcall(function()
             local function OpenCommunity()
-                local Invite = tostring(Library.DiscordInvite or "https://discord.gg/WXvrhu2z8X")
+                local Invite = tostring(Library.DiscordInvite or "https://discord.gg/aXWW8hytgX")
                 Library:CopyToClipboard(Invite, "Discord invite copied")
                 local Code = string.match(Invite, "([%w%-]+)/?$")
                 if Code then
@@ -32439,7 +32439,7 @@ do
 	SaveManager = loadAddon("SaveManager.lua")
 	Options = Library.Options
 	Toggles = Library.Toggles
-	Discord = "https://discord.gg/WXvrhu2z8X"
+	Discord = "https://discord.gg/aXWW8hytgX"
 	GameName = "Break and Steal an Egg"
 	LoaderScript = 'loadstring(game:HttpGet("' .. HubRepo .. 'Loader"))()'
 	local Env = getgenv()
@@ -39450,7 +39450,7 @@ do
 				Discord = Discord,
 				DiscordAvatar = nil,
 				DiscordBanner = nil,
-				DiscordTitle = "°☆STALALIKA☆°🎃👻",
+				DiscordTitle = "Nhoiii Community",
 				DiscordDescription = "",
 				Feedback = function(Box)
 					Tabs.FeedbackBox = Box
@@ -40799,7 +40799,7 @@ if Window.AddInfoTab then
 		local community = info.Groupboxes and info.Groupboxes.Community
 		if community then
 			community:AddLabel({
-				Text = '<font color="#60d696">All Stalalika scripts are keyless and free.</font> <font transparency="0.35">Want your own script for any game? We make custom paid scripts on request, open a ticket on our Discord.</font>',
+				Text = '<font color="#60d696">All NhoiiiX scripts are keyless and free.</font> <font transparency="0.35">Want your own script for any game? We make custom paid scripts on request, open a ticket on our Discord.</font>',
 				DoesWrap = true,
 			})
 		end
