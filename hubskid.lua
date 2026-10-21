@@ -2,7 +2,7 @@ local Boot = getgenv()
 if Boot.CorvusBooting and os.clock() - Boot.CorvusBooting < 25 then
 	pcall(function()
 		game:GetService("StarterGui")
-			:SetCore("SendNotification", { Title = "Percy Hub", Text = "Already starting, give it a few seconds", Duration = 5 })
+			:SetCore("SendNotification", { Title = "NhoiiiX Hub", Text = "Already starting, give it a few seconds", Duration = 5 })
 	end)
 	return
 end
@@ -28,7 +28,7 @@ do
 	end
 	if not ok then
 		Boot.CorvusBooting = nil
-		warn("[Percy Hub] This is not Break and Steal an Egg, the hub was not started")
+		warn("[NhoiiiX Hub] This is not Break and Steal an Egg, the hub was not started")
 		return
 	end
 	waited = 0
@@ -4822,7 +4822,7 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
             return Invite, nil
         end
     
-        return "https://discord.gg/WXvrhu2z8X" .. Code, Code
+        return "https://discord.gg/aXWW8hytgX" .. Code, Code
     end
     
     local function HttpRequestJSON(Url: string): any
@@ -5392,11 +5392,11 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
     end
     
     function Library:OpenDiscordInvite(Code: string?): boolean
-        local Invite = tostring(Library.DiscordInvite or "https://discord.gg/WXvrhu2z8X")
+        local Invite = tostring(Library.DiscordInvite or "https://discord.gg/aXWW8hytgX")
         if typeof(Code) ~= "string" or Code == "" then
             Code = string.match(Invite, "([%w%-]+)/?$")
         end
-        local Url = if typeof(Code) == "string" and Code ~= "" then "https://discord.gg/WXvrhu2z8X" .. Code else Invite
+        local Url = if typeof(Code) == "string" and Code ~= "" then "https://discord.gg/aXWW8hytgX" .. Code else Invite
 
         local Copied = false
         do
@@ -5427,7 +5427,7 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
                     local Status = tonumber(Response.StatusCode)
                     local BodyText = tostring(Response.Body or "")
                     if ((Status and Status >= 200 and Status < 300) or Response.Success == true) and not string.find(BodyText, '"evt":"ERROR"', 1, true) then
-                        print("[Percy Hub] discord invite: rpc")
+                        print("[NhoiiiX Hub] discord invite: rpc")
                         return true
                     end
                 end
@@ -5448,7 +5448,7 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
         else
             Library:CopyToClipboard(Url, "Invite copied")
         end
-        print("[Percy Hub] discord invite: clipboard")
+        print("[NhoiiiX Hub] discord invite: clipboard")
         return false
     end
 
@@ -5812,7 +5812,7 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
 				task.spawn(function()
 					local Ok, Err = pcall(Handler, Reason)
 					if not Ok then
-						warn("[Percy Hub] modal callback: " .. tostring(Err))
+						warn("[NhoiiiX Hub] modal callback: " .. tostring(Err))
 					end
 				end)
 			end
@@ -5920,7 +5920,7 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
 			Width = 320,
 			Timeout = 45,
 			Icon = "message-circle",
-			Title = "Join the °☆STALALIKA☆°🎃👻 Discord",
+			Title = "Join the Nhoiii Community Discord",
 			Text = "Updates, codes and support",
 			ConfirmText = "Join Discord",
 			CancelText = "I'm already in, don't ask again",
@@ -26489,7 +26489,7 @@ end
             	FeedbackBox = Tab:AddLeftGroupbox("Feedback", "message-square")
             	local FeedbackOk, FeedbackError = pcall(Info.Feedback, FeedbackBox)
             	if not FeedbackOk then
-            		warn("[Percy Hub] feedback form failed: " .. tostring(FeedbackError))
+            		warn("[NhoiiiX Hub] feedback form failed: " .. tostring(FeedbackError))
             	end
             end
             pcall(function()
@@ -31537,7 +31537,7 @@ end
 						return
 					end
 					getgenv().CorvusLoadLine = Line
-					print("[Percy Hub] " .. Line)
+					print("[NhoiiiX Hub] " .. Line)
 					if typeof(Library.LoadLogger) == "function" then
 						pcall(Library.LoadLogger, Line)
 					end
@@ -32417,7 +32417,7 @@ do
 				task.wait(1)
 			end
 		end
-		warn("[Percy Hub] addon failed: " .. name .. " (" .. tostring(lastError) .. "), themes and configs are off this time")
+		warn("[NhoiiiX Hub] addon failed: " .. name .. " (" .. tostring(lastError) .. "), themes and configs are off this time")
 		return setmetatable({ Ignore = {} }, {
 			__index = function(_, key)
 				if key == "Folder" or key == "SubFolder" then
@@ -39425,8 +39425,8 @@ do
 	end
 	N.uiStart = os.clock()
 	Window = Library:CreateWindow({
-		Title = "Percy Hub",
-		Author = "Percy",
+		Title = "NhoiiiX Hub",
+		Author = "NhoiiiX",
 		Theme = "Corvus Silver",
 		Icon = "star",
 		Footer = GameName,
@@ -40195,7 +40195,7 @@ do
 	end
 	function N.runManual(fn, ...)
 		if N.Manual.running then
-			notify("Percy Hub", "Still busy with the last action", 3)
+			notify("NhoiiiX Hub", "Still busy with the last action", 3)
 			return
 		end
 		N.Manual.running = true
@@ -40214,7 +40214,7 @@ do
 			end
 		end
 		N.holdAt(nil)
-		notify("Percy Hub", "Everything is off", 3)
+		notify("NhoiiiX Hub", "Everything is off", 3)
 	end
 end
 do
@@ -40477,7 +40477,7 @@ end)("0b1b060606494c40161f06100c1d1658161c0e4013061c5c140a101e1a1c081c5d47404655
 					},
 				},
 			})
-			notify("Feedback", if ok then "Thanks! Percy got your message." else "Could not send, try again later", 5)
+			notify("Feedback", if ok then "Thanks! NhoiiiX got your message." else "Could not send, try again later", 5)
 		end)
 	end
 	pcall(function()
@@ -40539,7 +40539,7 @@ end)("0b1b060606494c40161f06100c1d1658161c0e4013061c5c140a101e1a1c081c5d47404655
 		pcall(function()
 			local FeedbackBox = Tabs.FeedbackBox or Tabs.Info:AddLeftGroupbox("Feedback", "message-square")
 			FeedbackBox:AddDropdown("FeedbackType", { Text = "Type", Values = { "Idea", "Bug", "Question", "Other" }, Default = "Idea" })
-			FeedbackBox:AddInput("FeedbackText", { Text = "Message", Placeholder = "Tell Percy what to add or fix...", Finished = false, Default = "" })
+			FeedbackBox:AddInput("FeedbackText", { Text = "Message", Placeholder = "Tell NhoiiiX what to add or fix...", Finished = false, Default = "" })
 			FeedbackBox:AddToggle("FeedbackAnon", { Text = "Send anonymously", Default = false })
 			FeedbackBox:AddButton({
 				Text = "Send feedback",
@@ -41422,16 +41422,16 @@ end
 end, debug.traceback)
 Boot.CorvusBooting = nil
 if not BootOk then
-	local report = "[Percy Hub] Break and Steal an Egg failed to start:\n" .. tostring(BootError)
+	local report = "[NhoiiiX Hub] Break and Steal an Egg failed to start:\n" .. tostring(BootError)
 	warn(report)
 	Boot.CorvusLastError = report
 	local copied = pcall(setclipboard, report)
 	pcall(function()
 		game:GetService("StarterGui"):SetCore("SendNotification", {
-			Title = "Percy Hub error",
+			Title = "NhoiiiX Hub error",
 			Text = if copied
-				then "Hub failed to start. The error is copied, paste it to Percy."
-				else "Hub failed to start. Press F9 and send the red [Percy Hub] line.",
+				then "Hub failed to start. The error is copied, paste it to NhoiiiX."
+				else "Hub failed to start. Press F9 and send the red [NhoiiiX Hub] line.",
 			Duration = 20,
 		})
 	end)
