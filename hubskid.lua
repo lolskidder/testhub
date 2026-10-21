@@ -23211,7 +23211,69 @@ if #rep > 0 then
 print("[BLYXO] repeated failures:")
 for _, r in ipairs(rep) do print("[BLYXO]   " .. r) end
 end
-\n-- NhoiiiX Anti-Die UI module (merged from LunarXAntiDieSAE.lua)\n
+return h
+end
+env.NhoiiiXProfile = function()
+for _, line in ipairs(BX.profile.report()) do print("[BLYXO] " .. line) end
+end
+env.NhoiiiXStages = function()
+print(("[BLYXO] startup: %s in %.2fs"):format(
+startup.state, startup.readyAt or (os.clock() - startup.t0)))
+print("[BLYXO]   stage          result      cost      at")
+for _, s in ipairs(startup.stages) do
+print(("[BLYXO]   %-14s %-9s %7.0fms %6.2fs%s"):format(
+s.name, s.result, s.ms or 0, s.at,
+s.detail and ("  " .. tostring(s.detail)) or ""))
+end
+if startup.initAt then
+print(("[BLYXO]   init %.2fs | loading screen %.2fs | total %.2fs"):format(
+startup.initAt,
+(startup.readyAt or startup.initAt) - startup.initAt,
+startup.readyAt or startup.initAt))
+end
+end
+startup.initAt = os.clock() - startup.t0
+logmod.session(("startup complete - all work done in %.2fs"):format(startup.initAt))
+local function diag()
+local rep = BX.require("core.exec").report()
+local lines = {
+("executor = %s  (NhoiiiX-Hub %s build %s, generation %d)")
+:format(tostring(rep.executor), tostring(BX.version),
+tostring(BX.build), BX.generation),
+("capabilities = %s"):format(#rep.have > 0 and table.concat(rep.have, ",") or "(none)"),
+("missing = %s"):format(#rep.missing > 0 and table.concat(rep.missing, ",") or "(none)"),
+("prompt path = %s  |  game require = %s (%s)%s"):format(
+tostring(rep.promptVia), tostring(BX.require("core.exec").can.gameRequire),
+tostring(rep.gameRequireWhy),
+#rep.denied > 0 and ("  |  SIMULATED DENIES = " .. table.concat(rep.denied, ",")) or ""),
+}
+local st, failed = {}, {}
+for _, s in ipairs(startup.stages) do
+st[#st + 1] = s.name .. ":" .. s.result
+if s.result == "FAILED" or s.result == "FALLBACK" then
+failed[#failed + 1] = s.name .. " = " .. tostring(s.detail or s.result)
+end
+end
+lines[#lines + 1] = ("startup stage = %s  |  %s"):format(startup.state, table.concat(st, " "))
+if #failed > 0 then
+for _, f in ipairs(failed) do
+local mod = tostring(f):match('module "([^"]+)" failed') or "-"
+lines[#lines + 1] = ("module failed = %s  |  error = %s"):format(mod, f)
+end
+else
+lines[#lines + 1] = "module failed = none"
+end
+for _, l in ipairs(lines) do
+log.info("diag %s", l)
+print("[BLYXO diag] " .. l)
+end
+return lines
+end
+env.NhoiiiXDiag = diag
+BX.try("startup.diag", diag)
+end
+
+-- NhoiiiX Anti-Die UI module (placed after the main script initialization)
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -23611,28 +23673,25 @@ local function makeFeatureCard(cardName, text, xOffset, stateKey)
     local function toggle()
         toggleStates[stateKey] = not toggleStates[stateKey]
         render(true)
-        if stateKey == "antiDie" then
-            if toggleStates.antiDie then
-                -- Client-side recovery attempt; server-authoritative deaths may not be preventable.
-                local function bindCharacter(character)
-                    if not toggleStates.antiDie or not character then return end
-                    local humanoid = character:FindFirstChildOfClass("Humanoid")
-                        or character:WaitForChild("Humanoid", 5)
-                    if not humanoid then return end
-                    humanoid.HealthChanged:Connect(function(health)
-                        if toggleStates.antiDie and humanoid.Parent and health > 0
-                        and health < humanoid.MaxHealth then
-                            humanoid.Health = humanoid.MaxHealth
-                        end
-                    end)
-                end
-                bindCharacter(player.Character)
-                player.CharacterAdded:Connect(function(character)
-                    if toggleStates.antiDie then
-                        task.defer(bindCharacter, character)
+
+        if stateKey == "antiDie" and toggleStates.antiDie then
+            local function bindCharacter(character)
+                if not toggleStates.antiDie or not character then return end
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                    or character:WaitForChild("Humanoid", 5)
+                if not humanoid then return end
+                humanoid.HealthChanged:Connect(function(health)
+                    -- Client-side recovery attempt only; the server can still enforce death.
+                    if toggleStates.antiDie and humanoid.Parent and health > 0
+                    and health < humanoid.MaxHealth then
+                        humanoid.Health = humanoid.MaxHealth
                     end
                 end)
             end
+            if player.Character then task.defer(bindCharacter, player.Character) end
+            player.CharacterAdded:Connect(function(character)
+                if toggleStates.antiDie then task.defer(bindCharacter, character) end
+            end)
         end
     end
 
@@ -23707,64 +23766,4 @@ RunService.RenderStepped:Connect(function(dt)
     end
 end)
 
-print("[NhoiiiX] UI loaded â€” midnight storm build")\n\nreturn h
-end
-env.NhoiiiXProfile = function()
-for _, line in ipairs(BX.profile.report()) do print("[BLYXO] " .. line) end
-end
-env.NhoiiiXStages = function()
-print(("[BLYXO] startup: %s in %.2fs"):format(
-startup.state, startup.readyAt or (os.clock() - startup.t0)))
-print("[BLYXO]   stage          result      cost      at")
-for _, s in ipairs(startup.stages) do
-print(("[BLYXO]   %-14s %-9s %7.0fms %6.2fs%s"):format(
-s.name, s.result, s.ms or 0, s.at,
-s.detail and ("  " .. tostring(s.detail)) or ""))
-end
-if startup.initAt then
-print(("[BLYXO]   init %.2fs | loading screen %.2fs | total %.2fs"):format(
-startup.initAt,
-(startup.readyAt or startup.initAt) - startup.initAt,
-startup.readyAt or startup.initAt))
-end
-end
-startup.initAt = os.clock() - startup.t0
-logmod.session(("startup complete - all work done in %.2fs"):format(startup.initAt))
-local function diag()
-local rep = BX.require("core.exec").report()
-local lines = {
-("executor = %s  (NhoiiiX-Hub %s build %s, generation %d)")
-:format(tostring(rep.executor), tostring(BX.version),
-tostring(BX.build), BX.generation),
-("capabilities = %s"):format(#rep.have > 0 and table.concat(rep.have, ",") or "(none)"),
-("missing = %s"):format(#rep.missing > 0 and table.concat(rep.missing, ",") or "(none)"),
-("prompt path = %s  |  game require = %s (%s)%s"):format(
-tostring(rep.promptVia), tostring(BX.require("core.exec").can.gameRequire),
-tostring(rep.gameRequireWhy),
-#rep.denied > 0 and ("  |  SIMULATED DENIES = " .. table.concat(rep.denied, ",")) or ""),
-}
-local st, failed = {}, {}
-for _, s in ipairs(startup.stages) do
-st[#st + 1] = s.name .. ":" .. s.result
-if s.result == "FAILED" or s.result == "FALLBACK" then
-failed[#failed + 1] = s.name .. " = " .. tostring(s.detail or s.result)
-end
-end
-lines[#lines + 1] = ("startup stage = %s  |  %s"):format(startup.state, table.concat(st, " "))
-if #failed > 0 then
-for _, f in ipairs(failed) do
-local mod = tostring(f):match('module "([^"]+)" failed') or "-"
-lines[#lines + 1] = ("module failed = %s  |  error = %s"):format(mod, f)
-end
-else
-lines[#lines + 1] = "module failed = none"
-end
-for _, l in ipairs(lines) do
-log.info("diag %s", l)
-print("[BLYXO diag] " .. l)
-end
-return lines
-end
-env.NhoiiiXDiag = diag
-BX.try("startup.diag", diag)
-end
+print("[NhoiiiX] UI loaded â€” midnight storm build")
