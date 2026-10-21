@@ -307,15 +307,15 @@ local IS_SEA2_MAP   = (game.PlaceId == SEA2_PLACE_ID)   -- 🆕
 print("[Map] " .. (IS_MOON_MAP and "🌙 Moon" or IS_SEA2_MAP and "🌊 Sea 2" or "🌊 Sea 1") .. " detected")
 
 local Window = Library:CreateWindow({
-    Title = "MarvenRiz Hub" .. (IS_MOON_MAP and " (Moon)" or ""),
+    Title = "NhoiiiX Hub" .. (IS_MOON_MAP and " (Moon)" or ""),
     Subtitle = IS_MOON_MAP and "Auto Raid Moon Only" or "Sea 1 — Rock Fruit",
     Size = UDim2.fromOffset(500, 370),
     AccentColor = Color3.fromRGB(50, 150, 255),
     SideBarWidth = 120,
-    Logo = "rbxassetid://87526284179554",
+    Logo = "rbxassetid://70895505430795",
     LogoSize = 32,
     SphereText = false,
-    SphereImage = "rbxassetid://87526284179554",
+    SphereImage = "rbxassetid://70895505430795",
     SphereIconSize = 38,
     Map = "RockFruit"
 })
