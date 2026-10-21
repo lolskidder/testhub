@@ -1895,6 +1895,100 @@ local function __InstallUI()
     Helpers.ValincSession.UI = uiRoot
     Features.Window = Window
 
+    -- Floating NhoiiiX logo button: click it to hide/show the Hub.
+    -- The toggle lives in its own ScreenGui so it remains visible while the Hub is hidden.
+    pcall(function()
+        local toggleGui = Instance.new("ScreenGui")
+        toggleGui.Name = "NhoiiiX_HubToggleGui"
+        toggleGui.IgnoreGuiInset = true
+        toggleGui.ResetOnSpawn = false
+        toggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+        toggleGui.DisplayOrder = 1000000
+        toggleGui.Parent = targetParent
+
+        local toggleButton = Instance.new("ImageButton")
+        toggleButton.Name = "NhoiiiX_HubToggleButton"
+        toggleButton.AnchorPoint = Vector2.new(0, 0.5)
+        toggleButton.Position = UDim2.new(0, 18, 0.5, 0)
+        toggleButton.Size = UDim2.fromOffset(52, 52)
+        toggleButton.BackgroundColor3 = Color3.fromRGB(16, 16, 24)
+        toggleButton.BackgroundTransparency = 0.12
+        toggleButton.BorderSizePixel = 0
+        toggleButton.AutoButtonColor = true
+        toggleButton.Image = "rbxassetid://70895505430795"
+        toggleButton.ScaleType = Enum.ScaleType.Fit
+        toggleButton.ZIndex = 1000001
+        toggleButton.Parent = toggleGui
+
+        local toggleCorner = Instance.new("UICorner")
+        toggleCorner.CornerRadius = UDim.new(1, 0)
+        toggleCorner.Parent = toggleButton
+
+        local toggleStroke = Instance.new("UIStroke")
+        toggleStroke.Thickness = 1.5
+        toggleStroke.Color = Color3.fromRGB(96, 76, 214)
+        toggleStroke.Transparency = 0.08
+        toggleStroke.Parent = toggleButton
+
+        local hubFrame = nil
+        local function findHubFrame()
+            -- Prefer explicit references exposed by the UI library.
+            for _, key in ipairs({"MainFrame", "MainWindow", "WindowFrame", "Main", "Frame", "Container", "Root"}) do
+                local ok, candidate = pcall(function() return Window[key] end)
+                if ok and typeof(candidate) == "Instance" and candidate:IsA("GuiObject") and candidate ~= toggleButton then
+                    return candidate
+                end
+            end
+
+            -- Then try common root frame names in the created UI tree.
+            if uiRoot and uiRoot:IsA("Instance") then
+                for _, name in ipairs({"MainFrame", "MainWindow", "WindowFrame", "Main", "Window", "Container", "Root", "Base"}) do
+                    local candidate = uiRoot:FindFirstChild(name, true)
+                    if candidate and candidate:IsA("GuiObject") then
+                        return candidate
+                    end
+                end
+
+                -- Fallback: use the frame with the largest UI subtree, usually the main window.
+                local best, bestScore = nil, -math.huge
+                for _, candidate in ipairs(uiRoot:GetDescendants()) do
+                    if candidate:IsA("Frame") then
+                        local name = string.lower(candidate.Name)
+                        if not (name:find("dropdown") or name:find("tooltip") or name:find("notification") or name:find("toast")) then
+                            local descendants = #candidate:GetDescendants()
+                            local size = candidate.AbsoluteSize
+                            local area = math.max(0, size.X) * math.max(0, size.Y)
+                            local score = descendants * 100000 + math.min(area, 2000000)
+                            if score > bestScore then
+                                best, bestScore = candidate, score
+                            end
+                        end
+                    end
+                end
+                if best then return best end
+            end
+            return nil
+        end
+
+        hubFrame = findHubFrame()
+        toggleButton.Activated:Connect(function()
+            pcall(function()
+                if not hubFrame or not hubFrame.Parent then
+                    hubFrame = findHubFrame()
+                end
+                if hubFrame and hubFrame.Parent then
+                    hubFrame.Visible = not hubFrame.Visible
+                elseif uiRoot and uiRoot:IsA("ScreenGui") then
+                    uiRoot.Enabled = not uiRoot.Enabled
+                end
+            end)
+        end)
+
+        onCleanup(function()
+            pcall(function() toggleGui:Destroy() end)
+        end)
+    end)
+
     pcall(function()
         local tabList = uiRoot:FindFirstChild("TabList", true)
         local listLayout = tabList and tabList:FindFirstChildOfClass("UIListLayout")
