@@ -5396,7 +5396,7 @@ local AddonsUrl = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main
         if typeof(Code) ~= "string" or Code == "" then
             Code = string.match(Invite, "([%w%-]+)/?$")
         end
-        local Url = if typeof(Code) == "string" and Code ~= "" then "https://discord.gg/aXWW8hytgX" .. Code else Invite
+        local Url = if typeof(Code) == "string" and Code ~= "" then "" .. Code else Invite
 
         local Copied = false
         do
