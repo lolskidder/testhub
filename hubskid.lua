@@ -67,11 +67,11 @@ do
 
 	pcall(function() StarterGui:SetCore("TopbarEnabled", false) end)
 
-	local old = PlayerGui:FindFirstChild("ZeoHubIntro")
+	local old = PlayerGui:FindFirstChild("NhoiiiXHubIntro")
 	if old then old:Destroy() end
 
 	local ScreenGui2 = Instance.new("ScreenGui")
-	ScreenGui2.Name = "ZeoHubIntro"
+	ScreenGui2.Name = "NhoiiiXIntro"
 	ScreenGui2.ResetOnSpawn = false
 	ScreenGui2.IgnoreGuiInset = true
 	ScreenGui2.DisplayOrder = 1000
@@ -86,7 +86,7 @@ do
 	bg.ZIndex = 0
 
 	BlurEffect = Instance.new("BlurEffect")
-	BlurEffect.Name = "ZeoHubIntroBlur"
+	BlurEffect.Name = "NhoiiiXHubIntroBlur"
 	BlurEffect.Size = 0
 	BlurEffect.Parent = Lighting
 	tweenTo(BlurEffect, 1.2, { Size = 24 }):Play()
@@ -1239,7 +1239,7 @@ local function newLoop(name, fn, delay, hidden)
 		task.spawn(function()
 			while active() do
 				local ok, res = pcall(fn, active)
-				if not ok then warn("[Zeohub] " .. name .. ": " .. tostring(res)) end
+				if not ok then warn("[NhoiiiX Hub] " .. name .. ": " .. tostring(res)) end
 				local d = (ok and type(res) == "number") and res
 					or (type(delay) == "function" and delay() or delay or 1)
 				task.wait(math.max(tonumber(d) or 1, 0.1))
