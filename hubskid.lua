@@ -11381,11 +11381,39 @@ return NeverLose;
 				end)
 			end
 
-			-- Repair the interaction scripts at load time and after each respawn.
+			-- Restore the grab/beam controller at startup and reinitialize it after every respawn.
 			fn54(false)
+			local function repairGrabControllerAfterReset()
+				pcall(function()
+					local scripts = localPlayer:FindFirstChild("PlayerScripts") or localPlayer:WaitForChild("PlayerScripts", 8)
+					if not scripts then return end
+					local controller
+					for _, child in ipairs(scripts:GetDescendants()) do
+						if child:IsA("LocalScript") and child.Name:lower() == "characterandbeammove" then
+							controller = child
+							break
+						end
+					end
+					-- Restart the controller once so its mouse-grab input binds to the new character.
+					if controller and controller.Parent then
+						controller.Disabled = true
+						task.wait(0.15)
+						if controller.Parent then controller.Disabled = false end
+					end
+					task.wait(0.25)
+					fn54(false)
+				end)
+			end
 			pcall(function()
-				localPlayer.CharacterAdded:Connect(function()
-					task.delay(1, function()
+				localPlayer.CharacterAdded:Connect(function(character)
+					task.spawn(function()
+						pcall(function()
+							character:WaitForChild("Humanoid", 8)
+							character:WaitForChild("HumanoidRootPart", 8)
+						end)
+						task.wait(0.8)
+						repairGrabControllerAfterReset()
+						task.wait(1.2)
 						fn54(false)
 					end)
 				end)
